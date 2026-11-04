@@ -50,7 +50,7 @@ export function DocSectionCard({
 
   return (
     <section id={section.id} className="docs-section-card">
-      <div className="docs-section-header">
+      <div id={`${section.id}-overview`} className="docs-section-header">
         <div className="docs-section-meta-row">
           <span className="docs-section-index">#{sectionNum}</span>
           <span className="docs-section-badge">{section.badge}</span>
@@ -67,7 +67,7 @@ export function DocSectionCard({
       </div>
 
       {section.steps && section.steps.length > 0 && (
-        <div className="docs-steps-grid">
+        <div id={`${section.id}-steps`} className="docs-steps-grid">
           {section.steps.map((step, i) => (
             <div
               key={i}
@@ -86,17 +86,25 @@ export function DocSectionCard({
         </div>
       )}
 
-      {section.sandbox === "3d" && <Interactive3DSandbox ui={ui} />}
-      {section.sandbox === "image" && <InteractiveImageSandbox ui={ui} />}
+      {section.sandbox === "3d" && (
+        <div id={`${section.id}-sandbox`}>
+          <Interactive3DSandbox ui={ui} />
+        </div>
+      )}
+      {section.sandbox === "image" && (
+        <div id={`${section.id}-sandbox`}>
+          <InteractiveImageSandbox ui={ui} />
+        </div>
+      )}
 
-      <div className="docs-code-list">
+      <div id={`${section.id}-code`} className="docs-code-list">
         {section.codeExamples.map((ex, idx) => {
           const lines = ex.code.split("\n");
           const isCopied = copiedIdx === idx;
           return (
             <div
               key={idx}
-              id={`code-${section.id}-${idx}`}
+              id={`${section.id}-code-${idx}`}
               className="docs-code-block"
               data-swarm="rect"
             >
@@ -156,7 +164,7 @@ export function DocSectionCard({
 
       {section.propsTable && (
         <div
-          id={`table-${section.id}`}
+          id={`${section.id}-props`}
           className="docs-table-wrap"
           data-swarm="rect"
         >
