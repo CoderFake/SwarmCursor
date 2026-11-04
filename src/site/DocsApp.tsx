@@ -350,7 +350,19 @@ export function DocsApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleViewModeChange = (nextMode: SiteViewMode) => {
+    setViewMode(nextMode);
+    if (nextMode === "artboard") {
+      setSidebarCollapsed(true);
+    } else {
+      setSidebarCollapsed(false);
+    }
+    scrollMainToTop();
+  };
+
   const handleSelectCatalog = () => {
+    setViewMode("docs");
+    setSidebarCollapsed(false);
     setActivePageId("catalog");
     setReplaySignal((n) => n + 1);
     scrollMainToTop();
@@ -359,6 +371,8 @@ export function DocsApp() {
   const handleSelectModule = (modKey: HubModuleKey) => {
     const found = modules.find((m) => m.key === modKey);
     if (found && found.items.length > 0) {
+      setViewMode("docs");
+      setSidebarCollapsed(false);
       setActivePageId(found.items[0].id);
       setReplaySignal((n) => n + 1);
       scrollMainToTop();
@@ -366,6 +380,8 @@ export function DocsApp() {
   };
 
   const handleSelectSection = (secId: string) => {
+    setViewMode("docs");
+    setSidebarCollapsed(false);
     setActivePageId(secId);
     setReplaySignal((n) => n + 1);
     scrollMainToTop();
@@ -384,14 +400,16 @@ export function DocsApp() {
       <HubSidebar
         lang={lang}
         collapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+        onToggleCollapse={() => setSidebarCollapsed(true)}
+        onRestoreFromBottomLeft={() => {
+          setViewMode("docs");
+          setSidebarCollapsed(false);
+          scrollMainToTop();
+        }}
         mobileOpen={mobileOpen}
         onCloseMobile={() => setMobileOpen(false)}
         viewMode={viewMode}
-        onViewModeChange={(m) => {
-          setViewMode(m);
-          scrollMainToTop();
-        }}
+        onViewModeChange={handleViewModeChange}
         activePageId={activePageId}
         activeModule={activeModule}
         modules={modules}
@@ -414,8 +432,8 @@ export function DocsApp() {
       {/* Right Workspace Column */}
       <div
         className={`hub-workspace ${
-          sidebarCollapsed ? "is-sidebar-collapsed" : ""
-        }`}
+          sidebarCollapsed || viewMode === "artboard" ? "is-sidebar-collapsed" : ""
+        } ${viewMode === "artboard" ? "is-artboard-mode" : ""}`}
       >
         {/* Subtle Aurora Background */}
         <div className="hub-aurora" aria-hidden="true" />
@@ -431,10 +449,7 @@ export function DocsApp() {
           onOpenMobile={() => setMobileOpen(true)}
           onSelectCatalog={handleSelectCatalog}
           onSelectModule={handleSelectModule}
-          onViewModeChange={(m) => {
-            setViewMode(m);
-            scrollMainToTop();
-          }}
+          onViewModeChange={handleViewModeChange}
           onReplaySwarm={() => setReplaySignal((n) => n + 1)}
           onLangChange={(nextLang) => {
             setLang(nextLang);
@@ -468,10 +483,7 @@ export function DocsApp() {
                   modules={modules}
                   onSelectModule={handleSelectModule}
                   onSelectSection={handleSelectSection}
-                  onOpenArtboard={() => {
-                    setViewMode("artboard");
-                    scrollMainToTop();
-                  }}
+                  onOpenArtboard={() => handleViewModeChange("artboard")}
                 />
               ) : (
                 <DocSectionCard
@@ -504,12 +516,14 @@ export function DocsApp() {
         </main>
 
         {/* Minimal Workspace Footer (Identical to WEUP_MCP_HUB) */}
-        <footer className="hub-footer" data-swarm-ignore="true">
-          <div className="hub-footer-inner">
-            <span>{bundle.ui.footer.title}</span>
-            <span>{bundle.ui.footer.subtitle}</span>
-          </div>
-        </footer>
+        {viewMode === "docs" && (
+          <footer className="hub-footer" data-swarm-ignore="true">
+            <div className="hub-footer-inner">
+              <span>{bundle.ui.footer.title}</span>
+              <span>{bundle.ui.footer.subtitle}</span>
+            </div>
+          </footer>
+        )}
       </div>
     </div>
   );

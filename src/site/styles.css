@@ -84,8 +84,49 @@
   transition: width 0.2s ease-out;
 }
 
-.hub-sidebar.is-collapsed {
-  width: 72px;
+/* Bottom-Left Floating Corner Icon Launcher (Góc trái dưới khi ẩn Sidebar hoặc ở Showcase) */
+.hub-corner-launcher {
+  position: fixed;
+  left: 28px;
+  bottom: 18px;
+  z-index: 95;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 13px 0 9px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-ink);
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition:
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.hub-corner-launcher:hover {
+  transform: translateY(-2px) scale(1.04);
+  border-color: var(--color-brand);
+  box-shadow:
+    0 14px 34px rgba(79, 70, 229, 0.22),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.hub-corner-launcher:active {
+  transform: scale(0.97);
+}
+
+.hub-corner-launcher-icon {
+  display: grid;
+  place-items: center;
+  color: var(--color-brand);
 }
 
 .hub-sidebar-top {
@@ -515,7 +556,14 @@
 }
 
 .hub-workspace.is-sidebar-collapsed {
-  margin-left: 88px;
+  margin-left: 0;
+}
+
+.hub-workspace.is-artboard-mode .hub-main {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Single Floating Pill Topbar (NO double header!) */

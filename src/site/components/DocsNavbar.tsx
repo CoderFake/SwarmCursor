@@ -21,7 +21,13 @@ export interface HubModuleGroup {
   items: DocSection[];
 }
 
-function ModuleIcon({ moduleKey, size = 18 }: { moduleKey: HubModuleKey | "catalog" | "artboard"; size?: number }) {
+function ModuleIcon({
+  moduleKey,
+  size = 18,
+}: {
+  moduleKey: HubModuleKey | "catalog" | "artboard";
+  size?: number;
+}) {
   switch (moduleKey) {
     case "catalog":
       return (
@@ -86,6 +92,7 @@ export function HubSidebar({
   lang,
   collapsed,
   onToggleCollapse,
+  onRestoreFromBottomLeft,
   mobileOpen,
   onCloseMobile,
   viewMode,
@@ -103,6 +110,7 @@ export function HubSidebar({
   lang: Lang;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  onRestoreFromBottomLeft: () => void;
   mobileOpen: boolean;
   onCloseMobile: () => void;
   viewMode: SiteViewMode;
@@ -117,78 +125,64 @@ export function HubSidebar({
   onScrollToAnchor: (anchorId: string) => void;
   onLangChange: (lang: Lang) => void;
 }) {
-  const renderNavContent = (isCollapsed: boolean, onNavClick?: () => void) => (
+  // When in Artboard Showcase mode OR when sidebar is collapsed into icon mode,
+  // render the floating bottom-left icon launcher (`góc trái dưới`).
+  const isMinimizedToCorner = viewMode === "artboard" || collapsed;
+
+  const renderNavContent = (onNavClick?: () => void) => (
     <>
-      <nav className={`hub-nav ${isCollapsed ? "is-collapsed" : ""}`} aria-label="Main Navigation">
-        {/* Context-Aware Workspace Mode: If inside a specific Module, show Back to Hub + Module Box + Module's own Guides */}
+      <nav className="hub-nav" aria-label="Main Navigation">
         {activeModule && activePageId !== "catalog" && viewMode === "docs" ? (
           <>
             <button
               type="button"
-              className={`hub-back-btn ${isCollapsed ? "is-collapsed" : ""}`}
+              className="hub-back-btn"
               onClick={() => {
                 onSelectCatalog();
                 onNavClick?.();
               }}
-              title={lang === "vi" ? "Quay lại Kho Module" : "Back to Module Hub"}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                 <line x1="19" y1="12" x2="5" y2="12" />
                 <polyline points="12 19 5 12 12 5" />
               </svg>
-              {!isCollapsed && (
-                <span>{lang === "vi" ? "Kho Module (Catalog)" : "Back to Module Hub"}</span>
-              )}
+              <span>{lang === "vi" ? "Kho Module (Catalog)" : "Back to Module Hub"}</span>
             </button>
 
-            {isCollapsed ? (
-              <div
-                className="hub-module-pill-collapsed"
-                title={lang === "vi" ? activeModule.titleVi : activeModule.titleEn}
-              >
-                <ModuleIcon moduleKey={activeModule.key} size={18} />
+            <div className="hub-module-card">
+              <span className="hub-module-card-icon">
+                <ModuleIcon moduleKey={activeModule.key} size={19} />
+              </span>
+              <div className="hub-module-card-text">
+                <small>{lang === "vi" ? "KHÔNG GIAN MODULE" : "MODULE WORKSPACE"}</small>
+                <strong>{lang === "vi" ? activeModule.titleVi : activeModule.titleEn}</strong>
               </div>
-            ) : (
-              <div className="hub-module-card">
-                <span className="hub-module-card-icon">
-                  <ModuleIcon moduleKey={activeModule.key} size={19} />
-                </span>
-                <div className="hub-module-card-text">
-                  <small>{lang === "vi" ? "KHÔNG GIAN MODULE" : "MODULE WORKSPACE"}</small>
-                  <strong>{lang === "vi" ? activeModule.titleVi : activeModule.titleEn}</strong>
-                </div>
-              </div>
-            )}
+            </div>
 
-            {/* Module's Dedicated Guides */}
             <div className="hub-nav-group">
-              {!isCollapsed && (
-                <p className="hub-nav-group-label">
-                  {lang === "vi" ? "TÀI LIỆU TRONG MODULE" : "MODULE GUIDES"}
-                </p>
-              )}
+              <p className="hub-nav-group-label">
+                {lang === "vi" ? "TÀI LIỆU TRONG MODULE" : "MODULE GUIDES"}
+              </p>
               {activeModule.items.map((sec) => {
                 const isActive = activePageId === sec.id && viewMode === "docs";
                 return (
                   <button
                     key={sec.id}
                     type="button"
-                    className={`hub-nav-item ${isActive ? "is-active" : ""} ${isCollapsed ? "is-collapsed" : ""}`}
+                    className={`hub-nav-item ${isActive ? "is-active" : ""}`}
                     onClick={() => {
                       onSelectSection(sec.id);
                       onNavClick?.();
                     }}
-                    title={isCollapsed ? sec.title : undefined}
                   >
                     <ModuleIcon moduleKey={activeModule.key} size={17} />
-                    {!isCollapsed && <span>{sec.title}</span>}
+                    <span>{sec.title}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Active Guide's On-Page Sections */}
-            {activeSection && !isCollapsed && (
+            {activeSection && (
               <div className="hub-nav-group">
                 <p className="hub-nav-group-label">
                   {lang === "vi" ? "MỤC TRONG TRANG" : "ON THIS PAGE"}
@@ -246,96 +240,82 @@ export function HubSidebar({
               </div>
             )}
 
-            {/* Quick Switch to Other Modules */}
             <div className="hub-nav-group">
-              {!isCollapsed && (
-                <p className="hub-nav-group-label">
-                  {lang === "vi" ? "CHUYỂN NHANH MODULE" : "SWITCH MODULE"}
-                </p>
-              )}
+              <p className="hub-nav-group-label">
+                {lang === "vi" ? "CHUYỂN NHANH MODULE" : "SWITCH MODULE"}
+              </p>
               {modules
                 .filter((m) => m.key !== activeModule.key)
                 .map((m) => (
                   <button
                     key={m.key}
                     type="button"
-                    className={`hub-nav-item ${isCollapsed ? "is-collapsed" : ""}`}
+                    className="hub-nav-item"
                     onClick={() => {
                       onSelectModule(m.key);
                       onNavClick?.();
                     }}
-                    title={isCollapsed ? (lang === "vi" ? m.titleVi : m.titleEn) : undefined}
                   >
                     <ModuleIcon moduleKey={m.key} size={17} />
-                    {!isCollapsed && <span>{lang === "vi" ? m.titleVi : m.titleEn}</span>}
+                    <span>{lang === "vi" ? m.titleVi : m.titleEn}</span>
                   </button>
                 ))}
             </div>
           </>
         ) : (
-          /* Global Hub Sidebar (when at Catalog Root or Artboard) */
           <>
             <div className="hub-nav-group">
-              {!isCollapsed && (
-                <p className="hub-nav-group-label">
-                  {lang === "vi" ? "TRUNG TÂM TÀI LIỆU" : "DOCUMENTATION HUB"}
-                </p>
-              )}
+              <p className="hub-nav-group-label">
+                {lang === "vi" ? "TRUNG TÂM TÀI LIỆU" : "DOCUMENTATION HUB"}
+              </p>
               <button
                 type="button"
-                className={`hub-nav-item ${activePageId === "catalog" && viewMode === "docs" ? "is-active" : ""} ${isCollapsed ? "is-collapsed" : ""}`}
+                className={`hub-nav-item ${
+                  activePageId === "catalog" && viewMode === "docs" ? "is-active" : ""
+                }`}
                 onClick={() => {
                   onViewModeChange("docs");
                   onSelectCatalog();
                   onNavClick?.();
                 }}
-                title={isCollapsed ? (lang === "vi" ? "Kho Module" : "Module Catalog") : undefined}
               >
                 <ModuleIcon moduleKey="catalog" size={18} />
-                {!isCollapsed && (
-                  <span>{lang === "vi" ? "Kho Module (Catalog)" : "Module Catalog"}</span>
-                )}
+                <span>{lang === "vi" ? "Kho Module (Catalog)" : "Module Catalog"}</span>
               </button>
 
               <button
                 type="button"
-                className={`hub-nav-item ${viewMode === "artboard" ? "is-active" : ""} ${isCollapsed ? "is-collapsed" : ""}`}
+                className={`hub-nav-item ${viewMode === "artboard" ? "is-active" : ""}`}
                 onClick={() => {
                   onViewModeChange("artboard");
                   onNavClick?.();
                 }}
-                title={isCollapsed ? "Artboard Showcase" : undefined}
               >
                 <ModuleIcon moduleKey="artboard" size={18} />
-                {!isCollapsed && <span>Artboard Showcase</span>}
+                <span>Artboard Showcase</span>
               </button>
             </div>
 
             <div className="hub-nav-group">
-              {!isCollapsed && (
-                <p className="hub-nav-group-label">
-                  {lang === "vi" ? "DANH MỤC HƯỚNG DẪN" : "MODULE WORKSPACES"}
-                </p>
-              )}
+              <p className="hub-nav-group-label">
+                {lang === "vi" ? "DANH MỤC HƯỚNG DẪN" : "MODULE WORKSPACES"}
+              </p>
               {modules.map((m) => (
                 <button
                   key={m.key}
                   type="button"
-                  className={`hub-nav-item ${isCollapsed ? "is-collapsed" : ""}`}
+                  className="hub-nav-item"
                   onClick={() => {
                     onViewModeChange("docs");
                     onSelectModule(m.key);
                     onNavClick?.();
                   }}
-                  title={isCollapsed ? (lang === "vi" ? m.titleVi : m.titleEn) : undefined}
                 >
                   <ModuleIcon moduleKey={m.key} size={18} />
-                  {!isCollapsed && (
-                    <span className="hub-nav-item-flex">
-                      <span>{lang === "vi" ? m.titleVi : m.titleEn}</span>
-                      <small className="hub-nav-count">{m.items.length}</small>
-                    </span>
-                  )}
+                  <span className="hub-nav-item-flex">
+                    <span>{lang === "vi" ? m.titleVi : m.titleEn}</span>
+                    <small className="hub-nav-count">{m.items.length}</small>
+                  </span>
                 </button>
               ))}
             </div>
@@ -343,32 +323,27 @@ export function HubSidebar({
         )}
       </nav>
 
-      {/* Bottom Note + Footer Block (Identical to WEUP_MCP_HUB) */}
-      {!isCollapsed && (
-        <div className="hub-sidebar-note">
-          <span className="hub-sidebar-note-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
-          </span>
-          <div className="hub-sidebar-note-text">
-            <strong>Rust/WASM SIMD128</strong>
-            <span>60fps Multi-Agent Engine</span>
+      <div className="hub-sidebar-note">
+        <span className="hub-sidebar-note-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+          </svg>
+        </span>
+        <div className="hub-sidebar-note-text">
+          <strong>Rust/WASM SIMD128</strong>
+          <span>60fps Multi-Agent Engine</span>
+        </div>
+      </div>
+
+      <div className="hub-sidebar-footer">
+        <div className="hub-user-info">
+          <CoderFakeLogo size={32} />
+          <div className="hub-user-meta">
+            <strong>CoderFake</strong>
+            <span>v2.0.0 · MIT</span>
           </div>
         </div>
-      )}
-
-      <div className={`hub-sidebar-footer ${isCollapsed ? "is-collapsed" : ""}`}>
-        {!isCollapsed && (
-          <div className="hub-user-info">
-            <CoderFakeLogo size={32} />
-            <div className="hub-user-meta">
-              <strong>CoderFake</strong>
-              <span>v2.0.0 · MIT</span>
-            </div>
-          </div>
-        )}
         <div className="hub-footer-actions">
           <button
             type="button"
@@ -396,24 +371,32 @@ export function HubSidebar({
 
   return (
     <>
-      {/* Desktop Floating Rounded-[28px] Sidebar */}
-      <aside
-        className={`hub-sidebar ${collapsed ? "is-collapsed" : ""}`}
-        data-swarm-ignore="true"
-      >
-        {collapsed ? (
-          <div className="hub-sidebar-top is-collapsed">
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="hub-expand-trigger"
-              aria-label="Expand sidebar"
-              title="Expand sidebar"
-            >
-              <CoderFakeLogo size={40} />
-            </button>
-          </div>
-        ) : (
+      {/* When in Showcase or Collapsed: Floating Bottom-Left Icon Button (Góc trái dưới) */}
+      {isMinimizedToCorner ? (
+        <button
+          type="button"
+          className="hub-corner-launcher"
+          onClick={onRestoreFromBottomLeft}
+          title={
+            lang === "vi"
+              ? "Mở lại Sidebar & Tài liệu"
+              : "Restore Sidebar & Documentation"
+          }
+          aria-label="Restore Sidebar & Documentation"
+          data-swarm-ignore="true"
+        >
+          <CoderFakeLogo size={28} />
+          <span className="hub-corner-launcher-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <line x1="9" y1="3" x2="9" y2="21" />
+              <polyline points="13 9 16 12 13 15" />
+            </svg>
+          </span>
+        </button>
+      ) : (
+        /* Normal Expanded Left Sidebar */
+        <aside className="hub-sidebar" data-swarm-ignore="true">
           <div className="hub-sidebar-top">
             <button
               type="button"
@@ -433,8 +416,12 @@ export function HubSidebar({
               type="button"
               onClick={onToggleCollapse}
               className="hub-collapse-btn"
-              aria-label="Collapse sidebar"
-              title="Collapse sidebar"
+              aria-label="Collapse sidebar to bottom-left icon"
+              title={
+                lang === "vi"
+                  ? "Thu gọn Sidebar xuống góc trái dưới"
+                  : "Minimize sidebar to bottom-left icon"
+              }
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -443,10 +430,10 @@ export function HubSidebar({
               </svg>
             </button>
           </div>
-        )}
 
-        <div className="hub-sidebar-scroll">{renderNavContent(collapsed)}</div>
-      </aside>
+          <div className="hub-sidebar-scroll">{renderNavContent()}</div>
+        </aside>
+      )}
 
       {/* Mobile / Tablet Modal Drawer */}
       {mobileOpen && (
@@ -482,7 +469,7 @@ export function HubSidebar({
               </button>
             </div>
             <div className="hub-sidebar-scroll">
-              {renderNavContent(false, onCloseMobile)}
+              {renderNavContent(onCloseMobile)}
             </div>
           </div>
         </div>
@@ -518,6 +505,10 @@ export function HubTopbar({
   onReplaySwarm: () => void;
   onLangChange: (lang: Lang) => void;
 }) {
+  // In Artboard Showcase mode, hide the topbar so the showcase is 100% clean,
+  // controlled via the bottom-left icon launcher!
+  if (viewMode === "artboard") return null;
+
   return (
     <header className="hub-topbar" data-swarm-ignore="true">
       <div className="hub-topbar-left">
@@ -534,7 +525,7 @@ export function HubTopbar({
           </svg>
         </button>
 
-        {/* Floating Pill Breadcrumbs (Identical to WEUP_MCP_HUB) */}
+        {/* Floating Pill Breadcrumbs */}
         <div className="hub-breadcrumb-pill">
           <nav className="hub-breadcrumbs" aria-label="Breadcrumb">
             <button
@@ -548,9 +539,7 @@ export function HubTopbar({
               SwarmCursor Hub
             </button>
             <span className="hub-crumb-sep">/</span>
-            {viewMode === "artboard" ? (
-              <strong className="hub-crumb-current">Artboard Showcase</strong>
-            ) : activePageId === "catalog" || !activeModule ? (
+            {activePageId === "catalog" || !activeModule ? (
               <strong className="hub-crumb-current">
                 {lang === "vi" ? "Kho Module & Tài liệu" : "Module Catalog"}
               </strong>
@@ -583,40 +572,32 @@ export function HubTopbar({
           <span>SwarmCursor 2.0 · SIMD128</span>
         </span>
 
-        {viewMode === "docs" && (
-          <button
-            type="button"
-            className="hub-action-pill"
-            onClick={onReplaySwarm}
-            title={ui.nav.replayTooltip}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-              <path d="M16 16h5v5" />
-            </svg>
-            <span className="hub-hide-sm">{ui.nav.replayBtn}</span>
-          </button>
-        )}
+        <button
+          type="button"
+          className="hub-action-pill"
+          onClick={onReplaySwarm}
+          title={ui.nav.replayTooltip}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+            <path d="M16 16h5v5" />
+          </svg>
+          <span className="hub-hide-sm">{ui.nav.replayBtn}</span>
+        </button>
 
         <button
           type="button"
-          className={`hub-action-pill ${viewMode === "artboard" ? "is-active" : ""}`}
-          onClick={() => onViewModeChange(viewMode === "docs" ? "artboard" : "docs")}
+          className="hub-action-pill"
+          onClick={() => onViewModeChange("artboard")}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <rect x="3" y="3" width="18" height="18" rx="2" />
             <line x1="3" y1="9" x2="21" y2="9" />
             <line x1="9" y1="21" x2="9" y2="9" />
           </svg>
-          <span>
-            {viewMode === "docs"
-              ? ui.nav.artboardMode
-              : lang === "vi"
-              ? "Quay lại Docs"
-              : "Back to Docs"}
-          </span>
+          <span>{ui.nav.artboardMode}</span>
         </button>
 
         <div className="hub-lang-pill" role="group" aria-label="Language">
