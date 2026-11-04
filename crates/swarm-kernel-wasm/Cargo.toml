@@ -1,0 +1,15 @@
+[package]
+name = "swarm-kernel-wasm"
+version = "2.0.0"
+edition = "2021"
+description = "Zero-copy Structure-of-Arrays (SoA) O(N) Spatial Hash Boids & 3D Projection WebAssembly Kernel for SwarmCursor"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

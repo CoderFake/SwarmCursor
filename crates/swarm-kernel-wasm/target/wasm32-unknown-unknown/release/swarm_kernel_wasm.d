@@ -1,0 +1,1 @@
+/Users/hoangdieu/Projects/swarm-cursor/crates/swarm-kernel-wasm/target/wasm32-unknown-unknown/release/swarm_kernel_wasm.wasm: /Users/hoangdieu/Projects/swarm-cursor/crates/swarm-kernel-wasm/src/lib.rs
