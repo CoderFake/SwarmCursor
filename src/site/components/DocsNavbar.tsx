@@ -69,17 +69,17 @@ export function DocsNavbar({
           <div className="docs-segmented" role="group" aria-label="Language">
             <button
               type="button"
-              className={`docs-seg-btn ${lang === "vi" ? "is-active" : ""}`}
-              onClick={() => onLangChange("vi")}
-            >
-              🇻🇳 Tiếng Việt
-            </button>
-            <button
-              type="button"
               className={`docs-seg-btn ${lang === "en" ? "is-active" : ""}`}
               onClick={() => onLangChange("en")}
             >
               🇬🇧 English
+            </button>
+            <button
+              type="button"
+              className={`docs-seg-btn ${lang === "vi" ? "is-active" : ""}`}
+              onClick={() => onLangChange("vi")}
+            >
+              🇻🇳 Tiếng Việt
             </button>
           </div>
 

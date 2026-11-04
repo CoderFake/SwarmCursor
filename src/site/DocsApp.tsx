@@ -178,7 +178,7 @@ export function DocsApp() {
       const urlLang = params.get("lang");
       if (urlLang === "en" || urlLang === "vi") return urlLang;
     }
-    return "vi";
+    return "en";
   });
   const [viewMode, setViewMode] = useState<SiteViewMode>("docs");
   const [activeId, setActiveId] = useState<string>("installation");

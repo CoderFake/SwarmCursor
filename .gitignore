@@ -4,3 +4,4 @@ dist/
 .superpowers/
 .vercel/
 crates/swarm-kernel-wasm/target/
+.vercel
