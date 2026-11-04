@@ -314,6 +314,20 @@
   font-size: 11.5px;
 }
 
+@media (max-width: 860px) {
+  .swarm-turbopack-trigger {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+  }
+  .swarm-tp-trigger-dot,
+  .swarm-tp-trigger-count {
+    display: none;
+  }
+}
+
 .swarm-turbopack-popover {
   position: absolute;
   bottom: calc(100% + 10px);
