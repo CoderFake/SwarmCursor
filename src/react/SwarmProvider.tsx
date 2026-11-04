@@ -9,7 +9,12 @@ import { AutoScrollController } from "../core/autoscroll";
 import { DESIGN_WIDTH } from "../core/constants";
 import { scanDOMElements } from "../core/dom-scanner";
 import { SwarmEngine } from "../core/engine";
-import type { ScrollMode } from "../core/types";
+import { scanDeepDOMElements } from "../scanner";
+import {
+  FastCursorLayerController,
+  FastOverlayCanvasController,
+} from "../renderers";
+import type { ScrollMode, Swarm3DBuildMode } from "../core/types";
 import {
   CursorsLayer,
   RulersOverlay,
@@ -48,6 +53,10 @@ export interface SwarmProviderProps {
   controlsSlot?: React.ReactNode;
   showCursorLabels?: boolean;
   designWidth?: number;
+  /** Recursively scans inner component DOM elements (headings, SVG paths, buttons, 3D canvases) */
+  deepScan?: boolean;
+  /** Uses Zero-React-Tick Direct-DOM & 2D Canvas fast renderers for 60-120fps performance */
+  fastMode?: boolean;
   /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
   agentPill?: boolean | Omit<SwarmAgentPillProps, "engine">;
 }
@@ -61,9 +70,13 @@ export function SwarmProvider({
   controlsSlot,
   showCursorLabels = false,
   designWidth = DESIGN_WIDTH,
+  deepScan = false,
+  fastMode = true,
   agentPill = false,
 }: SwarmProviderProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const fastCursorsRef = useRef<HTMLDivElement | null>(null);
+  const fastCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<SwarmEngine | null>(null);
   if (!engineRef.current) {
     engineRef.current = new SwarmEngine({ designWidth });
@@ -91,12 +104,25 @@ export function SwarmProvider({
     }
     window.scrollTo(0, 0);
 
-    const scanned = scanDOMElements(rootRef.current, designWidth);
+    const scanned = deepScan
+      ? scanDeepDOMElements(rootRef.current, { designWidth })
+      : scanDOMElements(rootRef.current, designWidth);
     const rebuilt = new SwarmEngine({
       scene: scanned.scene,
       designWidth,
     });
     engineRef.current = rebuilt;
+
+    const fastCursorCtrl =
+      fastMode && fastCursorsRef.current
+        ? new FastCursorLayerController(fastCursorsRef.current, {
+            showLabels: showCursorLabels,
+          })
+        : null;
+    const fastOverlayCtrl =
+      fastMode && fastCanvasRef.current
+        ? new FastOverlayCanvasController(fastCanvasRef.current)
+        : null;
 
     const updateViewport = () => {
       const clientW = document.documentElement.clientWidth || designWidth;
@@ -130,19 +156,26 @@ export function SwarmProvider({
       lastTime = now;
       autoScroll.update(dt, rebuilt);
       rebuilt.step(dt);
-      setTick((t) => t + 1);
+      if (fastCursorCtrl && fastOverlayCtrl) {
+        fastCursorCtrl.sync(rebuilt);
+        fastOverlayCtrl.sync(rebuilt);
+      } else {
+        setTick((t) => t + 1);
+      }
       rafId = requestAnimationFrame(frame);
     };
     rafId = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(rafId);
+      fastCursorCtrl?.destroy();
+      fastOverlayCtrl?.destroy();
       window.removeEventListener("resize", updateViewport);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointermove", onPointerMove);
     };
-  }, [autoScroll, designWidth]);
+  }, [autoScroll, designWidth, deepScan, fastMode, showCursorLabels]);
 
   const activeEngine = engineRef.current;
   const ctxValue: SwarmContextValue = {
@@ -157,11 +190,33 @@ export function SwarmProvider({
 
   return (
     <SwarmContext.Provider value={ctxValue}>
-      <div ref={rootRef} className="swarm-root">
+      <div
+        ref={rootRef}
+        className="swarm-root"
+        data-swarm-deep={deepScan ? "true" : undefined}
+      >
         {children}
         <MainCanvas engine={activeEngine} />
-        <SelectionAndGuidesOverlay engine={activeEngine} />
-        <CursorsLayer engine={activeEngine} showLabels={showCursorLabels} />
+        {fastMode ? (
+          <>
+            <canvas
+              ref={fastCanvasRef}
+              className="swarm-fast-overlay-canvas"
+              style={{
+                position: "fixed",
+                inset: 0,
+                pointerEvents: "none",
+                zIndex: 25,
+              }}
+            />
+            <div ref={fastCursorsRef} className="cursors" />
+          </>
+        ) : (
+          <>
+            <SelectionAndGuidesOverlay engine={activeEngine} />
+            <CursorsLayer engine={activeEngine} showLabels={showCursorLabels} />
+          </>
+        )}
       </div>
       <RulersOverlay engine={activeEngine} />
       {agentPill && (
@@ -185,7 +240,9 @@ export function SwarmProvider({
 
 export interface SwarmElementProps {
   id: string;
-  tool?: "rect" | "text" | "path";
+  tool?: "rect" | "text" | "path" | "3d" | "deep";
+  buildMode?: Swarm3DBuildMode;
+  squadSize?: number;
   grow?: boolean;
   snapAxis?: "x" | "y" | string;
   deps?: string[];
@@ -197,6 +254,8 @@ export interface SwarmElementProps {
 export function SwarmElement({
   id,
   tool = "rect",
+  buildMode,
+  squadSize,
   grow = false,
   snapAxis,
   deps,
@@ -209,6 +268,9 @@ export function SwarmElement({
       id={id}
       data-swarm={tool}
       data-swarm-id={id}
+      data-swarm-deep={tool === "deep" ? "true" : undefined}
+      data-swarm-3d={tool === "3d" ? buildMode ?? "all" : undefined}
+      data-swarm-squad={squadSize}
       data-swarm-grow={grow ? "true" : undefined}
       data-swarm-snap={snapAxis}
       data-swarm-deps={deps?.join(",")}

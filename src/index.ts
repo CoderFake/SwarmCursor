@@ -13,3 +13,4 @@ export * from "./kernel";
 export * from "./scanner";
 export * from "./three";
 export * from "./tools";
+export * from "./renderers";

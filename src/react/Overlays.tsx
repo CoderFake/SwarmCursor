@@ -192,6 +192,113 @@ export function SelectionAndGuidesOverlay({ engine }: { engine: SwarmEngine }) {
             </div>
           );
         }
+      } else if (item.t === "gizmo3d") {
+        const pts = item.corners.map((p) => ({
+          x: toScreenX(p.x),
+          y: toCursorScreenY(p.y),
+        }));
+        const edges: ReadonlyArray<[number, number]> = [
+          [0, 1], [1, 2], [2, 3], [3, 0],
+          [4, 5], [5, 6], [6, 7], [7, 4],
+          [0, 4], [1, 5], [2, 6], [3, 7],
+        ];
+        if (pts.length >= 8) {
+          svgNodes.push(
+            <g
+              key={keyCounter++}
+              stroke="#0D99FF"
+              strokeWidth={1.25}
+              strokeDasharray="4 3"
+              opacity={0.85}
+            >
+              {edges.map(([i, j], eIdx) => (
+                <line
+                  key={eIdx}
+                  x1={pts[i].x}
+                  y1={pts[i].y}
+                  x2={pts[j].x}
+                  y2={pts[j].y}
+                />
+              ))}
+            </g>
+          );
+          const orig = {
+            x: toScreenX(item.origin.x),
+            y: toCursorScreenY(item.origin.y),
+          };
+          const axX = {
+            x: toScreenX(item.axes.x.x),
+            y: toCursorScreenY(item.axes.x.y),
+          };
+          const axY = {
+            x: toScreenX(item.axes.y.x),
+            y: toCursorScreenY(item.axes.y.y),
+          };
+          const axZ = {
+            x: toScreenX(item.axes.z.x),
+            y: toCursorScreenY(item.axes.z.y),
+          };
+          svgNodes.push(
+            <g key={keyCounter++} strokeWidth={2}>
+              <line x1={orig.x} y1={orig.y} x2={axX.x} y2={axX.y} stroke="#F24822" />
+              <line x1={orig.x} y1={orig.y} x2={axY.x} y2={axY.y} stroke="#14AE5C" />
+              <line x1={orig.x} y1={orig.y} x2={axZ.x} y2={axZ.y} stroke="#0D99FF" />
+            </g>
+          );
+          if (item.badge) {
+            badgeNodes.push(
+              <div
+                key={keyCounter++}
+                className="badge"
+                style={{
+                  left: orig.x,
+                  top: Math.max(...pts.map((p) => p.y)) + 8,
+                  background: "#7C3AED",
+                }}
+              >
+                {item.badge}
+              </div>
+            );
+          }
+        }
+      } else if (item.t === "laser3d") {
+        const lPt = {
+          x: toScreenX(item.leftPt.x),
+          y: toCursorScreenY(item.leftPt.y),
+        };
+        const rPt = {
+          x: toScreenX(item.rightPt.x),
+          y: toCursorScreenY(item.rightPt.y),
+        };
+        const cPt = {
+          x: toScreenX(item.cursorPt.x),
+          y: toCursorScreenY(item.cursorPt.y),
+        };
+        const midX = (lPt.x + rPt.x) * 0.5;
+        const midY = (lPt.y + rPt.y) * 0.5;
+        svgNodes.push(
+          <g key={keyCounter++}>
+            {item.mode === "slice" && (
+              <line
+                x1={lPt.x}
+                y1={lPt.y}
+                x2={rPt.x}
+                y2={rPt.y}
+                stroke="#38BDF8"
+                strokeWidth={2.2}
+              />
+            )}
+            <line
+              x1={cPt.x}
+              y1={cPt.y}
+              x2={midX}
+              y2={midY}
+              stroke="#7C3AED"
+              strokeWidth={1.3}
+              strokeDasharray="3 3"
+            />
+          </g>
+        );
       } else {
         const ptA = { x: toScreenX(item.a.x), y: toCursorScreenY(item.a.y) };
         const ptB = { x: toScreenX(item.b.x), y: toCursorScreenY(item.b.y) };
