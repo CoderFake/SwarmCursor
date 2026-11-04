@@ -1,7 +1,7 @@
 {
   "name": "swarm-cursor",
-  "version": "1.0.0",
-  "description": "Autonomous multi-agent Figma cursor choreography, scroll-driven UI builder, and Boids vortex mouse follower for React & Vanilla TS",
+  "version": "2.0.0",
+  "description": "SwarmCursor 2.0: Compiled Rust/WASM multi-agent Figma cursor choreography, 3D/Three.js/GLB builder (extrude, GPU particle swarm, holographic slice), deep DOM scanner, and zero-React-tick renderer",
   "author": "CoderFake",
   "license": "MIT",
   "repository": {
@@ -18,6 +18,11 @@
     "figma-cursor",
     "multi-agent",
     "boids",
+    "threejs",
+    "glb",
+    "webgl",
+    "wasm",
+    "rust",
     "scroll-animation",
     "react",
     "typescript"

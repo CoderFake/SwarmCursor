@@ -1,15 +1,16 @@
-# `<SwarmProvider>` & `<SwarmElement>` (DOM-Driven Mode)
+# `<SwarmProvider>`, `<SwarmElement>` & `<Swarm3D>` (DOM-Driven & 3D Mode)
 
-Chế độ **DOM-Driven** cho phép bạn giữ nguyên cấu trúc HTML/React/Tailwind của dự án. Khi người dùng kéo trang (hoặc khi trang tự động cuộn), `<SwarmProvider>` tự động quét tọa độ các `<SwarmElement>` và điều phối đàn chuột AI bay tới thực hiện thao tác vẽ tương ứng trước khi làm hiện phần tử thật.
+Chế độ **DOM-Driven** cho phép bạn giữ nguyên cấu trúc HTML/React/Tailwind và các canvas Three.js/WebGL của dự án. Khi người dùng kéo trang (hoặc khi trang tự động cuộn), `<SwarmProvider>` tự động quét tọa độ các `<SwarmElement>`, `<Swarm3D>`, hoặc đệ quy vào toàn bộ DOM con bên trong component (`deepScan={true}`) và điều phối đàn chuột AI bay tới thực hiện thao tác vẽ tương ứng trước khi làm hiện phần tử thật.
 
 ---
 
-## Ví dụ sử dụng
+## Ví dụ sử dụng kết hợp 2D + Deep DOM + 3D/GLB
 
 ```tsx
 import {
   SwarmProvider,
   SwarmElement,
+  Swarm3D,
   SwarmControls,
 } from "swarm-cursor/react";
 import "swarm-cursor/styles.css";
@@ -19,6 +20,8 @@ export default function PortfolioSection() {
     <SwarmProvider
       scrollMode="hybrid"
       autoScrollSpeed={180}
+      deepScan={true}
+      useFastRenderers={true}
       showCursorLabels={true}
       agentPill={{
         maxIcons: 5,
@@ -32,20 +35,30 @@ export default function PortfolioSection() {
           <h1 className="text-5xl font-bold">Creative Engineering</h1>
         </SwarmElement>
 
-        {/* 2. Công cụ Crosshair kéo khung hình chữ nhật sau khi "title" xong */}
-        <SwarmElement id="card-1" tool="rect" deps={["title"]} snapAxis="y">
-          <div className="p-8 rounded-2xl border bg-white shadow-sm">
-            <h3>Interactive Systems</h3>
-            <p>Multi-agent cursor choreography.</p>
-          </div>
-        </SwarmElement>
+        {/* 2. Container tự động quét đệ quy các thẻ h3, p, button, svg bên trong */}
+        <div
+          id="card-1"
+          data-swarm="rect"
+          data-swarm-deep="true"
+          data-swarm-deps="t:title"
+          className="p-8 rounded-2xl border bg-white shadow-sm"
+        >
+          <h3>Interactive Multi-Agent Systems</h3>
+          <p>Child headings, paragraphs, buttons and SVGs are built automatically.</p>
+          <button type="button">Launch Demo</button>
+        </div>
 
-        {/* 3. Công cụ Pen Tool đồ nét vector SVG */}
-        <SwarmElement id="logo-svg" tool="path" deps={["card-1"]}>
-          <svg viewBox="0 0 120 120" className="w-20 h-20">
-            <path d="M10 90 L60 15 L110 90 Z" />
-          </svg>
-        </SwarmElement>
+        {/* 3. Khối 3D / GLB được đội 4 chuột AI điêu khắc (extrude -> particles -> slice) */}
+        <Swarm3D
+          id="orb-3d"
+          src="/models/orb.glb"
+          buildMode="all"
+          squadSize={4}
+          deps={["r:card-1"]}
+          className="w-80 h-80"
+        >
+          <canvas />
+        </Swarm3D>
       </section>
 
       <SwarmControls position="bottom-right" />
@@ -62,10 +75,25 @@ export default function PortfolioSection() {
 | :--- | :--- | :--- | :--- |
 | `scrollMode` | `"manual" \| "auto" \| "hybrid"` | `"manual"` | `"manual"`: cuộn tay tới đâu vẽ tới đó.<br>`"auto"`: tự cuộn theo tiến độ.<br>`"hybrid"`: tự cuộn nhưng nhường quyền khi người dùng lăn chuột, tự tiếp tục sau 1.2s nghỉ. |
 | `autoScrollSpeed` | `number` | `180` | Tốc độ tự động cuộn tối đa (`px/s`). |
+| `deepScan` | `boolean` | `false` | Bật `scanDeepDOM` để tự động quét đệ quy các thẻ con bên trong component và nối DAG Cha $\rightarrow$ Con. |
+| `useFastRenderers` | `boolean` | `true` | Sử dụng bộ render Zero-React-Tick (`FastCursorLayerController` + `FastOverlayCanvasController`) 60fps. |
 | `controls` | `boolean` | `false` | Hiển thị thanh điều khiển nổi mặc định. |
 | `showCursorLabels` | `boolean` | `false` | Hiển thị nhãn tên Agent cạnh mỗi con trỏ. |
 | `designWidth` | `number` | `1280` | Chiều rộng tham chiếu của khung thiết kế. |
 | `agentPill` | `boolean \| Omit<SwarmAgentPillProps, "engine">` | `false` | **Chỉ hiện khi khai báo.** Hiển thị thanh Bottom-Bar Queue tối đa 5 icon AI + `{N} agents`. |
+
+---
+
+## Props của `<Swarm3D>` & Hook `useSwarm3D`
+
+| Prop | Kiểu dữ liệu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | `string` *(bắt buộc)* | — | ID duy nhất của phần tử 3D (task ID trong DAG sẽ là `3d:${id}`). |
+| `src` | `string` | `undefined` | Đường dẫn file `.glb` / `.gltf` (tùy chọn). |
+| `buildMode` | `"extrude" \| "particles" \| "slice" \| "all"` | `"all"` | Thuật toán hiệu ứng xây dựng 3D (`all` chạy tuần tự chồng lắp cả 3 giai đoạn). |
+| `squadSize` | `number` | `4` | Số lượng con trỏ AI hợp tác cùng lúc trên vật thể 3D này (`1` Lead + `N-1` Assistants). |
+| `deps` | `string[]` | `undefined` | Danh sách task ID phải thỏa mãn trước khi bắt đầu dựng khối 3D. |
+| `onProgress` | `(progress: number, weights: Phase3DWeights) => void` | `undefined` | Callback nhận tiến độ `0..1` và trọng số từng pha `{ extrude, particles, slice }` mỗi frame. |
 
 ---
 
@@ -78,5 +106,3 @@ export default function PortfolioSection() {
 | `grow` | `boolean` | `false` | Chỉ áp dụng cho `tool="text"`: gõ chữ cỡ nhỏ trước, bôi đen toàn bộ rồi kéo giãn lên cỡ chữ thật. |
 | `snapAxis` | `"x" \| "y" \| "xy"` | `undefined` | Cử thêm 1 chuột AI kéo đường gióng đỏ (Red Guide) từ thanh Ruler trên/trái khớp vào cạnh phần tử. |
 | `deps` | `string[]` | `undefined` | Danh sách `id` phải vẽ xong trước khi phần tử này được phép bắt đầu. |
-| `className` | `string` | `undefined` | Class CSS của thẻ wrapper. |
-| `style` | `React.CSSProperties` | `undefined` | Inline style của thẻ wrapper. |
