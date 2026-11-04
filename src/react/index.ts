@@ -29,3 +29,5 @@ export type {
 export { SwarmControls as SwarmControlsBar } from "./SwarmControls";
 export { SwarmFollower } from "./SwarmFollower";
 export type { SwarmFollowerProps } from "./SwarmFollower";
+export { SwarmAgentPill } from "./SwarmAgentPill";
+export type { SwarmAgentPillProps } from "./SwarmAgentPill";

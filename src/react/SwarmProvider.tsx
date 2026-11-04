@@ -16,6 +16,7 @@ import {
   SelectionAndGuidesOverlay,
 } from "./Overlays";
 import { MainCanvas } from "./SwarmCanvas";
+import { SwarmAgentPill, type SwarmAgentPillProps } from "./SwarmAgentPill";
 import { SwarmControls as SwarmControlsBar } from "./SwarmControls";
 
 export interface SwarmContextValue {
@@ -45,6 +46,8 @@ export interface SwarmProviderProps {
   controls?: boolean;
   showCursorLabels?: boolean;
   designWidth?: number;
+  /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
+  agentPill?: boolean | Omit<SwarmAgentPillProps, "engine">;
 }
 
 export function SwarmProvider({
@@ -54,6 +57,7 @@ export function SwarmProvider({
   controls = false,
   showCursorLabels = false,
   designWidth = DESIGN_WIDTH,
+  agentPill = false,
 }: SwarmProviderProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const engineRef = useRef<SwarmEngine | null>(null);
@@ -152,6 +156,12 @@ export function SwarmProvider({
         <CursorsLayer engine={activeEngine} showLabels={showCursorLabels} />
       </div>
       <RulersOverlay engine={activeEngine} />
+      {agentPill && (
+        <SwarmAgentPill
+          engine={activeEngine}
+          {...(typeof agentPill === "object" ? agentPill : {})}
+        />
+      )}
       {controls && (
         <SwarmControlsBar engine={activeEngine} autoScroll={autoScroll} />
       )}

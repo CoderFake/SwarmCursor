@@ -1,5 +1,6 @@
 export * from "./core/types";
 export * from "./core/constants";
+export * from "./core/agent-icons";
 export * from "./core/text-measure";
 export * from "./core/scene-builder";
 export * from "./core/physics";

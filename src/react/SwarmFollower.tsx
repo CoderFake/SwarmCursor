@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FLOCK_TARGET_CURSORS } from "../core/constants";
 import { SwarmEngine } from "../core/engine";
 import { CursorView } from "./CursorSvg";
+import { SwarmAgentPill, type SwarmAgentPillProps } from "./SwarmAgentPill";
 
 export interface SwarmFollowerProps {
   /** Number of cursors in the swirling flock (default: 36) */
@@ -12,6 +13,8 @@ export interface SwarmFollowerProps {
   tempoMultiplier?: number;
   /** Show agent name labels next to cursors (default: false) */
   showLabels?: boolean;
+  /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
+  agentPill?: boolean | Omit<SwarmAgentPillProps, "engine">;
   /** Z-index of the fixed overlay layer (default: 40) */
   zIndex?: number;
   className?: string;
@@ -27,6 +30,7 @@ export function SwarmFollower({
   radiusScale = 1,
   tempoMultiplier = 1,
   showLabels = false,
+  agentPill = false,
   zIndex = 40,
   className,
 }: SwarmFollowerProps) {
@@ -100,27 +104,36 @@ export function SwarmFollower({
   }, [engine, radiusScale]);
 
   return (
-    <div
-      className={className ? `cursors ${className}` : "cursors"}
-      style={{
-        position: "fixed",
-        inset: 0,
-        width: "100vw",
-        height: "100vh",
-        pointerEvents: "none",
-        zIndex,
-        overflow: "hidden",
-      }}
-    >
-      {engine.cursors.map((c) => (
-        <CursorView
-          key={c.id}
-          c={c}
-          X={c.x}
-          Y={c.y}
-          showLabel={showLabels}
+    <>
+      <div
+        className={className ? `cursors ${className}` : "cursors"}
+        style={{
+          position: "fixed",
+          inset: 0,
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none",
+          zIndex,
+          overflow: "hidden",
+        }}
+      >
+        {engine.cursors.map((c) => (
+          <CursorView
+            key={c.id}
+            c={c}
+            X={c.x}
+            Y={c.y}
+            showLabel={showLabels}
+          />
+        ))}
+      </div>
+      {agentPill && (
+        <SwarmAgentPill
+          engine={engine}
+          count={count}
+          {...(typeof agentPill === "object" ? agentPill : {})}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }

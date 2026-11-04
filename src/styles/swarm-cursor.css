@@ -280,3 +280,127 @@
   font-variant-numeric: tabular-nums;
   padding: 0 4px;
 }
+
+/* Figma Bottom-Bar Agent Queue Pill */
+.swarm-agent-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px 5px 7px;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  border: 1px solid rgba(18, 20, 23, 0.08);
+  box-shadow:
+    0 4px 14px rgba(18, 20, 23, 0.08),
+    0 1px 2px rgba(18, 20, 23, 0.05);
+  color: #121417;
+  font: 600 14px/20px Inter, system-ui, -apple-system, sans-serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.swarm-agent-pill.bottom-center {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 48;
+}
+
+.swarm-agent-pill.bottom-left {
+  position: fixed;
+  left: 28px;
+  bottom: 18px;
+  z-index: 48;
+}
+
+.swarm-agent-pill.bottom-right {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 48;
+}
+
+.swarm-agent-pill.inline {
+  position: relative;
+}
+
+.swarm-agent-stack {
+  display: inline-flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.swarm-agent-avatar {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.swarm-agent-avatar + .swarm-agent-avatar {
+  margin-left: -8px;
+}
+
+.swarm-agent-avatar svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.swarm-agent-avatar.is-entering {
+  animation: swarm-agent-enter 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.swarm-agent-avatar.is-shifting,
+.swarm-agent-avatar.is-shifting-a {
+  animation: swarm-agent-shift-a 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.swarm-agent-avatar.is-shifting-b {
+  animation: swarm-agent-shift-b 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.swarm-agent-pill-label {
+  color: #121417;
+  letter-spacing: -0.01em;
+}
+
+@keyframes swarm-agent-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes swarm-agent-shift-a {
+  0% {
+    transform: translateX(-14px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes swarm-agent-shift-b {
+  0% {
+    transform: translateX(-14px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

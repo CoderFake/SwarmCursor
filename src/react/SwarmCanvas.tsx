@@ -23,6 +23,7 @@ import {
   RulersOverlay,
   SelectionAndGuidesOverlay,
 } from "./Overlays";
+import { SwarmAgentPill, type SwarmAgentPillProps } from "./SwarmAgentPill";
 import { SwarmControls } from "./SwarmControls";
 
 export function highlightCodeLine(line: string): React.ReactNode {
@@ -257,6 +258,8 @@ export interface SwarmCanvasProps {
   controls?: boolean;
   showCursorLabels?: boolean;
   showIntroLogo?: boolean;
+  /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
+  agentPill?: boolean | Omit<SwarmAgentPillProps, "engine">;
 }
 
 export function SwarmCanvas({
@@ -267,6 +270,7 @@ export function SwarmCanvas({
   controls = false,
   showCursorLabels = false,
   showIntroLogo = true,
+  agentPill = false,
 }: SwarmCanvasProps) {
   const engineRef = useRef<SwarmEngine | null>(null);
   if (!engineRef.current) {
@@ -370,6 +374,12 @@ export function SwarmCanvas({
         <CursorsLayer engine={engine} showLabels={showCursorLabels} />
       </div>
       <RulersOverlay engine={engine} />
+      {agentPill && (
+        <SwarmAgentPill
+          engine={engine}
+          {...(typeof agentPill === "object" ? agentPill : {})}
+        />
+      )}
       {controls && <SwarmControls engine={engine} autoScroll={autoScroll} />}
     </>
   );

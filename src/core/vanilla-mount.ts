@@ -1,8 +1,15 @@
+import {
+  type AgentIconId,
+  createInitialIconQueue,
+  getAgentIconPool,
+  pickRandomAgentIcon,
+} from "./agent-icons";
 import { AutoScrollController } from "./autoscroll";
 import {
   ARROW_CURSOR_PATH,
   CURSOR_HOTSPOTS,
   DESIGN_WIDTH,
+  FLOCK_TARGET_CURSORS,
   GUIDE_RED,
   SELECTION_BLUE,
 } from "./constants";
@@ -16,12 +23,25 @@ import type {
   SwarmScene,
 } from "./types";
 
+export interface SwarmAgentPillOptions {
+  container?: HTMLElement;
+  engine?: SwarmEngine;
+  count?: number;
+  label?: string | ((count: number) => string);
+  maxIcons?: number;
+  intervalMs?: number;
+  icons?: AgentIconId[];
+  position?: "bottom-center" | "bottom-left" | "bottom-right" | "inline";
+}
+
 export interface CreateSwarmOptions extends SwarmEngineOptions {
   container?: HTMLElement;
   mode?: "canvas" | "dom" | "hybrid";
   scrollMode?: ScrollMode;
   autoScrollSpeed?: number;
   controls?: boolean;
+  /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
+  agentPill?: boolean | Omit<SwarmAgentPillOptions, "engine" | "container">;
 }
 
 export interface SwarmInstance {
@@ -88,6 +108,15 @@ export function createSwarm(options: CreateSwarmOptions = {}): SwarmInstance {
 
   let overlayRoot: HTMLDivElement | null = null;
   let rafId = 0;
+  let pillInstance: { destroy: () => void } | null = null;
+
+  if (options.agentPill && container) {
+    pillInstance = createSwarmAgentPill({
+      container,
+      engine,
+      ...(typeof options.agentPill === "object" ? options.agentPill : {}),
+    });
+  }
 
   if (container && typeof document !== "undefined") {
     overlayRoot = document.createElement("div");
@@ -217,6 +246,7 @@ export function createSwarm(options: CreateSwarmOptions = {}): SwarmInstance {
     destroy: () => {
       if (rafId) cancelAnimationFrame(rafId);
       overlayRoot?.remove();
+      pillInstance?.destroy();
     },
   };
 }
@@ -227,6 +257,80 @@ export interface SwarmFollowerOptions {
   radiusScale?: number;
   tempoMultiplier?: number;
   zIndex?: number;
+  /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
+  agentPill?: boolean | Omit<SwarmAgentPillOptions, "engine" | "container">;
+}
+
+export function createSwarmAgentPill(
+  options: SwarmAgentPillOptions = {}
+): { element: HTMLDivElement | null; destroy: () => void } {
+  const clampedMax = Math.max(1, Math.min(5, options.maxIcons ?? 5));
+  const pool = getAgentIconPool(options.icons);
+  const position = options.position ?? "bottom-center";
+  const intervalMs = options.intervalMs ?? 650;
+  let queue = createInitialIconQueue(clampedMax, pool);
+  let nextKey = clampedMax + 1;
+  let step = 0;
+  let timer = 0;
+  let pillEl: HTMLDivElement | null = null;
+
+  if (typeof document !== "undefined") {
+    const parent = options.container ?? document.body;
+    pillEl = document.createElement("div");
+    pillEl.className = `swarm-agent-pill ${position}`;
+    pillEl.setAttribute("role", "status");
+
+    const stackEl = document.createElement("div");
+    stackEl.className = "swarm-agent-stack";
+    const labelEl = document.createElement("span");
+    labelEl.className = "swarm-agent-pill-label";
+
+    pillEl.appendChild(stackEl);
+    pillEl.appendChild(labelEl);
+    parent.appendChild(pillEl);
+
+    const renderPill = () => {
+      const resolvedCount =
+        options.count ?? options.engine?.cursors.length ?? FLOCK_TARGET_CURSORS;
+      labelEl.textContent =
+        typeof options.label === "function"
+          ? options.label(resolvedCount)
+          : typeof options.label === "string"
+            ? options.label
+            : `${resolvedCount} agents`;
+
+      const shiftClass = step % 2 === 0 ? "is-shifting-a" : "is-shifting-b";
+      stackEl.innerHTML = queue
+        .slice(0, clampedMax)
+        .map((entry, idx) => {
+          const anim =
+            step === 0 ? "" : idx === 0 ? "is-entering" : shiftClass;
+          return `<span class="swarm-agent-avatar ${anim}" title="${entry.icon.name}" style="background-color:${entry.icon.avatarBg};z-index:${clampedMax - idx}"><svg viewBox="${entry.icon.viewBox}" xmlns="http://www.w3.org/2000/svg">${entry.icon.svgBody}</svg></span>`;
+        })
+        .join("");
+    };
+
+    renderPill();
+
+    const tempo = Math.max(0.25, options.engine?.tempoMultiplier ?? 1);
+    const delay = Math.max(120, Math.round(intervalMs / tempo));
+    timer = window.setInterval(() => {
+      if (options.engine?.paused) return;
+      const headId = queue[0]?.icon.id;
+      const nextIcon = pickRandomAgentIcon(pool, headId);
+      step += 1;
+      queue = [{ key: nextKey++, icon: nextIcon }, ...queue.slice(0, clampedMax - 1)];
+      renderPill();
+    }, delay);
+  }
+
+  return {
+    element: pillEl,
+    destroy: () => {
+      if (timer && typeof window !== "undefined") window.clearInterval(timer);
+      pillEl?.remove();
+    },
+  };
 }
 
 export function createSwarmFollower(
@@ -248,9 +352,18 @@ export function createSwarmFollower(
 
   let layer: HTMLDivElement | null = null;
   let rafId = 0;
+  let pillInstance: { destroy: () => void } | null = null;
 
   if (typeof document !== "undefined") {
     const parent = options.container ?? document.body;
+    if (options.agentPill) {
+      pillInstance = createSwarmAgentPill({
+        container: parent,
+        engine,
+        count,
+        ...(typeof options.agentPill === "object" ? options.agentPill : {}),
+      });
+    }
     layer = document.createElement("div");
     layer.className = "cursors";
     layer.style.cssText = `position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:${options.zIndex ?? 40};overflow:hidden;`;
@@ -302,6 +415,7 @@ export function createSwarmFollower(
     destroy: () => {
       if (rafId) cancelAnimationFrame(rafId);
       layer?.remove();
+      pillInstance?.destroy();
     },
   };
 }
