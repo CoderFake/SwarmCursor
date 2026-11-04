@@ -27,6 +27,16 @@
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
 }
 
+html,
+body,
+#app {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -902,6 +912,9 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border-radius: 26px;
   border: 1px solid rgba(255, 255, 255, 0.88);
   background: rgba(255, 255, 255, 0.94);
@@ -957,10 +970,14 @@
   font-size: 12.8px;
   line-height: 1.6;
   color: var(--color-ink-muted);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .hub-code-value {
   display: block;
+  min-width: 0;
+  max-width: 100%;
   border-radius: 12px;
   border: 1px solid var(--color-line);
   background: #f8f9fc;
@@ -969,11 +986,14 @@
   font-size: 12px;
   color: var(--color-ink-soft);
   overflow-x: auto;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hub-code-value.is-lg {
-  flex: 1;
+  flex: 1 1 220px;
+  min-width: 0;
   font-size: 12.5px;
 }
 
@@ -1018,6 +1038,9 @@
 .hub-panel {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.88);
   background: rgba(255, 255, 255, 0.94);
@@ -1082,6 +1105,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
   border-radius: 14px;
   border: 1px solid var(--color-line);
   background: #fafbfe;
@@ -1093,6 +1118,7 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 
 .hub-subpkg-info code {
@@ -1100,6 +1126,8 @@
   font-size: 12.2px;
   font-weight: 700;
   color: var(--color-ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .hub-subpkg-info span {
@@ -1684,8 +1712,12 @@
   }
   .hub-breadcrumb-pill {
     padding: 7px 12px;
-    max-width: calc(100vw - 196px);
+    max-width: calc(100vw - 204px);
     overflow: hidden;
+  }
+  .hub-breadcrumbs .hub-crumb-link,
+  .hub-breadcrumbs .hub-crumb-sep {
+    display: none;
   }
   .hub-breadcrumbs {
     flex-wrap: nowrap;
@@ -1693,15 +1725,51 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .hub-crumb-current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .hub-main {
     width: calc(100% - 32px);
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+  }
+  .hub-page-stack,
+  .hub-page-title,
+  .hub-page-title-main,
+  .hub-panel-body,
+  .hub-step-item,
+  .hub-code-card,
+  .docs-sandbox,
+  .docs-3d-canvas-wrap,
+  .docs-image-preview-stage,
+  .docs-sandbox-metrics,
+  .hub-pager-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .hub-page-title h1,
+  .hub-page-desc,
+  .hub-catalog-meta h2,
+  .hub-catalog-desc,
+  .hub-panel-header h2,
+  .hub-panel-header p,
+  .hub-step-title-row h3,
+  .hub-step-text,
+  .hub-pager-card strong {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .hub-catalog-card {
+    padding: 18px;
   }
   .hub-catalog-grid,
   .hub-subpkg-grid,
   .docs-sandbox-body,
   .hub-steps-grid,
   .hub-pager {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
   .hub-status-pill,
   .hub-hide-sm {
@@ -1709,8 +1777,15 @@
   }
   .hub-panel-header,
   .hub-panel-body {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .hub-prop-name,
+  .hub-prop-type,
+  .hub-prop-default {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
   }
 }
 
