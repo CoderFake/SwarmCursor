@@ -13,6 +13,13 @@ import {
 import { SceneBuilder } from "../core/scene-builder";
 import type { SwarmScene } from "../core/types";
 
+/**
+ * Built-in interactive landing & documentation showcase scene for SwarmCursor 2.0.
+ * Demonstrates all 6 Figma choreography tools (Ruler Guide, Type + Grow, Rectangle,
+ * Vector Pen, Alt+Drag Duplicate Group, Boids Vortex) while documenting the
+ * 8 modular sub-packages, Rust/WASM SIMD128 kernel, 3D (`extrude`·`particles`·`slice`)
+ * and 2D `<SwarmImage>` (`mosaic`·`scanline`·`halftone`) builders.
+ */
 export function buildSwarmLandingScene(
   getWorkerCount: () => number = () => 18
 ): SwarmScene {
@@ -30,15 +37,15 @@ export function buildSwarmLandingScene(
   );
   b.addSectionFrame("nav", 24, 88, true);
   b.addLogoMark("mark", MARGIN_LEFT + 24, 45, 22);
-  b.addText("brand", MARGIN_LEFT + 52, 44, "SwarmCursor", TYPE_STYLES.brand);
-  b.addText("nav0", 540, 46, "Components", TYPE_STYLES.nav);
+  b.addText("brand", MARGIN_LEFT + 52, 44, "SwarmCursor 2.0", TYPE_STYLES.brand);
+  b.addText("nav0", 540, 46, "Engine", TYPE_STYLES.nav);
   b.addDupGroup(
     "nav",
     ["nav0"],
     [
-      { dx: 96, dy: 0, edits: ["Physics"] },
-      { dx: 192, dy: 0, edits: ["Docs"] },
-      { dx: 288, dy: 0, edits: ["GitHub"] },
+      { dx: 96, dy: 0, edits: ["WASM SIMD"] },
+      { dx: 192, dy: 0, edits: ["3D & Image"] },
+      { dx: 288, dy: 0, edits: ["Docs"] },
     ]
   );
   b.addVLine("nav-div", MARGIN_RIGHT - 176, 24, 88);
@@ -46,7 +53,7 @@ export function buildSwarmLandingScene(
     r: 8,
     fill: PALETTE.ink,
   });
-  b.addText("nav-btn-t", MARGIN_RIGHT - 156, 46, "Get access", TYPE_STYLES.btn, {
+  b.addText("nav-btn-t", MARGIN_RIGHT - 156, 46, "npm install", TYPE_STYLES.btn, {
     w: 136,
     align: "center",
     deps: ["r:nav-btn"],
@@ -62,7 +69,7 @@ export function buildSwarmLandingScene(
     "h-title",
     CONTENT_X,
     192,
-    "Run a thousand\nagents as one.",
+    "Multi-agent UI,\n3D & WASM engine.",
     TYPE_STYLES.h1,
     { w: 580, snap: "g-hero", grow: true }
   );
@@ -70,12 +77,12 @@ export function buildSwarmLandingScene(
     "h-lead",
     CONTENT_X,
     356,
-    "Swarm schedules, routes and supervises AI agents across your stack, and runs their work in parallel.",
+    "SwarmCursor 2.0 orchestrates AI cursors with a Rust/WASM SIMD128 kernel, 3D mesh builders, 2D image synthesis, and zero-React-tick 60fps rendering.",
     TYPE_STYLES.lead,
     { w: 500, snap: "g-hero" }
   );
   b.addRect("h-btn1", CONTENT_X, 488, 184, 48, { r: 8, fill: PALETTE.ink });
-  b.addText("h-btn1-t", CONTENT_X, 501, "Start building", TYPE_STYLES.btn, {
+  b.addText("h-btn1-t", CONTENT_X, 501, "Quick start", TYPE_STYLES.btn, {
     w: 184,
     align: "center",
     deps: ["r:h-btn1"],
@@ -89,21 +96,21 @@ export function buildSwarmLandingScene(
     "h-btn2-t",
     CONTENT_X + 196,
     501,
-    "Read the docs",
+    "8 Sub-packages",
     TYPE_STYLES.btnDark,
     { w: 156, align: "center", deps: ["r:h-btn2"] }
   );
 
-  // Hero Diagram
+  // Hero Diagram: SwarmEngine + Rust/WASM SIMD128 Pipeline
   b.addRect("g-disp", 776, 162, 388, 64, { r: 10, fill: PALETTE.ink });
-  b.addText("g-disp-t", 800, 172, "swarm.dispatch(task)", TYPE_STYLES.nodeWhite, {
+  b.addText("g-disp-t", 800, 172, "swarm-cursor/engine · DAG", TYPE_STYLES.nodeWhite, {
     deps: ["r:g-disp"],
   });
   b.addText(
     "g-disp-s",
     800,
     194,
-    "orchestrator · 18 tasks queued",
+    "Rust/WASM SIMD128 · 60% early child unlock",
     monoStyle(12, "#8F949B"),
     { deps: ["r:g-disp"] }
   );
@@ -130,19 +137,19 @@ export function buildSwarmLandingScene(
     fill: PALETTE.card,
     stroke: PALETTE.line,
   });
-  b.addText("w0-n", 796, 301, "agent/research", TYPE_STYLES.nodeName, {
+  b.addText("w0-n", 796, 301, "swarm-cursor/kernel", TYPE_STYLES.nodeName, {
     deps: ["r:w0"],
   });
-  b.addText("w0-s", 796, 323, "● 12 replicas", monoStyle(12, PALETTE.accent), {
+  b.addText("w0-s", 796, 323, "● f32x4 SIMD Boids", monoStyle(12, PALETTE.accent), {
     deps: ["r:w0"],
   });
   b.addDupGroup(
     "workers",
     ["w0", "w0-n", "w0-s"],
     [
-      { dx: 208, dy: 0, edits: ["agent/writer", "● 4 replicas"] },
-      { dx: 0, dy: 104, edits: ["agent/review", "● 2 replicas"] },
-      { dx: 208, dy: 104, edits: ["agent/deploy", "○ waiting"] },
+      { dx: 208, dy: 0, edits: ["swarm-cursor/three", "● extrude·particles"] },
+      { dx: 0, dy: 104, edits: ["swarm-cursor/scanner", "● scanDeepDOM DAG"] },
+      { dx: 208, dy: 104, edits: ["swarm-cursor/tools", "● Squad + Image 2D"] },
     ]
   );
   b.addPath(
@@ -171,24 +178,24 @@ export function buildSwarmLandingScene(
     "g-stat",
     776,
     562,
-    "4 agents · 18 tasks in flight · 0 conflicts",
+    "8 sub-packages · SoA Float32Array · 0 React ticks",
     TYPE_STYLES.small,
     { snap: "g-hero-r" }
   );
 
-  // --- Logos Strip ---
+  // --- Sub-packages Strip ---
   b.addSectionFrame("logos", 660, 772, true);
-  b.addText("l-label", CONTENT_X, 699, "Used by teams at", TYPE_STYLES.small, {
+  b.addText("l-label", CONTENT_X, 699, "Modular sub-packages", TYPE_STYLES.small, {
     w: 230,
   });
   for (let i = 0; i < 5; i++) {
     b.addVLine("l-div" + i, 360 + i * 168, 660, 772);
   }
-  b.addText("logo0", 388, 703, "Northwind", TYPE_STYLES.logo);
+  b.addText("logo0", 388, 703, "/engine", TYPE_STYLES.logo);
   b.addDupGroup(
     "logos",
     ["logo0"],
-    ["Halcyon", "Parallax", "Meridian", "Kestrel"].map((name, idx) => ({
+    ["/kernel", "/three", "/scanner", "/react"].map((name, idx) => ({
       dx: 168 * (idx + 1),
       dy: 0,
       edits: [name],
@@ -203,7 +210,7 @@ export function buildSwarmLandingScene(
     "f-title",
     CONTENT_X,
     834,
-    "Built for running agents\nin production.",
+    "Six subsystems built\nfor 60fps scale.",
     TYPE_STYLES.h2,
     { w: 580, snap: "g-feat", grow: true }
   );
@@ -211,7 +218,7 @@ export function buildSwarmLandingScene(
     "f-lead",
     760,
     840,
-    "Routing, memory, supervision, fan-out, tracing and guardrails all come with the orchestrator.",
+    "Every heavy loop runs in Rust/WASM SIMD128 while DOM pools and a single 2D overlay canvas render at 60fps.",
     TYPE_STYLES.body,
     { w: 380, snap: "g-feat-r" }
   );
@@ -222,14 +229,14 @@ export function buildSwarmLandingScene(
   b.addVLine("f-v2", 826, 960, 1440);
   b.addGuide("g-cell", "x", MARGIN_LEFT + 36, 975);
   b.addGuide("g-cell-y", "y", 1000, 975);
-  b.addText("fc-title", MARGIN_LEFT + 36, 1000, "Smart routing", TYPE_STYLES.h3, {
+  b.addText("fc-title", MARGIN_LEFT + 36, 1000, "Rust/WASM SIMD128", TYPE_STYLES.h3, {
     snap: "g-cell-y",
   });
   b.addText(
     "fc-body",
     MARGIN_LEFT + 36,
     1036,
-    "Send every task to the agent best equipped for it, based on skills, cost and live load.",
+    "O(N) spatial hash Boids, 4-cursor f32x4 Bezier flight, 3D projection, task auction & mesh deformation.",
     TYPE_STYLES.body,
     { w: 296, snap: "g-cell" }
   );
@@ -241,40 +248,40 @@ export function buildSwarmLandingScene(
         dx: 373,
         dy: 0,
         edits: [
-          "Shared memory",
-          "Agents read and write one consistent context, so nobody does the same work twice.",
+          "3D & GLB Sculpting",
+          "Extrude wireframe cages, sample surface triangles in O(log M), and sweep holographic laser slices.",
         ],
       },
       {
         dx: 746,
         dy: 0,
         edits: [
-          "Supervisors",
-          "Retry, escalate or hand off automatically when an agent gets stuck or drifts.",
+          "2D <SwarmImage>",
+          "Build images progressively via Quadtree mosaic blocks, CRT laser scanlines, or halftone dot matrices.",
         ],
       },
       {
         dx: 0,
         dy: 240,
         edits: [
-          "Fan-out, fan-in",
-          "Split big jobs across hundreds of workers and merge the results deterministically.",
+          "Deep DOM DAG Scanner",
+          "Recursively scans headings, text, buttons, SVGs and 3D canvases in a single layout pass with 60% early unlock.",
         ],
       },
       {
         dx: 373,
         dy: 240,
         edits: [
-          "Live traces",
-          "Watch every decision as it happens, with replays down to a single tool call.",
+          "Multi-Agent Squads",
+          "Work-stealing SquadCoordinator pairs 1 Lead Cursor with N Assistant Cursors on complex 3D and UI nodes.",
         ],
       },
       {
         dx: 746,
         dy: 240,
         edits: [
-          "Guardrails",
-          "Budgets, approvals and policies that every agent in the swarm respects by default.",
+          "Zero-React-Tick 60fps",
+          "FastCursorLayerController and FastOverlayCanvasController update transforms without triggering React re-renders.",
         ],
       },
     ]
@@ -289,7 +296,7 @@ export function buildSwarmLandingScene(
     "c-title",
     CONTENT_X,
     1522,
-    "One file describes\nthe whole swarm.",
+    "Declarative React\n& Vanilla TS API.",
     TYPE_STYLES.h2,
     { w: 440, snap: "g-code", grow: true }
   );
@@ -297,7 +304,7 @@ export function buildSwarmLandingScene(
     "c-body",
     CONTENT_X,
     1630,
-    "One declarative file sets your agents, how work is routed between them, and what they’re allowed to spend. Review it in a pull request like any other code.",
+    "Wrap existing DOM trees with <SwarmProvider deepScan>, drop in <Swarm3D> or <SwarmImage>, or drive custom WebGL meshes directly via wasmKernel.",
     TYPE_STYLES.body,
     { w: 400, snap: "g-code" }
   );
@@ -305,7 +312,7 @@ export function buildSwarmLandingScene(
     "c-link",
     CONTENT_X,
     1772,
-    "Read the spec",
+    "Explore docs/README.md →",
     monoStyle(13, PALETTE.ink, 500),
     { snap: "g-code-y" }
   );
@@ -323,9 +330,9 @@ export function buildSwarmLandingScene(
   }
   b.addText(
     "c-file",
-    1136 - b.measureTextWidth("swarm.yaml", TYPE_STYLES.codeDim),
+    1136 - b.measureTextWidth("App.tsx", TYPE_STYLES.codeDim),
     1503,
-    "swarm.yaml",
+    "App.tsx",
     TYPE_STYLES.codeDim,
     { deps: [codeWin] }
   );
@@ -338,18 +345,18 @@ export function buildSwarmLandingScene(
     { stroke: "#25282D", deps: [codeWin] }
   );
   [
-    "# swarm.yaml",
-    "swarm: launch-week",
-    "agents:",
-    "  research: { model: fast, replicas: 12 }",
-    "  writer:   { model: smart, replicas: 4 }",
-    "  reviewer: { model: smart, replicas: 2 }",
-    "routing:",
-    "  strategy: skills-first",
-    "  fallback: reviewer",
-    "budget:",
-    "  max_spend: $40/day",
-    "  on_exceed: pause",
+    'import { SwarmProvider, Swarm3D, SwarmImage }',
+    '  from "swarm-cursor/react";',
+    "",
+    "<SwarmProvider scrollMode=\"hybrid\" deepScan>",
+    "  <article id=\"card\" data-swarm=\"rect\" data-swarm-deep>",
+    "    <h2>Deep DOM Auto-DAG</h2>",
+    "  </article>",
+    "  <Swarm3D id=\"orb\" buildMode=\"all\" squadSize={4} />",
+    "  <SwarmImage id=\"cov\" src=\"/hero.webp\"",
+    "    buildMode=\"mosaic\" deps={[\"r:card\"]} />",
+    "</SwarmProvider>",
+    "// + wasmKernel.deformSculpturalMeshBatch()",
   ].forEach((line, idx) =>
     b.addText("c-ln" + idx, 664, 1556 + idx * 23, line, TYPE_STYLES.code, {
       deps: [codeWin],
@@ -363,14 +370,14 @@ export function buildSwarmLandingScene(
   }
   b.addGuide("g-stats", "y", 1960, 1930);
   b.addGuide("g-stats-x", "x", MARGIN_LEFT + 36, 1930);
-  b.addText("st-n", MARGIN_LEFT + 36, 1960, "10k+", TYPE_STYLES.stat, {
+  b.addText("st-n", MARGIN_LEFT + 36, 1960, "f32x4", TYPE_STYLES.stat, {
     snap: "g-stats",
   });
   b.addText(
     "st-l",
     MARGIN_LEFT + 36,
     2028,
-    "agents in a single swarm",
+    "WASM SIMD128 vector lanes",
     TYPE_STYLES.body,
     { w: 220, snap: "g-stats-x" }
   );
@@ -378,13 +385,13 @@ export function buildSwarmLandingScene(
     "stats",
     ["st-n", "st-l"],
     [
-      { dx: 280, dy: 0, edits: ["38ms", "median agent-to-agent handoff"] },
+      { dx: 280, dy: 0, edits: ["60fps", "zero-React-tick DOM & canvas sync"] },
       {
         dx: 560,
         dy: 0,
-        edits: ["99.99%", "orchestrator uptime, last 12 months"],
+        edits: ["O(log M)", "CDF surface triangle sampling"],
       },
-      { dx: 840, dy: 0, edits: ["0", "tasks dropped last quarter"] },
+      { dx: 840, dy: 0, edits: ["8 pkgs", "tree-shakeable subpath exports"] },
     ]
   );
 
@@ -396,7 +403,7 @@ export function buildSwarmLandingScene(
     "p-title",
     CONTENT_X,
     2194,
-    "How a task moves\nthrough Swarm.",
+    "How SwarmCursor\nbuilds your page.",
     TYPE_STYLES.h2,
     { w: 640, snap: "g-steps", grow: true }
   );
@@ -407,7 +414,7 @@ export function buildSwarmLandingScene(
     "ps-t",
     MARGIN_LEFT + 36,
     2364,
-    "Define",
+    "1. Scan & DAG",
     sansStyle(26, 600, 1.2, PALETTE.ink, -0.02),
     { snap: "g-steps-c" }
   );
@@ -415,7 +422,7 @@ export function buildSwarmLandingScene(
     "ps-b",
     MARGIN_LEFT + 36,
     2404,
-    "Declare agents, skills and budgets in one file, versioned right next to your code.",
+    "scanDeepDOM reads layout once via LayoutReadCache and links parent-to-child tasks with 60% early unlock.",
     TYPE_STYLES.body,
     { w: 296, snap: "g-steps-c" }
   );
@@ -427,22 +434,22 @@ export function buildSwarmLandingScene(
         dx: 373,
         dy: 0,
         edits: [
-          "Dispatch",
-          "Swarm fans tasks out to the best agents and keeps every handoff ordered and observable.",
+          "2. WASM Auction",
+          "auctionTasksBatch scores spatial proximity and viewport priority in SIMD128 to dispatch cursors & squads.",
         ],
       },
       {
         dx: 746,
         dy: 0,
         edits: [
-          "Converge",
-          "Results stream back, get checked by supervisors, and land as one coherent change.",
+          "3. Sculpt & Vortex",
+          "Cursors draw UI, extrude 3D meshes and scan images, then converge into an O(N) Boids vortex flock.",
         ],
       },
     ]
   );
 
-  // --- Pricing Section ---
+  // --- Integration Modes Section (uses "plans" dupGroup ID for test compatibility) ---
   b.addSectionFrame("pricing", 2640, 3280, true);
   b.addGuide("g-price", "x", CONTENT_X, 2660);
   b.addGuide("g-price-r", "x", 760, 2660);
@@ -451,7 +458,7 @@ export function buildSwarmLandingScene(
     "$-title",
     CONTENT_X,
     2714,
-    "Priced by the size\nof your swarm.",
+    "Three ways to run\nSwarmCursor 2.0.",
     TYPE_STYLES.h2,
     { w: 520, snap: "g-price", grow: true }
   );
@@ -459,7 +466,7 @@ export function buildSwarmLandingScene(
     "$-lead",
     760,
     2730,
-    "Every plan includes the full orchestrator. You only pay more when your swarm gets bigger.",
+    "Use the full DOM-driven orchestrator, the Virtual Artboard SceneBuilder, or standalone Boids & WASM kernels.",
     TYPE_STYLES.body,
     { w: 380, snap: "g-price-r" }
   );
@@ -471,22 +478,22 @@ export function buildSwarmLandingScene(
       stroke: PALETTE.line,
     }),
   ];
-  b.addText("pc-name", 144, 2878, "Hive", sansStyle(16, 600, 1.3), {
+  b.addText("pc-name", 144, 2878, "DOM + 3D Mode", sansStyle(16, 600, 1.3), {
     deps: planCard,
     snap: "g-plan",
   });
-  b.addText("pc-price", 144, 2912, "$0", TYPE_STYLES.price, {
+  b.addText("pc-price", 144, 2912, "React", TYPE_STYLES.price, {
     deps: planCard,
     snap: "g-plan",
   });
-  b.addText("pc-per", 144, 2966, "free forever", TYPE_STYLES.small, {
+  b.addText("pc-per", 144, 2966, "swarm-cursor/react", TYPE_STYLES.small, {
     deps: planCard,
   });
   b.addText(
     "pc-desc",
     144,
     3000,
-    "For tinkering with your first swarm on a weekend.",
+    "Turn any React, Tailwind & Three.js page into a live multi-agent build stage.",
     TYPE_STYLES.body,
     { w: 274, deps: planCard, snap: "g-plan" }
   );
@@ -494,13 +501,13 @@ export function buildSwarmLandingScene(
     fill: PALETTE.line,
     deps: planCard,
   });
-  b.addText("pc-f1", 144, 3088, "✓  Up to 10 agents", TYPE_STYLES.item, {
+  b.addText("pc-f1", 144, 3088, "✓  <SwarmProvider deepScan>", TYPE_STYLES.item, {
     deps: planCard,
   });
-  b.addText("pc-f2", 144, 3116, "✓  Community support", TYPE_STYLES.item, {
+  b.addText("pc-f2", 144, 3116, "✓  <Swarm3D> & <SwarmImage>", TYPE_STYLES.item, {
     deps: planCard,
   });
-  b.addText("pc-f3", 144, 3144, "✓  7-day trace history", TYPE_STYLES.item, {
+  b.addText("pc-f3", 144, 3144, "✓  <SwarmAgentPill> 5-icon queue", TYPE_STYLES.item, {
     deps: planCard,
   });
   b.addRect("pc-btn", 144, 3176, 274, 44, {
@@ -508,7 +515,7 @@ export function buildSwarmLandingScene(
     fill: PALETTE.ink,
     deps: planCard,
   });
-  b.addText("pc-btn-t", 144, 3187, "Start free", TYPE_STYLES.btn, {
+  b.addText("pc-btn-t", 144, 3187, "Read React docs", TYPE_STYLES.btn, {
     w: 274,
     align: "center",
     deps: ["r:pc-btn"],
@@ -533,28 +540,28 @@ export function buildSwarmLandingScene(
         dx: 355,
         dy: 0,
         edits: [
-          "Colony",
-          "$49",
-          "per month, billed monthly",
-          "For teams running agents in production, every day.",
-          "✓  Up to 500 agents",
-          "✓  Shared memory + supervisors",
-          "✓  30-day trace history",
-          "Get Colony",
+          "Virtual Artboard",
+          "Canvas",
+          "SceneBuilder + SwarmCanvas",
+          "Author pixel-exact Figma choreographies with guides, Alt+Drag dupGroups and vector paths.",
+          "✓  addRect, addText, addPath",
+          "✓  addDupGroup (Alt+Drag grid)",
+          "✓  add3D & addImage tasks",
+          "View SceneBuilder",
         ],
       },
       {
         dx: 710,
         dy: 0,
         edits: [
-          "Swarm",
-          "Let’s talk",
-          "annual contract",
-          "For fleets that never sleep and never stop shipping.",
-          "✓  Unlimited agents",
-          "✓  SSO, audit logs, VPC",
-          "✓  Dedicated orchestrator",
-          "Contact sales",
+          "WASM Kernel API",
+          "SIMD128",
+          "swarm-cursor/kernel",
+          "Drive custom WebGL meshes and 1,000+ cursor flocks directly from Rust/WASM.",
+          "✓  stepBoids & stepBezierPathsBatch",
+          "✓  project3DBatch & auctionTasksBatch",
+          "✓  deformSculpturalMeshBatch",
+          "View Kernel API",
         ],
       },
     ]
@@ -577,12 +584,12 @@ export function buildSwarmLandingScene(
     "x-lead",
     CONTENT_X,
     3506,
-    "Start with ten agents for free. Scale to ten thousand when you’re ready.",
+    "Open-source MIT library. Tree-shakeable sub-packages for React 18/19, Three.js and Vanilla TypeScript.",
     TYPE_STYLES.lead,
     { w: 460, snap: "g-cta" }
   );
   b.addRect("x-btn", CONTENT_X, 3596, 184, 48, { r: 8, fill: PALETTE.ink });
-  b.addText("x-btn-t", CONTENT_X, 3609, "Start building", TYPE_STYLES.btn, {
+  b.addText("x-btn-t", CONTENT_X, 3609, "Get SwarmCursor", TYPE_STYLES.btn, {
     w: 184,
     align: "center",
     deps: ["r:x-btn"],
@@ -591,13 +598,13 @@ export function buildSwarmLandingScene(
     w: 320,
     snap: "g-cta-r",
     dyn: () =>
-      `This page was built by ${getWorkerCount()} agents while you scrolled.`,
+      `This showcase was built live by ${getWorkerCount()} AI cursors while you scrolled.`,
   });
   b.addText(
     "x-note",
     840,
     3414,
-    "Every line, guide and word above was placed by a cursor working alongside the others.",
+    "Every ruler guide, rectangle, vector path and Alt+Drag duplicate group above was choreographed by SwarmEngine.",
     TYPE_STYLES.body,
     { w: 320, snap: "g-cta-r" }
   );
@@ -606,34 +613,48 @@ export function buildSwarmLandingScene(
   b.addSectionFrame("footer", 3690, 3970, true);
   b.addGuide("g-foot", "x", 560, 3700);
   b.addLogoMark("fmark", MARGIN_LEFT + 36, 3735, 22);
-  b.addText("f-brand", MARGIN_LEFT + 62, 3734, "SwarmCursor", TYPE_STYLES.brand);
+  b.addText("f-brand", MARGIN_LEFT + 62, 3734, "SwarmCursor 2.0", TYPE_STYLES.brand);
   b.addText(
     "f-copy",
     MARGIN_LEFT + 36,
     3916,
-    "© 2026 CoderFake · SwarmCursor MIT License.",
+    "© 2026 CoderFake · SwarmCursor 2.0 MIT License.",
     TYPE_STYLES.small
   );
   b.addText(
     "fc-h",
     560,
     3738,
-    "Product",
+    "Sub-packages",
     sansStyle(14.5, 600, 1.4, PALETTE.ink),
     { snap: "g-foot" }
   );
-  b.addText("fc-1", 560, 3772, "Agents", TYPE_STYLES.item, { snap: "g-foot" });
-  b.addText("fc-2", 560, 3802, "Routing", TYPE_STYLES.item);
-  b.addText("fc-3", 560, 3832, "Pricing", TYPE_STYLES.item);
+  b.addText("fc-1", 560, 3772, "swarm-cursor/engine", TYPE_STYLES.item, { snap: "g-foot" });
+  b.addText("fc-2", 560, 3802, "swarm-cursor/kernel", TYPE_STYLES.item);
+  b.addText("fc-3", 560, 3832, "swarm-cursor/three", TYPE_STYLES.item);
   b.addDupGroup(
     "fcols",
     ["fc-h", "fc-1", "fc-2", "fc-3"],
     [
-      { dx: 200, dy: 0, edits: ["Company", "About", "Careers", "Blog"] },
+      {
+        dx: 200,
+        dy: 0,
+        edits: [
+          "Components",
+          "<SwarmProvider>",
+          "<Swarm3D>",
+          "<SwarmImage>",
+        ],
+      },
       {
         dx: 400,
         dy: 0,
-        edits: ["Developers", "Docs", "API reference", "Status"],
+        edits: [
+          "Resources",
+          "docs/README.md",
+          "Vanilla & WASM API",
+          "GitHub Repo",
+        ],
       },
     ]
   );

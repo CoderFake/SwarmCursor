@@ -1,55 +1,115 @@
-# Vanilla JS / TypeScript & Modular Subsystems API Reference
+# Vanilla JS / TypeScript, Modular Engine & Rust/WASM API Reference
 
-**SwarmCursor 2.0** được thiết kế theo kiến trúc 6 phân hệ độc lập (`@swarm/kernel`, `@swarm/scanner`, `@swarm/three`, `@swarm/tools`, `@swarm/renderers`, `@swarm/react`), dễ dàng mở rộng và sử dụng trong mọi dự án TypeScript/JavaScript hoặc React.
+**SwarmCursor 2.0** được thiết kế theo kiến trúc **8 Sub-Packages độc lập (Tree-Shakeable Subpath Exports)**, cho phép bạn import từng phân hệ riêng biệt trong mọi dự án TypeScript/JavaScript hoặc React.
 
 ---
 
-## 1. `@swarm/kernel` — Rust/WASM Kernel, SoA Memory & DAG Scheduler
+## 1. Bảng tổng quan 8 Subpath Exports
 
 ```ts
-import {
-  SoACursorBuffer,
-  WasmSwarmKernel,
-  DAGScheduler,
-} from "swarm-cursor";
-
-// Bộ đệm Float32Array phẳng (16 floats/cursor) zero-GC
-const buffer = new SoACursorBuffer(64);
-
-// Lõi biên dịch Rust -> WebAssembly (Spatial Hash Grid O(N) Boids + 4x4 Matrix Projection)
-const kernel = await WasmSwarmKernel.create();
-kernel.stepBoids(buffer, dt, targetX, targetY, radiusScale, scrollVel);
-
-// Bộ lập lịch đồ thị phụ thuộc DAG (mở khóa con khi cha đạt 60% tiến độ)
-const dag = new DAGScheduler({ earlyUnlockThreshold: 0.6 });
+import { ... } from "swarm-cursor";           // Barrel đầy đủ tất cả phân hệ
+import { ... } from "swarm-cursor/engine";    // SwarmEngine & các module điều phối
+import { ... } from "swarm-cursor/kernel";    // Lõi Rust/WASM SIMD128, SoA Buffer & DAG
+import { ... } from "swarm-cursor/three";     // Thuật toán 3D / Three.js / GLB & Shaders
+import { ... } from "swarm-cursor/scanner";   // Quét đệ quy DOM & LayoutReadCache
+import { ... } from "swarm-cursor/renderers"; // Bộ vẽ 60fps Zero-React-Tick
+import { ... } from "swarm-cursor/tools";     // ToolRegistry, SquadCoordinator & Image 2D
+import { ... } from "swarm-cursor/react";     // Các React Components & Hooks
 ```
 
 ---
 
-## 2. `@swarm/scanner` — Deep DOM Scanner & Layout Read Cache
+## 2. `swarm-cursor/engine` — Modular Orchestrator & Coroutines
+
+Phân hệ `src/engine/` chia nhỏ `SwarmEngine` thành 6 module chuyên biệt có thể dùng độc lập hoặc mở rộng:
 
 ```ts
-import { scanDeepDOM, LayoutReadCache } from "swarm-cursor";
+import {
+  SwarmEngine,
+  hydrateEngineScene,
+  bumpVersion,
+  computeElementBounds,
+  computeSpacingMeasure,
+  triggerSnapGuideFlash,
+  getAvailableTasks,
+  pickBestTaskForCursor,
+  moveToCoroutine,
+  waitCoroutine,
+  drawRectCoroutine,
+  typeTextCoroutine,
+  drawPathCoroutine,
+  duplicateGroupCoroutine,
+  dragGuideCoroutine,
+} from "swarm-cursor/engine";
 
-// Quét đệ quy toàn bộ cây DOM trong 1 lần đọc layout duy nhất (Zero Layout Thrashing)
-const scene = scanDeepDOM(document.getElementById("app")!, 1280, {
-  maxDepth: 6,
+// Khởi tạo Engine điều phối
+const engine = new SwarmEngine({
+  workerCount: 18,
+  speedMultiplier: 1,
 });
 ```
 
 ---
 
-## 3. `@swarm/three` — 3D / Three.js / GLB Build Algorithms
+## 3. `swarm-cursor/kernel` — Rust/WASM SIMD128 Parallel Kernel, SoA Memory & DAG Scheduler
+
+Lõi Rust (`crates/swarm-kernel-wasm/src/`) được biên dịch với tập lệnh vector `wasm32` **SIMD128 (`f32x4`)** và chia thành 5 phép toán xử lý theo lô (batch operations) không cấp phát bộ nhớ (zero-allocation):
+
+| Phương thức trên `wasmKernel` | Module Rust & TS | Mô tả thuật toán |
+| :--- | :--- | :--- |
+| `stepBoids(buffer, dt, tx, ty, scale, scrollVel)` | `boids.rs` / `boids-ops.ts` | Boids Reynolds 3 quy tắc + lực xoáy Vortex trên lưới băm không gian **Uniform Spatial Hash Grid $O(N)$** sử dụng vector `f32x4`. |
+| `stepBezierPathsBatch(buffer, dt)` | `bezier.rs` / `bezier-ops.ts` | Giải đồng thời **4 đường cong Cubic Bezier mỗi chu kỳ lệnh (`f32x4`)** kèm xoay góc mũi tên và giảm chấn lò xo khi con trỏ bay giữa các tác vụ. |
+| `project3DBatch(verts3D, count, mvp16, vpW, vpH, out2D)` | `projection.rs` / `projection-ops.ts` | Nhân ma trận `4×4 Model-View-Projection` bằng thanh ghi `f32x4` và chia phối cảnh (`perspective divide`) cho hàng nghìn đỉnh 3D. |
+| `auctionTasksBatch(cursorXY, cCount, taskXY, taskPrio, tCount, vTop, vBot, outBest)` | `auction.rs` / `auction-ops.ts` | Đấu giá giao việc song song giữa $C$ con trỏ rảnh và $T$ tác vụ mở khóa (xét4 tác vụ/lần bằng `f32x4` theo khoảng cách Euclid và độ ưu tiên khung nhìn). |
+| `deformSculpturalMeshBatch(basePos, outPos, outNorm, time, px, py, extrudeW, sliceW, sliceY)` | `mesh.rs` / `mesh-ops.ts` | Biến dạng mặt cầu điêu khắc 3D đa tầng sóng hài (`sin`/`cos` xấp xỉ đa thức không nhánh) + tính pháp tuyến giải tích (`analytical normals`) trực tiếp trong WASM. |
+
+```ts
+import {
+  wasmKernel,
+  SwarmKernel,
+  SoACursorBuffer,
+  DAGScheduler,
+} from "swarm-cursor/kernel";
+
+// 1. Bộ đệm Float32Array phẳng (16 floats/cursor) zero-GC
+const buffer = new SoACursorBuffer(64);
+
+// 2. Bước nhảy vật lý Boids O(N) hoặc bay Bezier SIMD128
+wasmKernel.stepBoids(buffer, dt, targetX, targetY, 1.0, scrollVel);
+wasmKernel.stepBezierPathsBatch(buffer, dt);
+
+// 3. Biến dạng lưới 3D tốc độ cao cho Three.js BufferGeometry
+wasmKernel.deformSculpturalMeshBatch(
+  basePositions,
+  positionAttr.array as Float32Array,
+  normalAttr.array as Float32Array,
+  timeSeconds,
+  pointerX,
+  pointerY,
+  weights.extrude,
+  weights.slice,
+  slicePlaneConstant
+);
+
+// 4. Bộ lập lịch đồ thị phụ thuộc DAG (mở khóa con khi cha đạt 60% tiến độ)
+const dag = new DAGScheduler({ earlyUnlockThreshold: 0.6 });
+```
+
+---
+
+## 4. `swarm-cursor/three` — 3D / Three.js / GLB Build Algorithms
 
 ```ts
 import {
   CumulativeAreaSampler,
   compute3DPhaseWeights,
   registerSwarm3D,
+  ProjectionBridge,
+  SwarmGLBController,
   PARTICLE_BUILD_VERTEX_SHADER,
   PARTICLE_BUILD_FRAGMENT_SHADER,
   HOLOGRAPHIC_SLICE_FRAGMENT_CHUNK,
-} from "swarm-cursor";
+} from "swarm-cursor/three";
 
 // 1. Lấy mẫu bề mặt tam giác theo diện tích tích lũy (O(log M) binary search)
 const sampler = new CumulativeAreaSampler(positions, indices);
@@ -67,15 +127,28 @@ const unregister = registerSwarm3D("my-3d-id", {
 
 ---
 
-## 4. `@swarm/tools` — Pluggable Tool Registry, Multi-Agent Squads & Image Construction (`mosaic` · `scanline` · `halftone`)
+## 5. `swarm-cursor/scanner` — Deep DOM Scanner & Layout Read Cache
+
+```ts
+import { scanDeepDOM, LayoutReadCache } from "swarm-cursor/scanner";
+
+// Quét đệ quy toàn bộ cây DOM trong 1 lần đọc layout duy nhất (Zero Layout Thrashing)
+const scene = scanDeepDOM(document.getElementById("app")!, 1280, {
+  maxDepth: 6,
+});
+```
+
+---
+
+## 6. `swarm-cursor/tools` — Pluggable Tool Registry, Multi-Agent Squads & Image Construction (`mosaic` · `scanline` · `halftone`)
 
 ```ts
 import {
   ToolRegistry,
   SquadCoordinator,
   computeImageBuildState,
-  SceneBuilder,
-} from "swarm-cursor";
+} from "swarm-cursor/tools";
+import { SceneBuilder } from "swarm-cursor";
 
 // 1. Thêm tác vụ xây dựng ảnh 2D vào SceneBuilder
 const builder = new SceneBuilder(1280);
@@ -102,13 +175,13 @@ registry.register({
 
 ---
 
-## 5. `@swarm/renderers` — Zero-React-Tick 60fps Renderers
+## 7. `swarm-cursor/renderers` — Zero-React-Tick 60fps Renderers
 
 ```ts
 import {
   FastCursorLayerController,
   FastOverlayCanvasController,
-} from "swarm-cursor";
+} from "swarm-cursor/renderers";
 
 const cursorCtrl = new FastCursorLayerController(cursorsDiv, {
   showLabels: false,
@@ -123,7 +196,7 @@ overlayCtrl.sync(engine);
 
 ---
 
-## 6. High-Level Helpers (`createSwarm`, `createSwarmFollower`, `createSwarmAgentPill`)
+## 8. High-Level Helpers (`createSwarm`, `createSwarmFollower`, `createSwarmAgentPill`)
 
 ```ts
 import {

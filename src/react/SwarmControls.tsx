@@ -207,7 +207,7 @@ export function SwarmControls({
         {children && <div className="swarm-tp-extra">{children}</div>}
       </div>
 
-      {/* Corner Trigger Button (Next.js Turbopack Style) */}
+      {/* Corner Trigger Button (Pure Liquid Glass Theme SVG Cursor Icon) */}
       <button
         type="button"
         className="swarm-turbopack-trigger"
@@ -219,16 +219,54 @@ export function SwarmControls({
           className={`swarm-tp-trigger-dot${isBuilding ? " is-active" : ""}`}
         />
         <svg
-          width="15"
-          height="15"
+          width="18"
+          height="18"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
         >
-          <path d="M4 4l7.07 17 2.51-7.39L21 11.07z" />
+          <defs>
+            <linearGradient
+              id="swarm-tp-cursor-grad"
+              x1="3"
+              y1="3"
+              x2="21"
+              y2="21"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="55%" stopColor="#6D5DF6" />
+              <stop offset="100%" stopColor="#38BDF8" />
+            </linearGradient>
+            <linearGradient
+              id="swarm-tp-spark-grad"
+              x1="14"
+              y1="2"
+              x2="22"
+              y2="10"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop offset="0%" stopColor="#A78BFA" />
+              <stop offset="100%" stopColor="#38BDF8" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M4.2 3.6C3.75 2.72 4.62 1.85 5.5 2.3L19.85 9.15C20.82 9.61 20.68 11.03 19.63 11.29L13.45 12.82C12.92 12.95 12.5 13.37 12.37 13.9L10.84 20.08C10.58 21.13 9.16 21.27 8.7 20.3L4.2 3.6Z"
+            fill="url(#swarm-tp-cursor-grad)"
+            stroke="#FFFFFF"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M6.4 5.5L16.2 10.15L12.1 11.2L6.4 5.5Z"
+            fill="#FFFFFF"
+            fillOpacity="0.35"
+          />
+          <path
+            d="M18 2.5L18.85 4.95L21.3 5.8L18.85 6.65L18 9.1L17.15 6.65L14.7 5.8L17.15 4.95L18 2.5Z"
+            fill="url(#swarm-tp-spark-grad)"
+          />
         </svg>
         <span className="swarm-tp-trigger-count">{engine.cursors.length}</span>
       </button>
