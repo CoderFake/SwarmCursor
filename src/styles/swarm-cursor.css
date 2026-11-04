@@ -24,12 +24,14 @@
   top: 0;
   left: 0;
   transform-origin: 0 0;
+  pointer-events: none;
 }
 
 .nav-sticky {
   position: sticky;
   top: 0;
   z-index: 2;
+  pointer-events: none;
 }
 
 .nav-backdrop {
@@ -39,6 +41,7 @@
   bottom: 0;
   left: 0;
   background: var(--paper);
+  pointer-events: none;
 }
 
 .nav-canvas {
@@ -46,6 +49,7 @@
   top: 0;
   left: 0;
   transform-origin: 0 0;
+  pointer-events: none;
 }
 
 .paths {
@@ -55,15 +59,18 @@
   bottom: 0;
   left: 0;
   overflow: visible;
+  pointer-events: none;
 }
 
 .el-text {
   position: absolute;
   font-feature-settings: "cv11", "ss01";
+  pointer-events: none;
 }
 
 .el-rect {
   position: absolute;
+  pointer-events: none;
   transition:
     background-color 0.22s ease,
     border-radius 0.22s ease,
