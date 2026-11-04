@@ -78,8 +78,9 @@ export class SquadCoordinator {
     el: SwarmRectEl
   ): Generator<void, void, number> {
     cursor.shape = "pen";
-    const topRight = { x: el.x + el.w, y: el.y };
-    yield* engine.moveTo(cursor, topRight, { speed: 1.2 });
+    yield* engine.moveTo(cursor, () => ({ x: el.x + el.w, y: el.y }), {
+      speed: 1.2,
+    });
     while (el.vis && !el.styled) {
       yield;
       cursor.x = el.x + (el.draw?.w ?? el.w);

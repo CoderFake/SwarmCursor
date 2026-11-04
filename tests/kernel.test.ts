@@ -91,4 +91,50 @@ describe("@swarm/kernel (SoA Buffer, Spatial Hash O(N) WASM/SIMD Kernel & DAG Sc
     const a3 = dag.auctionNextTask({ x: 310, y: 215 }, 0, 800);
     expect(a3?.taskId).toBe("t:card-title");
   });
+
+  it("executes batch Bezier trajectories, spatial task auction, and 3D sculptural mesh deformation in Rust/WASM", () => {
+    const kernel = SwarmKernel.createSync();
+    expect(kernel.isWasmAccelerated).toBe(true);
+
+    // 1. Batch Bezier Path Evaluator
+    const cBuf = new SoACursorBuffer(4);
+    const bBuf = new Float32Array(4 * 12);
+    // [active, u, dur, speedMult, p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y]
+    bBuf.set([1, 0, 0.2, 1.0, 100, 100, 140, 110, 180, 130, 220, 160], 0);
+    const rem = kernel.stepBezierPathsBatch(0.05, 1.0, cBuf, bBuf, 1);
+    expect(rem).toBe(1);
+    expect(cBuf.getCursorPosition(0).x).toBeGreaterThan(100);
+
+    // 2. Batch Spatial Task Auction in Rust
+    const bids = kernel.auctionTasksBatch(
+      [
+        { x: 110, y: 120 },
+        { x: 115, y: 122 },
+      ],
+      [
+        {
+          x: 120,
+          y: 125,
+          state: 1,
+          activeWorkers: 0,
+          maxSquad: 3,
+          progress: 0,
+        },
+      ],
+      0,
+      800,
+      1000
+    );
+    expect(bids[0]?.taskIdx).toBe(0);
+    expect(bids[0]?.role).toBe("lead");
+    expect(bids[1]?.taskIdx).toBe(0);
+    expect(bids[1]?.role).toBe("assistant");
+
+    // 3. Batch 3D Sculptural Mesh Vertex Deformer in Rust
+    const baseVerts = new Float32Array([1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5]);
+    const outVerts = new Float32Array(9);
+    kernel.deformSculpturalMeshBatch(baseVerts, outVerts, 1.25);
+    expect(outVerts[0]).not.toBe(1.5);
+    expect(outVerts.every((v) => Number.isFinite(v))).toBe(true);
+  });
 });

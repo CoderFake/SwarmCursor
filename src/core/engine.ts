@@ -1000,7 +1000,7 @@ export class SwarmEngine {
     el: SwarmRectEl
   ): Generator<void, void, number> {
     cursor.shape = "cross";
-    yield* this.moveTo(cursor, { x: el.x, y: el.y });
+    yield* this.moveTo(cursor, () => ({ x: el.x, y: el.y }));
     cursor.press = 1;
     el.vis = true;
     el.draw = { w: 0, h: 0 };
@@ -1009,7 +1009,7 @@ export class SwarmEngine {
 
     yield* this.moveTo(
       cursor,
-      { x: el.x + el.w, y: el.y + el.h },
+      () => ({ x: el.x + el.w, y: el.y + el.h }),
       {
         speed: 1.35,
         drag: true,
@@ -1041,7 +1041,8 @@ export class SwarmEngine {
     grow: boolean
   ): Generator<void, void, number> {
     if (el.dyn) el.text = el.dyn();
-    if (guide) {
+    const isDomBacked = !!el.domEl;
+    if (guide && !isDomBacked) {
       if (guide.axis === "x") {
         el.dx = rand(28, 64);
         el.dy = rand(-8, 8);
@@ -1049,13 +1050,14 @@ export class SwarmEngine {
         el.dx = rand(-8, 8);
         el.dy = rand(18, 34) * (Math.random() < 0.5 ? -1 : 1);
       }
+    } else if (isDomBacked) {
+      el.dx = 0;
+      el.dy = 0;
     }
-    if (grow) el.size = 18;
+    if (grow && !isDomBacked) el.size = 18;
 
-    const startX = el.x + el.dx;
-    const startY = el.y + el.dy;
     cursor.shape = "cross";
-    yield* this.moveTo(cursor, { x: startX, y: startY });
+    yield* this.moveTo(cursor, () => ({ x: el.x + el.dx, y: el.y + el.dy }));
 
     if (el.w == null) {
       yield* this.click(cursor);
@@ -1071,8 +1073,8 @@ export class SwarmEngine {
         vis: true,
         dx: 0,
         dy: 0,
-        x: startX,
-        y: startY,
+        x: el.x + el.dx,
+        y: el.y + el.dy,
         w: 0,
         h: 0,
         r: 0,
@@ -1080,18 +1082,28 @@ export class SwarmEngine {
         draw: null,
         styled: true,
       };
-      const boxH = getLineHeightPx(el.st, el.size);
       cursor.ov = () => [this.selection(tempRect)];
       yield* this.moveTo(
         cursor,
-        { x: startX + el.w, y: startY + boxH },
+        () => {
+          const b = this.bounds(el);
+          const boxH = isDomBacked
+            ? Math.max(getLineHeightPx(el.st, el.size), b.h)
+            : getLineHeightPx(el.st, el.size);
+          return {
+            x: el.x + el.dx + (el.w ?? b.w),
+            y: el.y + el.dy + boxH,
+          };
+        },
         {
           speed: 1.5,
           drag: true,
           bend: 0,
           onStep: () => {
-            tempRect.w = Math.max(0, cursor.x - startX);
-            tempRect.h = Math.max(0, cursor.y - startY);
+            tempRect.x = el.x + el.dx;
+            tempRect.y = el.y + el.dy;
+            tempRect.w = Math.max(0, cursor.x - tempRect.x);
+            tempRect.h = Math.max(0, cursor.y - tempRect.y);
           },
         }
       );
@@ -1104,7 +1116,10 @@ export class SwarmEngine {
     cursor.ov = () => [{ t: "box", b: this.bounds(el) }];
     yield* this.moveTo(
       cursor,
-      { x: cursor.x + rand(-20, 8), y: cursor.y + rand(6, 18) },
+      () => ({
+        x: el.x + el.dx + Math.min(24, (el.w ?? 48) * 0.25),
+        y: el.y + el.dy + Math.min(14, getLineHeightPx(el.st, el.size) * 0.55),
+      }),
       { speed: 2.2 }
     );
     yield* this.type(el, el.text);
@@ -1115,7 +1130,7 @@ export class SwarmEngine {
     cursor.shape = "arrow";
     cursor.ov = () => [this.selection(el)];
 
-    if (grow) {
+    if (grow && !isDomBacked) {
       const steps = [24, 36, 52, 68].filter((s) => s < el.st.size);
       for (const sz of [...steps, el.st.size]) {
         yield* this.wait(0.025);
@@ -1125,7 +1140,7 @@ export class SwarmEngine {
       yield* this.wait(0.05);
     }
 
-    if (guide) {
+    if (guide && !isDomBacked) {
       const guideTask = this.byTask.get("g:" + guide.id);
       while (guideTask && guideTask.state !== "done") yield;
 
