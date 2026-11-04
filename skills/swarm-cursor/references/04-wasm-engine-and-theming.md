@@ -15,8 +15,8 @@ The Rust kernel (`crates/swarm-kernel-wasm/src/`) is compiled with `wasm32` SIMD
 ### [SIMD 1 & 2] stepBoids & stepBezierPathsBatch
 O(N) Uniform Spatial Hash Grid Boids and 4-cursor-per-instruction `f32x4` Cubic Bezier flight solver.
 
-### [SIMD 3 & 4] projectPoints3DBatch & auctionTasksBatch
-`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction (wired into `SwarmEngine.step()` via singleton `wasmKernel`).
+### [SIMD 3 & 4] projectPoints3DBatch & Child-Subtask auctionTasksBatch
+`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority + child-subtask (`priority` & `parentGroup` intra-card locality boost, `MAX_TASKS = 1024`) task auction & work-stealing assistant matcher (`assistSubtaskCoroutine`).
 
 ### [SIMD 5] deformSculpturalMeshBatch
 Multi-harmonic 3D mesh displacement (branchless polynomial `sin`/`cos`) in WASM linear memory.
@@ -28,7 +28,7 @@ Multi-harmonic 3D mesh displacement (branchless polynomial `sin`/`cos`) in WASM 
 | `boids.rs / boids-ops.ts` | `stepBoidsSpatialHash()` | `O(N) Grid + f32x4` | Reynolds Separation, Alignment, Cohesion + tangential Vortex orbit force. |
 | `bezier.rs / bezier-ops.ts` | `stepBezierPathsBatch()` | `4 cursors / cycle` | Evaluates 4 Cubic Bezier trajectories simultaneously with velocity-tangent rotation. |
 | `projection.rs / projection-ops.ts` | `projectPoints3DBatch()` | `f32x4 4x4 MVP` | Projects 3D mesh vertices to 2D viewport coordinates for cursor vertex tracking. |
-| `auction.rs / auction-ops.ts` | `auctionTasksBatch()` | `f32x4 4 tasks / step` | Scores spatial proximity and viewport priority for conflict-free task assignment. |
+| `auction.rs / auction-ops.ts` | `auctionTasksBatch()` | `MAX_TASKS = 1024 (8 f32/task)` | Parallel spatial auction with child-subtask (`luồng con`) priority boost, intra-card locality affinity, and work-stealing assistant assignment. |
 | `mesh.rs / mesh-ops.ts` | `deformSculpturalMeshBatch()` | `Zero-copy WASM` | Displaces 3D vertices across harmonic frequencies in a single WASM call. |
 
 ## Code Examples

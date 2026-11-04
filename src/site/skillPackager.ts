@@ -131,14 +131,18 @@ Choose the most specific entry point for tree-shaking and clean modular architec
 
 When writing custom integrations with \`SwarmEngine\`, \`SwarmKernel\`, or Three.js WebGL stages, ALWAYS follow these rules:
 
-1. **Promote ONLY primary card/section titles for \`text\` / \`edit\` tasks**:
-   - Keep body descriptions, tags, and metadata native inside their parent \`[data-swarm]\` card so they reveal with the parent card's \`clip-path\`. Promote only the card's primary title (\`h2\`/\`h3\`/\`strong\`) when you want live typing or Alt+Drag Clone + Select-All Re-Type (\`dup\` + \`edit\`) choreography, updating \`.textContent\` and \`.text-sel\` directly in \`requestAnimationFrame\` with zero React re-renders per character.
-2. **Isolate \`MutationObserver\` from cursor and overlay layers**:
-   - If observing DOM changes to register dynamic \`[data-swarm]\` nodes, observe ONLY the content container \`<div ref={contentRef}>{children}</div>\`, NEVER the parent wrapper containing \`.cursors\` or construction ghost layers.
+1. **Two-Tier Inner Subtask (\`luồng con\`) Promotion (Primary Title + Child Texts/Bullets/Badges)**:
+   - Give each card's primary heading (\`h2\`/\`h3\`/\`strong\`) the ID \`\${cardId}-title\` so sibling cards wired into a \`SwarmDupGroup\` perform Figma Alt+Drag Clone (\`dup\`) + Double-Click Select-All (\`.text-sel\`) & Re-Type (\`edit\`) choreography.
+   - Promote inner badges, pills, chips, and buttons (\`.badge\`, \`.pill\`, \`.chip\`, \`.tag\`, \`.btn\`) as child \`rect\` / \`glass-pill\` tasks (\`data-swarm-auto="true"\`, \`data-swarm-deps="r:\${cardId}"\`), and promote inner small texts, bullet list items (\`<li>\`), descriptions (\`<p>\`), kickers, and metrics as child \`text\` tasks (\`data-swarm-auto="true"\`, \`data-swarm-deps="r:\${cardId}"\`).
+   - Update \`.textContent\` and \`.text-sel\` directly in \`requestAnimationFrame\` with zero React re-renders per character.
+2. **Isolate \`MutationObserver\` & Evaluate DAG Dependencies Before \`getBoundingClientRect()\`**:
+   - Observe ONLY the content container \`<div ref={contentRef}>{children}</div>\`, NEVER the parent wrapper containing \`.cursors\` or construction ghost layers.
+   - In custom \`available()\` loops, always check \`t.deps.every(...)\` in memory BEFORE calling \`domEl.getBoundingClientRect()\` so locked child sub-tasks incur 0 DOM layout reads until their parent card unlocks them.
 3. **Use Zero-React-Tick Renderers (\`FastCursorLayerController\` + \`FastOverlayCanvasController\`)**:
-   - Never trigger React \`setState\` on every 60fps animation frame for cursor positions or rectangle drag progress.
-4. **Parallel Rust/WASM \`wasmKernel.auctionTasksBatch\` & Singleton \`wasmKernel\`**:
-   - \`SwarmEngine\` automatically uses the singleton \`wasmKernel\` (\`import { wasmKernel } from "swarm-cursor/kernel"\`) and dispatches idle cursors to available viewport tasks in parallel via \`wasmKernel.auctionTasksBatch(...)\` (\`crates/swarm-kernel-wasm/src/auction.rs\`). Never instantiate a new \`SwarmKernel\` on every frame or component re-render.
+   - Never trigger React \`setState\` on every 60fps animation frame for cursor positions or rectangle drag progress. Cursor user name labels (\`.cursor-label\`) are hidden by default for a clean visual aesthetic.
+4. **Parallel Rust/WASM \`wasmKernel.auctionTasksBatch\` with Child-Subtask Priority & Locality Boost**:
+   - \`SwarmEngine\` uses the singleton \`wasmKernel\` (\`MAX_TASKS = 1024\`, \`TASK_STRIDE = 8\` in \`crates/swarm-kernel-wasm/src/auction.rs\`) to dispatch idle cursors in parallel.
+   - Pass \`priority > 0\` (\`1.65\` for \`edit\`, \`1.35\` for child \`text\`, \`1.22\` for child \`rect\`) and \`parentGroup\` for child sub-tasks (\`luồng con\`) so idle cursors near an active/cloned card immediately swarm and finish all its inner small texts, bullet points, and badges in a top-to-bottom wave, while extra idle cursors assist on long paragraphs/cards via \`assistSubtaskCoroutine\` (\`role: "assistant"\`).
 5. **Strict Viewport Entry Gating & Off-Screen Loop Pausing**:
    - Gate below-the-fold sections until the user actually scrolls (\`scrollY > 64\` and \`rect.top <= vh * 0.72\`) so off-screen sections never build prematurely while idle at the top of the page.
    - Pause \`requestAnimationFrame\` when \`engine.flocking === true\` (all tasks done), when \`document.hidden === true\`, or when a 3D WebGL canvas leaves the viewport (\`IntersectionObserver\`).

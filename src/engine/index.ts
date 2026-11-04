@@ -27,6 +27,7 @@ export {
   waitCoroutine,
 } from "./cursor-motion";
 export {
+  assistSubtaskCoroutine,
   dragGuideCoroutine,
   drawLogoCoroutine,
   drawPathCoroutine,

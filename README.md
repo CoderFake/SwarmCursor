@@ -50,7 +50,7 @@ import { SwarmImage } from "swarm-cursor/react";
   1. `stepBoidsSpatialHash`: **$O(N)$ Uniform Spatial Hash Grid Boids** + tangential Vortex orbit on flat `SoACursorBuffer` memory (16 floats/cursor).
   2. `stepBezierPathsBatch`: Solves **4 Cubic Bezier flight trajectories per instruction (`f32x4`)** with velocity-tangent arrow rotation and spring damping.
   3. `projectPoints3DBatch`: Multiplies `4×4 MVP` matrices in `f32x4` registers with perspective divide for thousands of 3D $\rightarrow$ 2D vertices.
-  4. `auctionTasksBatch`: Parallel task auction scoring Euclidean distance and viewport priority across 4 tasks per SIMD step.
+  4. `auctionTasksBatch`: Parallel task & child-subtask (`luồng con`) auction (`MAX_TASKS = 1024`, 8 floats/task) scoring Euclidean distance, viewport priority, child-subtask `priority` boost, intra-card `locality_bonus`, and work-stealing `assistant` assignment (`assistSubtaskCoroutine`).
   5. `deformSculpturalMeshBatch`: Multi-harmonic 3D sculptural mesh displacement (branchless polynomial `sin`/`cos`) directly in WASM linear memory.
 - **Zero-React-Tick 60fps Renderers (`swarm-cursor/renderers`)**:
   - `FastCursorLayerController`: Fixed DOM pool updating cursor transforms via `translate3d(x, y, 0)`.

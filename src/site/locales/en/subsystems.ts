@@ -16,8 +16,8 @@ export const EN_SUBSYSTEMS: DocSection[] = [
       },
       {
         badge: "SIMD 3 & 4",
-        title: "projectPoints3DBatch & auctionTasksBatch",
-        body: "`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction (wired into `SwarmEngine.step()` via singleton `wasmKernel`).",
+        title: "projectPoints3DBatch & Child-Subtask auctionTasksBatch",
+        body: "`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority + child-subtask (`priority` & `parentGroup` intra-card locality boost, `MAX_TASKS = 1024`) task auction & work-stealing assistant matcher (`assistSubtaskCoroutine`).",
       },
       {
         badge: "SIMD 5",
@@ -76,8 +76,8 @@ wasmKernel.deformSculpturalMeshBatch(basePositions, outPositions, timeSeconds);`
         {
           name: "auction.rs / auction-ops.ts",
           type: "auctionTasksBatch()",
-          defaultVal: "f32x4 4 tasks / step",
-          desc: "Scores spatial proximity and viewport priority for conflict-free task assignment.",
+          defaultVal: "MAX_TASKS = 1024 (8 f32/task)",
+          desc: "Parallel spatial auction with child-subtask (`luồng con`) priority boost, intra-card locality affinity, and work-stealing assistant assignment.",
         },
         {
           name: "mesh.rs / mesh-ops.ts",

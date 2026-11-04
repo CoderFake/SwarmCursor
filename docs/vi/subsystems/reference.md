@@ -40,6 +40,7 @@ import {
   drawPathCoroutine,
   duplicateGroupCoroutine,
   editTextCoroutine,
+  assistSubtaskCoroutine,
   dragGuideCoroutine,
 } from "swarm-cursor/engine";
 
@@ -62,7 +63,7 @@ Lõi Rust (`crates/swarm-kernel-wasm/src/`) được biên dịch với tập l�
 | `stepBoids(buffer, dt, tx, ty, scale, scrollVel)` | `boids.rs` / `boids-ops.ts` | Boids Reynolds 3 quy tắc + lực xoáy Vortex trên lưới băm không gian **Uniform Spatial Hash Grid $O(N)$** sử dụng vector `f32x4`. |
 | `stepBezierPathsBatch(buffer, dt)` | `bezier.rs` / `bezier-ops.ts` | Giải đồng thời **4 đường cong Cubic Bezier mỗi chu kỳ lệnh (`f32x4`)** kèm xoay góc mũi tên và giảm chấn lò xo khi con trỏ bay giữa các tác vụ. |
 | `project3DBatch(verts3D, count, mvp16, vpW, vpH, out2D)` | `projection.rs` / `projection-ops.ts` | Nhân ma trận `4×4 Model-View-Projection` bằng thanh ghi `f32x4` và chia phối cảnh (`perspective divide`) cho hàng nghìn đỉnh 3D. |
-| `auctionTasksBatch(cursorXY, cCount, taskXY, taskPrio, tCount, vTop, vBot, outBest)` | `auction.rs` / `auction-ops.ts` | Đấu giá giao việc song song giữa $C$ con trỏ rảnh và $T$ tác vụ mở khóa (xét4 tác vụ/lần bằng `f32x4` theo khoảng cách Euclid và độ ưu tiên khung nhìn). |
+| `auctionTasksBatch(cursorPositions, tasks, viewTop, viewBot, frontierY)` | `auction.rs` / `auction-ops.ts` | Đấu giá không gian song song (`MAX_TASKS = 1024`, 8 floats/task) giữa $C$ con trỏ rảnh và $T$ tác vụ mở khóa, tích hợp ưu tiên luồng con (`priority` boost), độ bám cụm thẻ cha (`locality_bonus`) và chia sẻ việc cho con trỏ phụ (`assistSubtaskCoroutine`). |
 | `deformSculpturalMeshBatch(basePos, outPos, outNorm, time, px, py, extrudeW, sliceW, sliceY)` | `mesh.rs` / `mesh-ops.ts` | Biến dạng mặt cầu điêu khắc 3D đa tầng sóng hài (`sin`/`cos` xấp xỉ đa thức không nhánh) + tính pháp tuyến giải tích (`analytical normals`) trực tiếp trong WASM. |
 
 ```ts

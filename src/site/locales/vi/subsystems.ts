@@ -16,8 +16,8 @@ export const VI_SUBSYSTEMS: DocSection[] = [
       },
       {
         badge: "SIMD 3 & 4",
-        title: "projectPoints3DBatch & auctionTasksBatch",
-        body: "Nhân ma trận 4×4 MVP chiếu đỉnh 3D -> 2D và đấu giá giao việc song song giữa các con trỏ rảnh (tích hợp trực tiếp vào `SwarmEngine.step()` qua singleton `wasmKernel`).",
+        title: "projectPoints3DBatch & auctionTasksBatch (Tối ưu Luồng con)",
+        body: "Nhân ma trận 4×4 MVP chiếu đỉnh 3D -> 2D và đấu giá giao việc song song trong Rust/WASM (`MAX_TASKS = 1024`, ưu tiên luồng con `priority` & `parentGroup` + `assistSubtaskCoroutine` hỗ trợ gõ/vẽ song song).",
       },
       {
         badge: "SIMD 5",
@@ -76,8 +76,8 @@ wasmKernel.deformSculpturalMeshBatch(basePositions, outPositions, timeSeconds);`
         {
           name: "auction.rs / auction-ops.ts",
           type: "auctionTasksBatch()",
-          defaultVal: "f32x4 4 tasks / step",
-          desc: "Chấm điểm khoảng cách và độ ưu tiên khung nhìn để gán tác vụ tối ưu không xung đột.",
+          defaultVal: "MAX_TASKS = 1024 (8 f32/task)",
+          desc: "Đấu giá không gian song song kèm ưu tiên luồng con (`priority` & `parentGroup` locality boost) để đàn chuột rảnh dồn lực build hết text nhỏ, bullet point và badge trong từng card.",
         },
         {
           name: "mesh.rs / mesh-ops.ts",

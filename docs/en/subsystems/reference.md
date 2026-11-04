@@ -38,6 +38,7 @@ import {
   drawPathCoroutine,
   duplicateGroupCoroutine,
   editTextCoroutine,
+  assistSubtaskCoroutine,
   dragGuideCoroutine,
 } from "swarm-cursor/engine";
 
@@ -60,7 +61,7 @@ The Rust kernel (`crates/swarm-kernel-wasm/src/`) is compiled with `wasm32` **SI
 | `stepBoids(buffer, dt, tx, ty, scale, scrollVel)` | `boids.rs` / `boids-ops.ts` | Reynolds Boids + tangential Vortex orbit on an **$O(N)$ Uniform Spatial Hash Grid** using `f32x4` SIMD lanes. |
 | `stepBezierPathsBatch(buffer, dt)` | `bezier.rs` / `bezier-ops.ts` | Evaluates **4 Cubic Bezier flight paths per instruction (`f32x4`)** with velocity-tangent arrow rotation and spring damping. |
 | `project3DBatch(verts3D, count, mvp16, vpW, vpH, out2D)` | `projection.rs` / `projection-ops.ts` | `4×4 Model-View-Projection` matrix multiplication in `f32x4` registers with perspective divide for thousands of 3D vertices. |
-| `auctionTasksBatch(cursorXY, cCount, taskXY, taskPrio, tCount, vTop, vBot, outBest)` | `auction.rs` / `auction-ops.ts` | Parallel task auction between $C$ idle cursors and $T$ unlocked tasks (scoring 4 tasks at once in `f32x4` by Euclidean distance + viewport priority). |
+| `auctionTasksBatch(cursorPositions, tasks, viewTop, viewBot, frontierY)` | `auction.rs` / `auction-ops.ts` | Parallel spatial auction (`MAX_TASKS = 1024`, 8 floats/task) between $C$ idle cursors and $T$ unlocked tasks, with child-subtask (`luồng con`) `priority` boost, intra-card `locality_bonus`, and work-stealing `assistant` assignment. |
 | `deformSculpturalMeshBatch(basePos, outPos, outNorm, time, px, py, extrudeW, sliceW, sliceY)` | `mesh.rs` / `mesh-ops.ts` | Multi-harmonic 3D sculptural sphere deformation (branchless polynomial `sin`/`cos`) + analytical surface normals directly in WASM linear memory. |
 
 ---
