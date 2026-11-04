@@ -202,22 +202,22 @@ export function ShowcaseLanding() {
 
 ---
 
-## Tài liệu chi tiết (`docs/`)
+## Tài liệu chi tiết (`docs/vi/` & `docs/en/`)
 
-- **Tổng quan**: [Mục lục Tài liệu (`docs/README.md`)](./docs/README.md)
-- **Bắt đầu (`docs/getting-started/`)**
-  - [Cài đặt, 8 Sub-Packages & Thiết lập](./docs/getting-started/installation.md)
-  - [Bắt đầu nhanh trong 60 giây](./docs/getting-started/quick-start.md)
-- **React Components (`docs/components/`)**
-  - [`<SwarmProvider>`, `<SwarmElement>`, `<Swarm3D>` & `<SwarmImage>`](./docs/components/swarm-provider.md)
-  - [`<SwarmFollower>` (Mouse Follow & Circular Vortex Orbit)](./docs/components/swarm-follower.md)
-  - [`<SwarmAgentPill>` (Bottom-Bar 5 AI Icons Queue + `{N} agents`)](./docs/components/swarm-agent-pill.md)
-  - [`<SwarmCanvas>`, `SceneBuilder` & `buildSwarmLandingScene`](./docs/components/swarm-canvas.md)
-  - [`<SwarmControls>` & `useSwarm()` Hook](./docs/components/swarm-controls.md)
-- **Vanilla JS / TS, Modular Engine & Rust/WASM API (`docs/vanilla-api/`)**
-  - [API Reference (`swarm-cursor/engine`, `/kernel`, `/three`, `/scanner`, `/tools`, `/renderers`)](./docs/vanilla-api/reference.md)
-- **Tùy biến (`docs/customization/`)**
-  - [HTML Attributes `data-swarm-*` & CSS Variables](./docs/customization/theming-and-attributes.md)
+- **Tổng quan Song ngữ (EN / VI)**: [Mục lục Tài liệu (`docs/README.md`)](./docs/README.md)
+- **🇬🇧 English Documentation (`docs/en/`)**: [English Docs Index (`docs/en/README.md`)](./docs/en/README.md)
+- **🇻🇳 Tài liệu Tiếng Việt (`docs/vi/`)**: [Mục lục Tiếng Việt (`docs/vi/README.md`)](./docs/vi/README.md)
+  - [Cài đặt, 8 Sub-Packages & Thiết lập](./docs/vi/getting-started/installation.md)
+  - [Bắt đầu nhanh trong 60 giây](./docs/vi/getting-started/quick-start.md)
+  - [`<SwarmProvider>` & `<SwarmElement>`](./docs/vi/components/swarm-provider.md)
+  - [`<Swarm3D>` & `registerSwarm3D` (`extrude` · `particles` · `slice`)](./docs/vi/components/swarm-3d.md)
+  - [`<SwarmImage>` (`mosaic` · `scanline` · `halftone`)](./docs/vi/components/swarm-image.md)
+  - [`<SwarmFollower>` (Mouse Follow & Circular Vortex Orbit)](./docs/vi/components/swarm-follower.md)
+  - [`<SwarmAgentPill>` (Bottom-Bar 5 AI Icons Queue + `{N} agents`)](./docs/vi/components/swarm-agent-pill.md)
+  - [`<SwarmCanvas>`, `SceneBuilder` & `buildSwarmLandingScene`](./docs/vi/components/swarm-canvas.md)
+  - [`<SwarmControls>` & `useSwarm()` Hook](./docs/vi/components/swarm-controls.md)
+  - [API Reference (`swarm-cursor/engine`, `/kernel`, `/three`, `/scanner`, `/tools`, `/renderers`)](./docs/vi/subsystems/reference.md)
+  - [HTML Attributes `data-swarm-*` & CSS Variables](./docs/vi/customization/theming-and-attributes.md)
 
 ---
 

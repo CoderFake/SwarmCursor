@@ -140,3 +140,5 @@ export class SwarmKernel {
     );
   }
 }
+
+export const wasmKernel = SwarmKernel.createSync();

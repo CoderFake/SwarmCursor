@@ -1,0 +1,24 @@
+# SwarmCursor 2.0 — English Documentation (`docs/en/`)
+
+Welcome to the official English documentation of **SwarmCursor 2.0** (`https://github.com/CoderFake/SwarmCursor`).
+
+---
+
+## 1. Getting Started (`getting-started/`)
+- [Installation, 8 Sub-Packages & Rust/WASM Setup (`installation.md`)](./getting-started/installation.md)
+- [Quick Start in 60 Seconds (`quick-start.md`)](./getting-started/quick-start.md)
+
+## 2. React Components (`components/`)
+- [`<SwarmProvider>` & `<SwarmElement>` (`swarm-provider.md`)](./components/swarm-provider.md)
+- [`<Swarm3D>` & `registerSwarm3D` (`swarm-3d.md`)](./components/swarm-3d.md)
+- [`<SwarmImage>` & `computeImageBuildState` (`swarm-image.md`)](./components/swarm-image.md)
+- [`<SwarmCanvas>`, `SceneBuilder` & `buildSwarmLandingScene` (`swarm-canvas.md`)](./components/swarm-canvas.md)
+- [`<SwarmFollower>` (`swarm-follower.md`)](./components/swarm-follower.md)
+- [`<SwarmAgentPill>` (`swarm-agent-pill.md`)](./components/swarm-agent-pill.md)
+- [`<SwarmControls>` & `useSwarm()` (`swarm-controls.md`)](./components/swarm-controls.md)
+
+## 3. Modular Subsystems & Rust/WASM API (`subsystems/`)
+- [8 Sub-Packages & Rust/WASM SIMD128 Reference (`reference.md`)](./subsystems/reference.md)
+
+## 4. Customization & HTML Attributes (`customization/`)
+- [`data-swarm-*` HTML Attributes, CSS Variables & 9 AI Icons (`theming-and-attributes.md`)](./customization/theming-and-attributes.md)

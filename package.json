@@ -80,7 +80,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && cp src/styles/swarm-cursor.css dist/styles.css",
+    "build": "tsup && cp src/styles/swarm-cursor.css dist/styles.css && cp src/site/styles.css dist/docs-site.css && cp src/presets/logo-cf.svg dist/logo-cf.svg && cp src/presets/index.html dist/index.html && npx esbuild src/presets/landing-demo.tsx --bundle --format=esm --minify --outfile=dist/landing-demo.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
