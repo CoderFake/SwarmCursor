@@ -82,6 +82,10 @@ export function SwarmProvider({
 
   useEffect(() => {
     if (typeof window === "undefined" || !rootRef.current) return;
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
 
     const scanned = scanDOMElements(rootRef.current, designWidth);
     const rebuilt = new SwarmEngine({

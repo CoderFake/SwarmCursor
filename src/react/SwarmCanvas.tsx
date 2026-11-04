@@ -297,6 +297,7 @@ export function SwarmCanvas({
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
+    window.scrollTo(0, 0);
 
     const updateViewport = () => {
       const clientW = document.documentElement.clientWidth || width;

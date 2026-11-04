@@ -24,6 +24,8 @@ export interface SwarmAgentPillProps {
   icons?: AgentIconId[];
   /** Bottom-bar position or inline layout (default: "bottom-center") */
   position?: "bottom-center" | "bottom-left" | "bottom-right" | "inline";
+  /** Automatically hide the pill once all engine tasks finish, and re-open on reset/reload (default: true) */
+  hideWhenDone?: boolean;
   /** Pause random queue shifting */
   paused?: boolean;
   className?: string;
@@ -43,6 +45,7 @@ export function SwarmAgentPill({
   intervalMs = 650,
   icons,
   position = "bottom-center",
+  hideWhenDone = true,
   paused = false,
   className,
   style,
@@ -50,6 +53,13 @@ export function SwarmAgentPill({
   const clampedMax = Math.max(1, Math.min(5, maxIcons));
   const pool = useMemo(() => getAgentIconPool(icons), [icons]);
   const nextKeyRef = useRef(clampedMax + 1);
+
+  const isDone = Boolean(
+    hideWhenDone &&
+      engine &&
+      engine.tasks.length > 0 &&
+      (engine.flocking || engine.tasks.every((t) => t.state === "done"))
+  );
 
   const [queueState, setQueueState] = useState<{
     step: number;
@@ -67,12 +77,20 @@ export function SwarmAgentPill({
   }, [clampedMax]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || paused) return;
+    if (typeof window === "undefined" || paused || isDone) return;
     const tempo = Math.max(0.25, engine?.tempoMultiplier ?? 1);
     const delay = Math.max(120, Math.round(intervalMs / tempo));
 
     const timer = window.setInterval(() => {
       if (engine?.paused) return;
+      if (
+        hideWhenDone &&
+        engine &&
+        engine.tasks.length > 0 &&
+        (engine.flocking || engine.tasks.every((t) => t.state === "done"))
+      ) {
+        return;
+      }
       setQueueState((prev) => {
         const currentHeadId = prev.items[0]?.icon.id;
         const nextIcon = pickRandomAgentIcon(pool, currentHeadId);
@@ -85,7 +103,7 @@ export function SwarmAgentPill({
     }, delay);
 
     return () => window.clearInterval(timer);
-  }, [pool, clampedMax, intervalMs, paused, engine]);
+  }, [pool, clampedMax, intervalMs, paused, isDone, hideWhenDone, engine]);
 
   const resolvedCount = count ?? engine?.cursors.length ?? FLOCK_TARGET_CURSORS;
   const formattedLabel =
@@ -97,17 +115,19 @@ export function SwarmAgentPill({
 
   const visibleItems = queueState.items.slice(0, clampedMax);
   const shiftClass = queueState.step % 2 === 0 ? "is-shifting-a" : "is-shifting-b";
+  const doneClass = isDone ? " is-done" : "";
 
   return (
     <div
       className={
         className
-          ? `swarm-agent-pill ${position} ${className}`
-          : `swarm-agent-pill ${position}`
+          ? `swarm-agent-pill ${position}${doneClass} ${className}`
+          : `swarm-agent-pill ${position}${doneClass}`
       }
       style={style}
       role="status"
       aria-live="polite"
+      aria-hidden={isDone}
     >
       <div className="swarm-agent-stack" aria-hidden="true">
         {visibleItems.map((entry, idx) => {

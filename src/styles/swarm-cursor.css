@@ -299,27 +299,47 @@
   white-space: nowrap;
   user-select: none;
   pointer-events: auto;
+  opacity: 1;
+  transition:
+    opacity 0.38s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .swarm-agent-pill.bottom-center {
   position: fixed;
   left: 50%;
   bottom: 18px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(0) scale(1);
   z-index: 48;
+}
+
+.swarm-agent-pill.bottom-center.is-done {
+  opacity: 0;
+  transform: translateX(-50%) translateY(20px) scale(0.92);
+  pointer-events: none;
 }
 
 .swarm-agent-pill.bottom-left {
   position: fixed;
   left: 28px;
   bottom: 18px;
+  transform: translateY(0) scale(1);
   z-index: 48;
+}
+
+.swarm-agent-pill.bottom-left.is-done,
+.swarm-agent-pill.bottom-right.is-done,
+.swarm-agent-pill.inline.is-done {
+  opacity: 0;
+  transform: translateY(20px) scale(0.92);
+  pointer-events: none;
 }
 
 .swarm-agent-pill.bottom-right {
   position: fixed;
   right: 18px;
   bottom: 18px;
+  transform: translateY(0) scale(1);
   z-index: 48;
 }
 

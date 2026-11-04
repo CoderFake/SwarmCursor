@@ -32,6 +32,7 @@ export interface SwarmAgentPillOptions {
   intervalMs?: number;
   icons?: AgentIconId[];
   position?: "bottom-center" | "bottom-left" | "bottom-right" | "inline";
+  hideWhenDone?: boolean;
 }
 
 export interface CreateSwarmOptions extends SwarmEngineOptions {
@@ -289,7 +290,20 @@ export function createSwarmAgentPill(
     pillEl.appendChild(labelEl);
     parent.appendChild(pillEl);
 
+    const hideWhenDone = options.hideWhenDone ?? true;
+    const checkIsDone = () =>
+      Boolean(
+        hideWhenDone &&
+          options.engine &&
+          options.engine.tasks.length > 0 &&
+          (options.engine.flocking ||
+            options.engine.tasks.every((t) => t.state === "done"))
+      );
+
     const renderPill = () => {
+      if (!pillEl) return;
+      const done = checkIsDone();
+      pillEl.classList.toggle("is-done", done);
       const resolvedCount =
         options.count ?? options.engine?.cursors.length ?? FLOCK_TARGET_CURSORS;
       labelEl.textContent =
@@ -316,6 +330,11 @@ export function createSwarmAgentPill(
     const delay = Math.max(120, Math.round(intervalMs / tempo));
     timer = window.setInterval(() => {
       if (options.engine?.paused) return;
+      if (checkIsDone()) {
+        pillEl?.classList.add("is-done");
+        return;
+      }
+      pillEl?.classList.remove("is-done");
       const headId = queue[0]?.icon.id;
       const nextIcon = pickRandomAgentIcon(pool, headId);
       step += 1;
