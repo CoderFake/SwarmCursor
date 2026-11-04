@@ -30,15 +30,15 @@ export function buildSwarmLandingScene(
   );
   b.addSectionFrame("nav", 24, 88, true);
   b.addLogoMark("mark", MARGIN_LEFT + 24, 45, 22);
-  b.addText("brand", MARGIN_LEFT + 52, 44, "Swarm", TYPE_STYLES.brand);
-  b.addText("nav0", 540, 46, "Product", TYPE_STYLES.nav);
+  b.addText("brand", MARGIN_LEFT + 52, 44, "SwarmCursor", TYPE_STYLES.brand);
+  b.addText("nav0", 540, 46, "Components", TYPE_STYLES.nav);
   b.addDupGroup(
     "nav",
     ["nav0"],
     [
-      { dx: 96, dy: 0, edits: ["Agents"] },
+      { dx: 96, dy: 0, edits: ["Physics"] },
       { dx: 192, dy: 0, edits: ["Docs"] },
-      { dx: 288, dy: 0, edits: ["Pricing"] },
+      { dx: 288, dy: 0, edits: ["GitHub"] },
     ]
   );
   b.addVLine("nav-div", MARGIN_RIGHT - 176, 24, 88);
@@ -606,12 +606,12 @@ export function buildSwarmLandingScene(
   b.addSectionFrame("footer", 3690, 3970, true);
   b.addGuide("g-foot", "x", 560, 3700);
   b.addLogoMark("fmark", MARGIN_LEFT + 36, 3735, 22);
-  b.addText("f-brand", MARGIN_LEFT + 62, 3734, "Swarm", TYPE_STYLES.brand);
+  b.addText("f-brand", MARGIN_LEFT + 62, 3734, "SwarmCursor", TYPE_STYLES.brand);
   b.addText(
     "f-copy",
     MARGIN_LEFT + 36,
     3916,
-    "© 2026 Swarm Labs, Inc.",
+    "© 2026 CoderFake · SwarmCursor MIT License.",
     TYPE_STYLES.small
   );
   b.addText(
@@ -640,3 +640,5 @@ export function buildSwarmLandingScene(
 
   return b.build(4060);
 }
+
+export const buildSwarmShowcaseScene = buildSwarmLandingScene;

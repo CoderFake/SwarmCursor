@@ -1,7 +1,27 @@
 {
   "name": "swarm-cursor",
   "version": "1.0.0",
-  "description": "Multi-agent Figma cursor page-building animation engine for Vanilla JS & React",
+  "description": "Autonomous multi-agent Figma cursor choreography, scroll-driven UI builder, and Boids vortex mouse follower for React & Vanilla TS",
+  "author": "CoderFake",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CoderFake/SwarmCursor.git"
+  },
+  "homepage": "https://github.com/CoderFake/SwarmCursor#readme",
+  "bugs": {
+    "url": "https://github.com/CoderFake/SwarmCursor/issues"
+  },
+  "keywords": [
+    "cursor",
+    "swarm",
+    "figma-cursor",
+    "multi-agent",
+    "boids",
+    "scroll-animation",
+    "react",
+    "typescript"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -20,7 +40,9 @@
     "./styles.css": "./dist/styles.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup && cp src/styles/swarm-cursor.css dist/styles.css",

@@ -37,7 +37,7 @@ describe("SceneBuilder & Text Measurement", () => {
     expect(editTasks[0].deps).toEqual(["d:cards:0", "d:cards:1"]);
   });
 
-  it("builds the complete original swarm-site landing scene preset", () => {
+  it("builds the SwarmCursor showcase scene preset", () => {
     const scene = buildSwarmLandingScene(() => 24);
     expect(scene.height).toBe(4060);
     expect(scene.els.length).toBeGreaterThan(80);

@@ -1,85 +1,70 @@
-# `swarm-cursor`
+# SwarmCursor
 
-Multi-agent Figma cursor page-building animation engine for **Vanilla JS / TypeScript** and **React 18 / 19 (Next.js SSR-safe)**, extracted and generalized from `califa.github.io/swarm-site`.
+**Autonomous Multi-Agent Figma Cursor Choreography, Scroll-Driven UI Builder & Boids Vortex Mouse Follower for React & Vanilla TypeScript.**
 
-## Features
-
-- **6 Figma Tool Choreographies (ES6 Generator Coroutines)**:
-  - `*drawPath` & `*drawLogo`: Pen tool vertex placement, `#0D99FF` vector preview line, vertex handles, and fill transitions.
-  - `*drawRect`: Crosshair wireframe drag (`#D9D9D9`) with `W × H` dimensions badge and smooth transition to styled card.
-  - `*dragGuide`: Slides out `#2c2c2c` top/left Figma rulers and pulls out `#F24822` red alignment guides.
-  - `*drawText`: Crosshair text-box drag, `ibeam` human-cadence typing with blinking caret, stepped font-size growth, and drag-to-snap alignment that flashes the red guide on snap.
-  - `*duplicate`: Option-drag group cloning with `dup` double-arrow cursor and live red spacing measurement badges.
-  - `*editText`: Double-click select-all (`#0d99ff47`) and retyping on cloned elements.
-- **Boids Vortex Flocking & 48px Mouse Repulsion Physics**: Cursors orbit in a 3-lobed vortex before start and after completion, repelling elastically from the user's pointer.
-- **3 Scroll Modes**: `'manual'`, `'auto'` (Director autopilot), and `'hybrid'` (autopilot that yields on user scroll and resumes after inactivity).
-- **3 Integration Modes**:
-  1. **React / Next.js DOM Mode (`<SwarmProvider>` + `<SwarmElement>`)**
-  2. **React Virtual Artboard Mode (`<SwarmCanvas>`)**
-  3. **Vanilla JS / HTML Mode (`createSwarm()` + `data-swarm`)**
+Repository: **[https://github.com/CoderFake/SwarmCursor](https://github.com/CoderFake/SwarmCursor)**
 
 ---
 
-## Usage
+## Tính năng nổi bật
 
-### 1. React / Next.js (`<SwarmProvider>` + `<SwarmElement>`)
+- **6 Công cụ Figma tự động (Autonomous Coroutines)**:
+  - **Rectangle Tool (`cross` → `arrow`)**: Kéo khung wireframe `#D9D9D9`, hiển thị kích thước `W × H` (`#0D99FF`) rồi áp màu nền, bo góc, viền.
+  - **Type Tool (`ibeam` → `ew`)**: Gõ từng ký tự với dấu nháy caret, hoặc gõ cỡ chữ nhỏ rồi bôi đen toàn bộ và kéo giãn lên cỡ chữ lớn (`grow`).
+  - **Duplicate Group (`arrow` → `dup`)**: Nhân bản hàng loạt phần tử theo lưới (`Alt+Drag`) và cử chuột I-Beam tới sửa nội dung từng bản sao.
+  - **Vector Pen Tool (`pen` → `pen-add` → `pen-close`)**: Đặt từng điểm neo vector (`5×5`) và khép kín đường path SVG.
+  - **Ruler & Red Snap Guides (`ns` / `ew`)**: Kéo đường gióng đỏ (`#F24822`) từ thước đo trên/trái khớp vào cạnh phần tử.
+- **Boids Vortex Mouse Follower (`<SwarmFollower />`)**:
+  - Đuổi theo chuột người dùng khi di chuyển (Cohesion + Separation) và **xoay vòng tròn (Circular Vortex Orbit)** quanh mũi chuột khi chuột dừng lại.
+- **Opt-in Bottom-Bar AI Agent Queue Pill (`<SwarmAgentPill />`)**:
+  - Hiển thị tối đa **5 icon AI ngẫu nhiên** (Claude, OpenAI, Gemini, DeepSeek, Grok, Kimi, Mistral, Cohere, Ollama) nhảy liên tục đẩy kiểu hàng đợi (queue) từ trái sang phải kèm nhãn **`{N} agents`**. Chỉ hiện khi người dùng khai báo.
+- **3 Chế độ Cuộn (`manual` | `auto` | `hybrid`)**:
+  - Cuộn tay tới đâu vẽ tới đó, tự động cuộn mượt theo tiến độ task, hoặc chế độ lai thông minh.
+
+---
+
+## Tài liệu chi tiết theo thư mục (`docs/`)
+
+Toàn bộ hướng dẫn sử dụng chi tiết được chia theo từng thư mục trong [`docs/`](./docs/README.md):
+
+- **Bắt đầu (`docs/getting-started/`)**
+  - [Cài đặt & Thiết lập](./docs/getting-started/installation.md)
+  - [Bắt đầu nhanh trong 60 giây](./docs/getting-started/quick-start.md)
+- **React Components (`docs/components/`)**
+  - [`<SwarmProvider>` & `<SwarmElement>` (DOM-Driven Mode)](./docs/components/swarm-provider.md)
+  - [`<SwarmFollower>` (Mouse Follow & Circular Vortex Orbit)](./docs/components/swarm-follower.md)
+  - [`<SwarmAgentPill>` (Bottom-Bar 5 AI Icons Queue + `{N} agents`)](./docs/components/swarm-agent-pill.md)
+  - [`<SwarmCanvas>` & `SceneBuilder` (Virtual Artboard Mode)](./docs/components/swarm-canvas.md)
+  - [`<SwarmControls>` & `useSwarm()` Hook](./docs/components/swarm-controls.md)
+- **Vanilla JS / TS API (`docs/vanilla-api/`)**
+  - [Vanilla API Reference (`createSwarm`, `createSwarmFollower`, `createSwarmAgentPill`)](./docs/vanilla-api/reference.md)
+- **Tùy biến (`docs/customization/`)**
+  - [HTML Attributes `data-swarm-*` & CSS Variables](./docs/customization/theming-and-attributes.md)
+
+---
+
+## Cài đặt nhanh
+
+```bash
+npm install git+https://github.com/CoderFake/SwarmCursor.git
+```
 
 ```tsx
-import { SwarmProvider, SwarmElement, SwarmControls } from "swarm-cursor/react";
+import { SwarmFollower } from "swarm-cursor/react";
 import "swarm-cursor/styles.css";
 
-export default function PortfolioPage() {
+export default function App() {
   return (
-    <SwarmProvider scrollMode="hybrid" controls>
-      <SwarmElement id="hero-title" tool="text" grow snapAxis="x">
-        <h1 className="text-6xl font-bold">Hoang Dieu — Fullstack Engineer</h1>
-      </SwarmElement>
-
-      <SwarmElement id="project-card" tool="rect" deps={["hero-title"]}>
-        <div className="p-6 rounded-xl bg-white shadow">Project 1</div>
-      </SwarmElement>
-    </SwarmProvider>
+    <>
+      {/* Khai báo agentPill={true} khi muốn hiện thanh 5 icon + "36 agents" ở bottom bar */}
+      <SwarmFollower count={36} radiusScale={1} agentPill={true} />
+    </>
   );
 }
 ```
 
-### 2. React Virtual Artboard (`<SwarmCanvas>`)
+---
 
-```tsx
-import { SwarmCanvas } from "swarm-cursor/react";
-import { buildSwarmLandingScene } from "swarm-cursor";
-import "swarm-cursor/styles.css";
+## License
 
-export default function SwarmLandingDemo() {
-  return (
-    <SwarmCanvas
-      scene={buildSwarmLandingScene}
-      scrollMode="hybrid"
-      controls={true}
-    />
-  );
-}
-```
-
-### 3. Vanilla HTML / JS (`createSwarm`)
-
-```html
-<link rel="stylesheet" href="node_modules/swarm-cursor/dist/styles.css" />
-
-<div id="app">
-  <h1 id="title" data-swarm="text" data-swarm-grow="true" data-swarm-snap="x">
-    Built by AI Agents
-  </h1>
-  <div id="card" data-swarm="rect" data-swarm-deps="title">Card Body</div>
-</div>
-
-<script type="module">
-  import { createSwarm } from "swarm-cursor";
-
-  const swarm = createSwarm({
-    container: document.getElementById("app"),
-    mode: "dom",
-    scrollMode: "hybrid",
-  });
-</script>
-```
+MIT © [CoderFake](https://github.com/CoderFake/SwarmCursor)

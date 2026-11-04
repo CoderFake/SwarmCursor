@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SwarmCursor — Documentation &amp; Interactive Playground</title>
+  <link rel="stylesheet" href="../dist/styles.css" />
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --bg-elev: #12151c;
+      --bg-card: rgba(22, 26, 35, 0.78);
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text: #f3f5f8;
+      --muted: #949ba6;
+      --accent: #0d99ff;
+      --accent-glow: rgba(13, 153, 255, 0.22);
+      --red: #f24822;
+      --green: #14bb69;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 50% 0%, rgba(13, 153, 255, 0.14), transparent 55%),
+        radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px;
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px;
+      background: rgba(11, 13, 17, 0.82);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(13, 153, 255, 0.16);
+      border: 1px solid rgba(13, 153, 255, 0.35);
+      color: #58b6ff;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gh-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+
+    .gh-link:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-strong);
+    }
+
+    /* Layout */
+    .docs-shell {
+      display: grid;
+      grid-template-columns: 268px minmax(0, 1fr);
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 960px) {
+      .docs-shell {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+      overflow-y: auto;
+      padding: 28px 20px 80px;
+      border-right: 1px solid var(--border);
+    }
+
+    .nav-section {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6c737f;
+      margin: 22px 10px 8px;
+    }
+
+    .nav-section:first-child {
+      margin-top: 0;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 7px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-pill {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      color: #b5bcc6;
+    }
+
+    /* Content Area */
+    .content {
+      padding: 40px 56px 140px;
+      max-width: 1020px;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 24px 20px 120px;
+      }
+    }
+
+    /* Hero Interactive Stage */
+    .hero-stage {
+      position: relative;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(22, 26, 36, 0.92), rgba(14, 17, 24, 0.95));
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      padding: 36px 36px 28px;
+      margin-bottom: 44px;
+      overflow: hidden;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(13, 153, 255, 0.12);
+      border: 1px solid rgba(13, 153, 255, 0.3);
+      color: #6bc2ff;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .hero-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .hero-stage h1 {
+      font-size: clamp(30px, 4.2vw, 46px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin: 0 0 14px;
+    }
+
+    .hero-lead {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 660px;
+      margin: 0 0 24px;
+    }
+
+    /* Interactive Control Panel */
+    .playground-dock {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: rgba(9, 11, 15, 0.78);
+      border: 1px solid var(--border);
+    }
+
+    .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      font: 600 12.5px/16px Inter, sans-serif;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .ctrl-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .ctrl-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .ctrl-select {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border-strong);
+      background: #151922;
+      color: #fff;
+      font: 500 12.5px/16px Inter, sans-serif;
+      cursor: pointer;
+    }
+
+    .ctrl-label {
+      font-size: 12px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Live Mini Artboard Demo Cards */
+    .mini-artboard {
+      position: relative;
+      margin-top: 24px;
+      padding: 24px;
+      border-radius: 12px;
+      background: #f8f9fa;
+      color: #121417;
+      min-height: 220px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .mini-artboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5b6168;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mini-card {
+      background: #fff;
+      border: 1px solid #e2e4e8;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .mini-card h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #121417;
+    }
+
+    .mini-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #5b6168;
+    }
+
+    /* Docs Typography & Cards */
+    h2 {
+      font-size: 24px;
+      letter-spacing: -0.02em;
+      margin: 52px 0 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3 {
+      font-size: 17px;
+      margin: 28px 0 10px;
+      color: #fff;
+    }
+
+    p {
+      color: #c3c9d4;
+      margin: 0 0 14px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(13, 153, 255, 0.14);
+      border: 1px solid rgba(13, 153, 255, 0.3);
+      color: #6bc2ff;
+    }
+
+    .tag.opt-in {
+      background: rgba(20, 187, 105, 0.14);
+      border-color: rgba(20, 187, 105, 0.35);
+      color: #4ce091;
+    }
+
+    .code-block {
+      position: relative;
+      margin: 14px 0 24px;
+      border-radius: 12px;
+      background: #0d1017;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      color: #d6dce5;
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font: 13px/1.6 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #e6edf3;
+    }
+
+    code {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12.5px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: #82c8ff;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px;
+      font-size: 13.5px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 11px 15px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    td {
+      color: #c5cbd6;
+    }
+
+    .doc-tree-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 16px 0 28px;
+    }
+
+    .doc-tree-card {
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .doc-tree-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .doc-tree-card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .doc-tree-card span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="topbar">
+    <a href="#" class="brand">
+      <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
+        <path d="M5 3 L5 20 L9.8 15.8 L13 22.5 L15.8 21.2 L12.6 14.5 L19 14.5 Z" fill="#0D99FF" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span>SwarmCursor</span>
+      <span class="brand-badge">v1.0.0</span>
+    </a>
+    <div class="topbar-actions">
+      <a class="gh-link" href="https://github.com/CoderFake/SwarmCursor" target="_blank" rel="noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        <span>CoderFake/SwarmCursor</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="docs-shell">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-section">Getting Started</div>
+      <a href="#interactive-stage">Live Playground <span class="nav-pill">Interactive</span></a>
+      <a href="#doc-structure">Cấu trúc thư mục Docs</a>
+      <a href="#installation">1. Cài đặt &amp; Import</a>
+
+      <div class="nav-section">React Components</div>
+      <a href="#swarm-provider">2. &lt;SwarmProvider&gt; <span class="nav-pill">DOM</span></a>
+      <a href="#swarm-follower">3. &lt;SwarmFollower&gt; <span class="nav-pill">Orbit</span></a>
+      <a href="#swarm-agent-pill">4. &lt;SwarmAgentPill&gt; <span class="nav-pill">Queue</span></a>
+      <a href="#swarm-canvas">5. &lt;SwarmCanvas&gt; <span class="nav-pill">Artboard</span></a>
+      <a href="#swarm-controls">6. &lt;SwarmControls&gt;</a>
+
+      <div class="nav-section">Vanilla TS &amp; Custom</div>
+      <a href="#vanilla-api">7. Vanilla JS API</a>
+      <a href="#html-attributes">8. data-swarm-* &amp; CSS</a>
+    </aside>
+
+    <!-- Main Documentation Content -->
+    <main class="content">
+      <!-- Interactive Hero Stage -->
+      <section id="interactive-stage" class="hero-stage">
+        <div class="hero-eyebrow">
+          <span class="hero-dot"></span>
+          <span>Multi-Agent Figma Cursor Engine · React 18/19 &amp; Vanilla TS</span>
+        </div>
+        <h1>SwarmCursor Documentation</h1>
+        <p class="hero-lead">
+          Di chuyển chuột rồi dừng lại để xem <strong>đàn chuột AI đuổi theo và xoay vòng tròn (Vortex Orbit)</strong>,
+          nhìn xuống đáy màn hình để xem <strong>Queue 5 Icon AI (`{N} agents`)</strong> đẩy liên tục từ trái sang phải,
+          hoặc bấm <strong>Chạy lại hiệu ứng vẽ Card</strong> ngay bên dưới.
+        </p>
+
+        <div class="playground-dock">
+          <button id="btn-replay-build" class="ctrl-btn active" type="button">
+            ▶ Chạy lại hiệu ứng Chuột vẽ UI
+          </button>
+          <button id="btn-toggle-follower" class="ctrl-btn active" type="button">
+            Đàn chuột Follow &amp; Xoay vòng: BẬT
+          </button>
+          <button id="btn-toggle-pill" class="ctrl-btn active" type="button">
+            Bottom Pill ({N} agents): BẬT
+          </button>
+          <label class="ctrl-label">
+            Số lượng:
+            <select id="sel-count" class="ctrl-select">
+              <option value="18">18 agents</option>
+              <option value="30" selected>30 agents</option>
+              <option value="48">48 agents</option>
+            </select>
+          </label>
+          <label class="ctrl-label">
+            Tốc độ:
+            <select id="sel-tempo" class="ctrl-select">
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1.0×</option>
+              <option value="2">2.0×</option>
+              <option value="4">4.0×</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Mini Artboard where cursors actively build DOM elements -->
+        <div id="demo-artboard" class="mini-artboard">
+          <div class="mini-artboard-header">
+            <span id="demo-title" data-swarm="text" data-swarm-grow="true">
+              LIVE DOM BUILDER SANDBOX — ĐÀN CHUỘT TỰ ĐỘNG GÕ CHỮ &amp; KÉO KHUNG
+            </span>
+            <span>[data-swarm]</span>
+          </div>
+          <div class="mini-grid">
+            <div id="demo-card-1" class="mini-card" data-swarm="rect" data-swarm-deps="demo-title">
+              <h4>1. Crosshair &amp; Frame</h4>
+              <p>Chuột kéo khung wireframe #D9D9D9 kèm kích thước W × H rồi đổ màu Card.</p>
+            </div>
+            <div id="demo-card-2" class="mini-card" data-swarm="rect" data-swarm-deps="demo-card-1">
+              <h4>2. Type &amp; Grow</h4>
+              <p>Chuột I-Beam gõ từng ký tự, bôi đen toàn bộ và phóng to cỡ chữ.</p>
+            </div>
+            <div id="demo-card-3" class="mini-card" data-swarm="rect" data-swarm-deps="demo-card-2">
+              <h4>3. Vortex Orbit</h4>
+              <p>Hoàn thành nhiệm vụ, cả đàn chuột bay về xoay vòng quanh con trỏ của bạn.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Markdown Subdirectory Index -->
+      <h2 id="doc-structure">Cấu trúc thư mục Tài liệu Markdown (<code>docs/</code>)</h2>
+      <p>
+        Toàn bộ tài liệu được chia thành các thư mục con chuẩn trong repo
+        <a href="https://github.com/CoderFake/SwarmCursor" target="_blank" rel="noreferrer" style="color: #6bc2ff;">CoderFake/SwarmCursor</a>:
+      </p>
+      <div class="doc-tree-grid">
+        <a class="doc-tree-card" href="./getting-started/installation.md">
+          <strong>getting-started/installation.md</strong>
+          <span>Cài đặt từ GitHub/NPM &amp; cấu hình CSS</span>
+        </a>
+        <a class="doc-tree-card" href="./getting-started/quick-start.md">
+          <strong>getting-started/quick-start.md</strong>
+          <span>3 mẫu tích hợp nhanh trong 60 giây</span>
+        </a>
+        <a class="doc-tree-card" href="./components/swarm-provider.md">
+          <strong>components/swarm-provider.md</strong>
+          <span>&lt;SwarmProvider&gt; &amp; &lt;SwarmElement&gt;</span>
+        </a>
+        <a class="doc-tree-card" href="./components/swarm-follower.md">
+          <strong>components/swarm-follower.md</strong>
+          <span>&lt;SwarmFollower&gt; Follow &amp; Vortex Orbit</span>
+        </a>
+        <a class="doc-tree-card" href="./components/swarm-agent-pill.md">
+          <strong>components/swarm-agent-pill.md</strong>
+          <span>&lt;SwarmAgentPill&gt; Queue 5 AI Icons</span>
+        </a>
+        <a class="doc-tree-card" href="./components/swarm-canvas.md">
+          <strong>components/swarm-canvas.md</strong>
+          <span>&lt;SwarmCanvas&gt; &amp; SceneBuilder DSL</span>
+        </a>
+        <a class="doc-tree-card" href="./vanilla-api/reference.md">
+          <strong>vanilla-api/reference.md</strong>
+          <span>createSwarm / Follower / AgentPill</span>
+        </a>
+        <a class="doc-tree-card" href="./customization/theming-and-attributes.md">
+          <strong>customization/theming-and-attributes.md</strong>
+          <span>Bảng data-swarm-* &amp; CSS Variables</span>
+        </a>
+      </div>
+
+      <!-- 1. Installation -->
+      <h2 id="installation">1. Cài đặt &amp; Import</h2>
+      <div class="code-block">
+        <div class="code-header">
+          <span>Terminal</span>
+          <button class="copy-btn" data-copy="npm install git+https://github.com/CoderFake/SwarmCursor.git">Copy</button>
+        </div>
+        <pre><code>npm install git+https://github.com/CoderFake/SwarmCursor.git</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span>main.tsx / layout.tsx</span>
+          <button class="copy-btn" data-copy='import "swarm-cursor/styles.css";'>Copy</button>
+        </div>
+        <pre><code>import "swarm-cursor/styles.css";</code></pre>
+      </div>
+
+      <!-- 2. SwarmProvider & SwarmElement -->
+      <h2 id="swarm-provider">
+        2. <code>&lt;SwarmProvider&gt;</code> &amp; <code>&lt;SwarmElement&gt;</code>
+        <span class="tag">DOM-Driven Mode</span>
+      </h2>
+      <p>
+        Bọc trang React của bạn bằng <code>&lt;SwarmProvider&gt;</code> và đánh dấu các phần tử cần được đàn chuột AI vẽ bằng <code>&lt;SwarmElement&gt;</code>.
+        Hỗ trợ cả 3 chế độ cuộn: <code>"manual"</code> (kéo tới đâu vẽ tới đó), <code>"auto"</code> (tự động cuộn), và <code>"hybrid"</code>.
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span>PortfolioPage.tsx</span>
+          <button class="copy-btn" data-copy='import { SwarmProvider, SwarmElement, SwarmControls } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export default function PortfolioPage() {
+  return (
+    <SwarmProvider
+      scrollMode="hybrid"
+      autoScrollSpeed={180}
+      showCursorLabels={true}
+      agentPill={{ maxIcons: 5, intervalMs: 650 }} // Chỉ hiện khi khai báo
+    >
+      <SwarmElement id="hero-title" tool="text" grow snapAxis="x">
+        <h1>Creative Developer Portfolio</h1>
+      </SwarmElement>
+
+      <SwarmElement id="project-1" tool="rect" deps={["hero-title"]} snapAxis="y">
+        <div className="card">Dự án được chuột AI vẽ khung & đổ màu</div>
+      </SwarmElement>
+
+      <SwarmControls position="bottom-right" />
+    </SwarmProvider>
+  );
+}'>Copy</button>
+        </div>
+        <pre><code>import { SwarmProvider, SwarmElement, SwarmControls } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export default function PortfolioPage() {
+  return (
+    &lt;SwarmProvider
+      scrollMode="hybrid"
+      autoScrollSpeed={180}
+      showCursorLabels={true}
+      agentPill={{ maxIcons: 5, intervalMs: 650 }} // Chỉ hiện khi khai báo
+    &gt;
+      &lt;SwarmElement id="hero-title" tool="text" grow snapAxis="x"&gt;
+        &lt;h1&gt;Creative Developer Portfolio&lt;/h1&gt;
+      &lt;/SwarmElement&gt;
+
+      &lt;SwarmElement id="project-1" tool="rect" deps={["hero-title"]} snapAxis="y"&gt;
+        &lt;div className="card"&gt;Dự án được chuột AI vẽ khung &amp; đổ màu&lt;/div&gt;
+      &lt;/SwarmElement&gt;
+
+      &lt;SwarmControls position="bottom-right" /&gt;
+    &lt;/SwarmProvider&gt;
+  );
+}</code></pre>
+      </div>
+
+      <!-- 3. SwarmFollower -->
+      <h2 id="swarm-follower">
+        3. <code>&lt;SwarmFollower&gt;</code>
+        <span class="tag">Follow &amp; Circular Orbit</span>
+      </h2>
+      <p>
+        Component độc lập giúp đàn chuột đuổi theo chuột người dùng khi di chuyển và <strong>xoay vòng tròn (Vortex Orbit)</strong> quanh mũi chuột khi chuột dừng lại.
+        Thanh pill ở đáy màn hình <strong>mặc định tắt</strong> trừ khi bạn khai báo prop <code>agentPill</code>.
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span>CursorOverlay.tsx</span>
+          <button class="copy-btn" data-copy='import { SwarmFollower } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export function CursorOverlay() {
+  return (
+    <SwarmFollower
+      count={30}
+      radiusScale={1}
+      tempoMultiplier={1}
+      showLabels={false}
+      agentPill={true} // Khai báo mới hiện thanh 5 icon + "30 agents"
+    />
+  );
+}'>Copy</button>
+        </div>
+        <pre><code>import { SwarmFollower } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export function CursorOverlay() {
+  return (
+    &lt;SwarmFollower
+      count={30}
+      radiusScale={1}
+      tempoMultiplier={1}
+      showLabels={false}
+      agentPill={true} // Khai báo mới hiện thanh 5 icon + "30 agents"
+    /&gt;
+  );
+}</code></pre>
+      </div>
+
+      <!-- 4. SwarmAgentPill -->
+      <h2 id="swarm-agent-pill">
+        4. <code>&lt;SwarmAgentPill&gt;</code>
+        <span class="tag opt-in">Opt-in · Max 5 Icons Queue · {N} agents</span>
+      </h2>
+      <p>
+        Thanh trạng thái kiểu Figma ở bottom bar: hiển thị <strong>tối đa 5 icon tròn xếp chồng</strong> lấy ngẫu nhiên từ 9 bộ icon AI
+        (<code>claude</code>, <code>cohere</code>, <code>deepseek</code>, <code>gemini</code>, <code>grok</code>, <code>kimi</code>, <code>mistral</code>, <code>ollama</code>, <code>openai</code>).
+        Các icon nhảy ngẫu nhiên liên tục đẩy từ <strong>trái qua phải</strong> giống hàng đợi (queue) các agent đang làm việc, kèm nhãn <code>{N} agents</code>.
+      </p>
+      <div class="code-block">
+        <div class="code-header">
+          <span>BottomAgentQueue.tsx</span>
+          <button class="copy-btn" data-copy='import { SwarmAgentPill } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export function BottomAgentQueue() {
+  return (
+    <SwarmAgentPill
+      count={30}
+      maxIcons={5}               // Tối đa 5 icon (hard-capped <= 5)
+      intervalMs={650}           // Chu kỳ đẩy queue từ trái sang phải (ms)
+      position="bottom-center"   // "bottom-center" | "bottom-left" | "bottom-right" | "inline"
+      icons={["claude", "openai", "gemini", "deepseek", "grok", "kimi", "mistral"]}
+    />
+  );
+}'>Copy</button>
+        </div>
+        <pre><code>import { SwarmAgentPill } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+export function BottomAgentQueue() {
+  return (
+    &lt;SwarmAgentPill
+      count={30}
+      maxIcons={5}               // Tối đa 5 icon (hard-capped &lt;= 5)
+      intervalMs={650}           // Chu kỳ đẩy queue từ trái sang phải (ms)
+      position="bottom-center"   // "bottom-center" | "bottom-left" | "bottom-right" | "inline"
+      icons={["claude", "openai", "gemini", "deepseek", "grok", "kimi", "mistral"]}
+    /&gt;
+  );
+}</code></pre>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Prop</th>
+            <th>Kiểu dữ liệu</th>
+            <th>Mặc định</th>
+            <th>Mô tả</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>count</code></td>
+            <td><code>number</code></td>
+            <td><code>engine?.cursors.length ?? 36</code></td>
+            <td>Số lượng hiển thị trong <code>{N} agents</code>.</td>
+          </tr>
+          <tr>
+            <td><code>maxIcons</code></td>
+            <td><code>number</code></td>
+            <td><code>5</code></td>
+            <td>Số lượng icon tối đa hiển thị cùng lúc (luôn khóa ở mức &le; 5).</td>
+          </tr>
+          <tr>
+            <td><code>intervalMs</code></td>
+            <td><code>number</code></td>
+            <td><code>650</code></td>
+            <td>Thời gian (ms) mỗi nhịp đẩy 1 icon AI ngẫu nhiên mới từ trái qua phải.</td>
+          </tr>
+          <tr>
+            <td><code>icons</code></td>
+            <td><code>AgentIconId[]</code></td>
+            <td>Tất cả 9 icon AI</td>
+            <td>Danh sách lọc các icon được phép xuất hiện.</td>
+          </tr>
+          <tr>
+            <td><code>position</code></td>
+            <td><code>"bottom-center" | "bottom-left" | "bottom-right" | "inline"</code></td>
+            <td><code>"bottom-center"</code></td>
+            <td>Vị trí cố định dưới bottom bar hoặc inline.</td>
+          </tr>
+          <tr>
+            <td><code>label</code></td>
+            <td><code>string | ((count: number) =&gt; string)</code></td>
+            <td><code>(n) =&gt; `${n} agents`</code></td>
+            <td>Tùy biến chuỗi hiển thị bên phải hàng đợi icon.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 5. SwarmCanvas & SceneBuilder -->
+      <h2 id="swarm-canvas">
+        5. <code>&lt;SwarmCanvas&gt;</code> &amp; <code>SceneBuilder</code>
+        <span class="tag">Virtual Artboard</span>
+      </h2>
+      <div class="code-block">
+        <div class="code-header">
+          <span>CustomArtboard.tsx</span>
+          <button class="copy-btn" data-copy='import { SceneBuilder } from "swarm-cursor";
+import { SwarmCanvas } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+const customScene = () => {
+  const b = new SceneBuilder(1280);
+  const gLeft = b.guideX(80, 100);
+  const title = b.text(80, 140, "SwarmCursor Artboard", "h1", {
+    w: 620,
+    grow: true,
+    deps: [gLeft],
+  });
+  const card = b.rect(80, 280, 340, 180, {
+    fill: "#FFFFFF",
+    stroke: "#E2E4E9",
+    r: 14,
+    deps: [title],
+  });
+  b.dupGroup("row", [card], [{ dx: 370, dy: 0 }, { dx: 740, dy: 0 }], [card]);
+  return b.build(600);
+};
+
+export default function CustomArtboard() {
+  return <SwarmCanvas scene={customScene} scrollMode="hybrid" controls agentPill />;
+}'>Copy</button>
+        </div>
+        <pre><code>import { SceneBuilder } from "swarm-cursor";
+import { SwarmCanvas } from "swarm-cursor/react";
+import "swarm-cursor/styles.css";
+
+const customScene = () =&gt; {
+  const b = new SceneBuilder(1280);
+  const gLeft = b.guideX(80, 100);
+  const title = b.text(80, 140, "SwarmCursor Artboard", "h1", {
+    w: 620,
+    grow: true,
+    deps: [gLeft],
+  });
+  const card = b.rect(80, 280, 340, 180, {
+    fill: "#FFFFFF",
+    stroke: "#E2E4E9",
+    r: 14,
+    deps: [title],
+  });
+  b.dupGroup("row", [card], [{ dx: 370, dy: 0 }, { dx: 740, dy: 0 }], [card]);
+  return b.build(600);
+};
+
+export default function CustomArtboard() {
+  return &lt;SwarmCanvas scene={customScene} scrollMode="hybrid" controls agentPill /&gt;;
+}</code></pre>
+      </div>
+
+      <!-- 6. SwarmControls & useSwarm -->
+      <h2 id="swarm-controls">6. <code>&lt;SwarmControls&gt;</code> &amp; <code>useSwarm()</code> Hook</h2>
+      <div class="code-block">
+        <div class="code-header">
+          <span>CustomToolbar.tsx</span>
+          <button class="copy-btn" data-copy='import { useSwarm } from "swarm-cursor/react";
+
+export function CustomToolbar() {
+  const { engine, start, pause, resume, reset, setScrollMode } = useSwarm();
+  return (
+    <div className="toolbar">
+      <button onClick={() => (engine.paused ? resume() : pause())}>
+        {engine.paused ? "Resume" : "Pause"}
+      </button>
+      <button onClick={reset}>Reset</button>
+      <button onClick={() => setScrollMode("auto")}>Auto Scroll</button>
+    </div>
+  );
+}'>Copy</button>
+        </div>
+        <pre><code>import { useSwarm } from "swarm-cursor/react";
+
+export function CustomToolbar() {
+  const { engine, start, pause, resume, reset, setScrollMode } = useSwarm();
+  return (
+    &lt;div className="toolbar"&gt;
+      &lt;button onClick={() =&gt; (engine.paused ? resume() : pause())}&gt;
+        {engine.paused ? "Resume" : "Pause"}
+      &lt;/button&gt;
+      &lt;button onClick={reset}&gt;Reset&lt;/button&gt;
+      &lt;button onClick={() =&gt; setScrollMode("auto")}&gt;Auto Scroll&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+      </div>
+
+      <!-- 7. Vanilla JS API -->
+      <h2 id="vanilla-api">7. Vanilla JS / TypeScript API</h2>
+      <div class="code-block">
+        <div class="code-header">
+          <span>vanilla-example.ts</span>
+          <button class="copy-btn" data-copy='import {
+  createSwarm,
+  createSwarmFollower,
+  createSwarmAgentPill,
+} from "swarm-cursor";
+import "swarm-cursor/styles.css";
+
+// 1. Quét DOM [data-swarm] và cho chuột vẽ khi kéo trang
+const swarm = createSwarm({
+  container: document.body,
+  mode: "dom",
+  scrollMode: "hybrid",
+  agentPill: { maxIcons: 5, intervalMs: 650 }, // Chỉ hiện khi khai báo
+});
+
+// 2. Hoặc chỉ chạy đàn chuột đuổi & xoay vòng quanh trỏ chuột
+const follower = createSwarmFollower({
+  count: 30,
+  radiusScale: 1,
+  agentPill: true,
+});
+
+// 3. Hoặc gọi riêng thanh Bottom-Bar Queue 5 Icon AI
+const pill = createSwarmAgentPill({
+  count: 30,
+  maxIcons: 5,
+  intervalMs: 650,
+});'>Copy</button>
+        </div>
+        <pre><code>import {
+  createSwarm,
+  createSwarmFollower,
+  createSwarmAgentPill,
+} from "swarm-cursor";
+import "swarm-cursor/styles.css";
+
+// 1. Quét DOM [data-swarm] và cho chuột vẽ khi kéo trang
+const swarm = createSwarm({
+  container: document.body,
+  mode: "dom",
+  scrollMode: "hybrid",
+  agentPill: { maxIcons: 5, intervalMs: 650 }, // Chỉ hiện khi khai báo
+});
+
+// 2. Hoặc chỉ chạy đàn chuột đuổi &amp; xoay vòng quanh trỏ chuột
+const follower = createSwarmFollower({
+  count: 30,
+  radiusScale: 1,
+  agentPill: true,
+});
+
+// 3. Hoặc gọi riêng thanh Bottom-Bar Queue 5 Icon AI
+const pill = createSwarmAgentPill({
+  count: 30,
+  maxIcons: 5,
+  intervalMs: 650,
+});</code></pre>
+      </div>
+
+      <!-- 8. HTML Attributes & CSS -->
+      <h2 id="html-attributes">8. Bảng thuộc tính <code>data-swarm-*</code> &amp; CSS Variables</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Thuộc tính HTML</th>
+            <th>Giá trị</th>
+            <th>Mô tả</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>data-swarm</code></td>
+            <td><code>"rect" | "text" | "path"</code></td>
+            <td>Công cụ Figma mà chuột AI sẽ dùng để vẽ phần tử.</td>
+          </tr>
+          <tr>
+            <td><code>data-swarm-id</code></td>
+            <td><code>string</code></td>
+            <td>ID định danh phần tử để liên kết phụ thuộc (<code>deps</code>).</td>
+          </tr>
+          <tr>
+            <td><code>data-swarm-deps</code></td>
+            <td><code>"id1,id2"</code></td>
+            <td>Danh sách các ID phải hoàn thành trước khi vẽ phần tử này.</td>
+          </tr>
+          <tr>
+            <td><code>data-swarm-grow</code></td>
+            <td><code>"true"</code></td>
+            <td>Gõ chữ cỡ nhỏ trước rồi bôi đen phóng to cỡ chữ.</td>
+          </tr>
+          <tr>
+            <td><code>data-swarm-snap</code></td>
+            <td><code>"x" | "y" | "xy"</code></td>
+            <td>Kéo thước căn lề đỏ từ Ruler trên/trái khớp vào cạnh phần tử.</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Live Interactive Script -->
+  <script type="module">
+    import {
+      createSwarm,
+      createSwarmFollower,
+      createSwarmAgentPill,
+    } from "../dist/index.js";
+
+    let currentCount = 30;
+    let currentTempo = 1;
+    let followerActive = true;
+    let pillActive = true;
+
+    const artboardEl = document.getElementById("demo-artboard");
+    let domSwarm = createSwarm({
+      container: artboardEl,
+      mode: "dom",
+      initialCursors: 6,
+      flockCursors: 12,
+      tempoMultiplier: currentTempo,
+    });
+    domSwarm.start();
+
+    let follower = createSwarmFollower({
+      count: currentCount,
+      tempoMultiplier: currentTempo,
+    });
+
+    let pill = createSwarmAgentPill({
+      count: currentCount,
+      maxIcons: 5,
+      intervalMs: 650,
+      position: "bottom-center",
+    });
+
+    const btnReplay = document.getElementById("btn-replay-build");
+    const btnFollower = document.getElementById("btn-toggle-follower");
+    const btnPill = document.getElementById("btn-toggle-pill");
+    const selCount = document.getElementById("sel-count");
+    const selTempo = document.getElementById("sel-tempo");
+
+    btnReplay?.addEventListener("click", () => {
+      domSwarm.reset();
+      domSwarm.start();
+    });
+
+    btnFollower?.addEventListener("click", () => {
+      followerActive = !followerActive;
+      if (followerActive) {
+        follower = createSwarmFollower({
+          count: currentCount,
+          tempoMultiplier: currentTempo,
+        });
+        btnFollower.textContent = "Đàn chuột Follow & Xoay vòng: BẬT";
+        btnFollower.classList.add("active");
+      } else {
+        follower?.destroy();
+        follower = null;
+        btnFollower.textContent = "Đàn chuột Follow & Xoay vòng: TẮT";
+        btnFollower.classList.remove("active");
+      }
+    });
+
+    btnPill?.addEventListener("click", () => {
+      pillActive = !pillActive;
+      if (pillActive) {
+        pill = createSwarmAgentPill({
+          count: currentCount,
+          maxIcons: 5,
+          intervalMs: Math.round(650 / currentTempo),
+          position: "bottom-center",
+        });
+        btnPill.textContent = "Bottom Pill ({N} agents): BẬT";
+        btnPill.classList.add("active");
+      } else {
+        pill?.destroy();
+        pill = null;
+        btnPill.textContent = "Bottom Pill ({N} agents): TẮT";
+        btnPill.classList.remove("active");
+      }
+    });
+
+    selCount?.addEventListener("change", (e) => {
+      currentCount = parseInt(e.target.value, 10) || 30;
+      if (followerActive) {
+        follower?.destroy();
+        follower = createSwarmFollower({
+          count: currentCount,
+          tempoMultiplier: currentTempo,
+        });
+      }
+      if (pillActive) {
+        pill?.destroy();
+        pill = createSwarmAgentPill({
+          count: currentCount,
+          maxIcons: 5,
+          intervalMs: Math.round(650 / currentTempo),
+          position: "bottom-center",
+        });
+      }
+    });
+
+    selTempo?.addEventListener("change", (e) => {
+      currentTempo = parseFloat(e.target.value) || 1;
+      domSwarm.engine.setTempoMultiplier(currentTempo);
+      if (follower) {
+        follower.engine.setTempoMultiplier(currentTempo);
+      }
+      if (pillActive) {
+        pill?.destroy();
+        pill = createSwarmAgentPill({
+          count: currentCount,
+          maxIcons: 5,
+          intervalMs: Math.round(650 / currentTempo),
+          position: "bottom-center",
+        });
+      }
+    });
+
+    document.querySelectorAll(".copy-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const text = btn.getAttribute("data-copy") || "";
+        navigator.clipboard?.writeText(text);
+        const prev = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(() => {
+          btn.textContent = prev;
+        }, 1400);
+      });
+    });
+  </script>
+</body>
+</html>
