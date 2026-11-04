@@ -10,6 +10,8 @@ import {
 import { measureTextBlock } from "./text-measure";
 import type {
   Point2D,
+  Swarm3DBuildMode,
+  Swarm3DEl,
   SwarmDupGroup,
   SwarmElementNode,
   SwarmGuideEl,
@@ -21,6 +23,15 @@ import type {
   SwarmTextEl,
   TextStyleSpec,
 } from "./types";
+
+export interface Add3DOptions {
+  buildMode?: Swarm3DBuildMode;
+  squadSize?: number;
+  src?: string;
+  deps?: string[];
+  sticky?: boolean;
+  domEl?: HTMLElement | null;
+}
 
 export interface AddPathOptions {
   closed?: boolean;
@@ -215,6 +226,44 @@ export class SceneBuilder {
     };
     this.registerEl(el);
     return this.registerTask("g:" + id, triggerY, { type: "guide", el: id }, []);
+  }
+
+  public add3D(
+    id: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    opts: Add3DOptions = {}
+  ): string {
+    const buildMode = opts.buildMode ?? "all";
+    const squadSize = Math.max(1, opts.squadSize ?? 4);
+    const el: Swarm3DEl = {
+      kind: "3d",
+      id,
+      v: 0,
+      vis: false,
+      dx: 0,
+      dy: 0,
+      x,
+      y,
+      w,
+      h,
+      buildMode,
+      squadSize,
+      progress: 0,
+      phase: "idle",
+      src: opts.src,
+      sticky: opts.sticky,
+      domEl: opts.domEl,
+    };
+    this.registerEl(el);
+    return this.registerTask(
+      "3d:" + id,
+      y,
+      { type: "3d", el: id, buildMode, squadSize },
+      opts.deps ?? []
+    );
   }
 
   public addDupGroup(

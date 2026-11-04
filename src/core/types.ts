@@ -100,11 +100,27 @@ export interface SwarmGuideEl extends BaseElementNode {
   dragging: boolean;
 }
 
+export type Swarm3DBuildMode = "extrude" | "particles" | "slice" | "all";
+
+export interface Swarm3DEl extends BaseElementNode {
+  kind: "3d";
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  buildMode: Swarm3DBuildMode;
+  squadSize: number;
+  progress: number;
+  phase: "idle" | "extrude" | "particles" | "slice" | "done";
+  src?: string;
+}
+
 export type SwarmElementNode =
   | SwarmPathEl
   | SwarmRectEl
   | SwarmTextEl
-  | SwarmGuideEl;
+  | SwarmGuideEl
+  | Swarm3DEl;
 
 export type SwarmTaskSpec =
   | { type: "path"; el: string }
@@ -112,7 +128,8 @@ export type SwarmTaskSpec =
   | { type: "text"; el: string; snap?: string; grow?: boolean }
   | { type: "guide"; el: string }
   | { type: "dup"; group: string; k: number }
-  | { type: "edit"; el: string };
+  | { type: "edit"; el: string }
+  | { type: "3d"; el: string; buildMode?: Swarm3DBuildMode; squadSize?: number };
 
 export interface SwarmTask {
   id: string;
@@ -160,7 +177,30 @@ export interface MeasureOverlayItem {
   label: string;
 }
 
-export type SwarmOverlayItem = BoxOverlayItem | MeasureOverlayItem;
+export interface Gizmo3DOverlayItem {
+  t: "gizmo3d";
+  corners: Point2D[];
+  origin: Point2D;
+  axes: { x: Point2D; y: Point2D; z: Point2D };
+  progress: number;
+  phase: string;
+  badge?: string;
+}
+
+export interface Laser3DOverlayItem {
+  t: "laser3d";
+  leftPt: Point2D;
+  rightPt: Point2D;
+  cursorPt: Point2D;
+  progress: number;
+  mode: "slice" | "particles";
+}
+
+export type SwarmOverlayItem =
+  | BoxOverlayItem
+  | MeasureOverlayItem
+  | Gizmo3DOverlayItem
+  | Laser3DOverlayItem;
 
 export interface SwarmCursor {
   id: number;
