@@ -1,0 +1,15 @@
+# Exclude documentation website, markdown docs, tests, and Rust build caches when installing library
+docs/
+dist-site/
+src/
+tests/
+crates/
+.vercel/
+.superpowers/
+tsconfig.json
+tsconfig.lib.json
+tsup.config.ts
+vitest.config.ts
+vercel.json
+*.log
+.DS_Store

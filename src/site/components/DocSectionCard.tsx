@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { SwarmElement } from "../../react";
 import type { DocSection, DocsUI, Lang } from "../types";
+import { getShortNavLabel } from "./DocsNavbar";
 import { Interactive3DSandbox, InteractiveImageSandbox } from "./InteractiveSandboxes";
 
 function renderHighlightedLine(line: string): React.ReactNode {
@@ -83,7 +83,6 @@ export function DocSectionCard({
 
   return (
     <div id={section.id} className="hub-page-stack">
-      {/* PageTitle (Identical to WEUP_MCP_HUB/shared/ui/page-title.tsx) */}
       <div id={`${section.id}-overview`} className="hub-page-title">
         <div className="hub-page-title-main">
           <button
@@ -95,12 +94,10 @@ export function DocSectionCard({
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
-            <span>{lang === "vi" ? "Quay lại Kho Module" : "Back to Module Hub"}</span>
+            <span>{lang === "vi" ? "Kho Module" : "All Modules"}</span>
           </button>
 
-          <SwarmElement id={`title-${section.id}`} tool="text" grow snapAxis="x">
-            <h1>{section.title}</h1>
-          </SwarmElement>
+          <h1>{getShortNavLabel(section.id, section.title, lang)}</h1>
           <p className="hub-page-desc">{section.summary}</p>
         </div>
 
@@ -109,25 +106,13 @@ export function DocSectionCard({
         </div>
       </div>
 
-      {/* Panel 1: Architecture & Integration Workflow (WEUP_MCP_HUB ClientGuidePanel style) */}
       {section.steps && section.steps.length > 0 && (
-        <section
-          id={`${section.id}-steps`}
-          className="hub-panel"
-          data-swarm="rect"
-        >
+        <section id={`${section.id}-steps`} className="hub-panel">
           <div className="hub-panel-header">
             <div>
               <h2>
-                {lang === "vi"
-                  ? "Quy trình tích hợp & Kiến trúc"
-                  : "Integration Workflow & Architecture"}
+                {lang === "vi" ? "Kiến trúc & Quy trình" : "Architecture & Workflow"}
               </h2>
-              <p>
-                {lang === "vi"
-                  ? "Các bước cấu hình và cơ chế hoạt động cốt lõi của thành phần này."
-                  : "Step-by-step setup and core execution mechanics for this module."}
-              </p>
             </div>
           </div>
           <div className="hub-panel-body">
@@ -149,15 +134,12 @@ export function DocSectionCard({
         </section>
       )}
 
-      {/* Panel 2: Live Interactive Sandbox (3D or Image) */}
       {section.sandbox === "3d" && (
         <section id={`${section.id}-sandbox`} className="hub-panel">
           <div className="hub-panel-header">
             <div>
               <h2>
-                {lang === "vi"
-                  ? "Buồng thử nghiệm Điêu khắc 3D & WASM SIMD128"
-                  : "Live 3D Sculpting & WASM SIMD128 Sandbox"}
+                {lang === "vi" ? "3D & WASM Sandbox" : "Live 3D & WASM Sandbox"}
               </h2>
               <p>{ui.sandbox.threeTitle}</p>
             </div>
@@ -173,9 +155,7 @@ export function DocSectionCard({
           <div className="hub-panel-header">
             <div>
               <h2>
-                {lang === "vi"
-                  ? "Buồng thử nghiệm Quét ảnh 2D (<SwarmImage>)"
-                  : "Live 2D Progressive Image Sandbox (<SwarmImage>)"}
+                {lang === "vi" ? "2D Image Sandbox" : "Live 2D Image Sandbox"}
               </h2>
               <p>{ui.sandbox.imageTitle}</p>
             </div>
@@ -186,24 +166,10 @@ export function DocSectionCard({
         </section>
       )}
 
-      {/* Panel 3: Code Examples */}
-      <section
-        id={`${section.id}-code`}
-        className="hub-panel"
-        data-swarm="rect"
-      >
+      <section id={`${section.id}-code`} className="hub-panel">
         <div className="hub-panel-header">
           <div>
-            <h2>
-              {lang === "vi"
-                ? "Ví dụ mã nguồn & Cách sử dụng"
-                : "Code Examples & Usage Patterns"}
-            </h2>
-            <p>
-              {lang === "vi"
-                ? "Sao chép trực tiếp vào dự án React / TypeScript của bạn."
-                : "Copy and paste directly into your React / TypeScript application."}
-            </p>
+            <h2>{lang === "vi" ? "Ví dụ mã nguồn" : "Code Examples"}</h2>
           </div>
         </div>
         <div className="hub-panel-body">
@@ -250,21 +216,11 @@ export function DocSectionCard({
         </div>
       </section>
 
-      {/* Panel 4: Responsive DataTable for Props & API Reference (Identical to WEUP_MCP_HUB/shared/ui/data-table.tsx) */}
       {section.propsTable && (
-        <section
-          id={`${section.id}-props`}
-          className="hub-panel is-flush"
-          data-swarm="rect"
-        >
+        <section id={`${section.id}-props`} className="hub-panel is-flush">
           <div className="hub-panel-header is-flush">
             <div>
               <h2>{section.propsTable.title}</h2>
-              <p>
-                {lang === "vi"
-                  ? "Bảng tra cứu đầy đủ các thuộc tính, kiểu dữ liệu và giá trị mặc định."
-                  : "Complete reference of properties, TypeScript types, and default values."}
-              </p>
             </div>
           </div>
           <div className="hub-table-wrap">
@@ -300,7 +256,6 @@ export function DocSectionCard({
         </section>
       )}
 
-      {/* Prev / Next Navigation Cards */}
       <div className="hub-pager">
         {prevSection ? (
           <button
@@ -308,8 +263,8 @@ export function DocSectionCard({
             className="hub-pager-card"
             onClick={() => onNavigateSection(prevSection.id)}
           >
-            <small>← {lang === "vi" ? "Bài trước" : "Previous"}</small>
-            <strong>{prevSection.title}</strong>
+            <small>← {lang === "vi" ? "Trước" : "Previous"}</small>
+            <strong>{getShortNavLabel(prevSection.id, prevSection.title, lang)}</strong>
           </button>
         ) : (
           <button
@@ -317,10 +272,8 @@ export function DocSectionCard({
             className="hub-pager-card"
             onClick={onBackToCatalog}
           >
-            <small>← {lang === "vi" ? "Quay lại" : "Return to"}</small>
-            <strong>
-              {lang === "vi" ? "Kho Module (Catalog)" : "Module Catalog"}
-            </strong>
+            <small>← {lang === "vi" ? "Quay lại" : "Back to"}</small>
+            <strong>{lang === "vi" ? "Kho Module" : "Catalog"}</strong>
           </button>
         )}
 
@@ -330,8 +283,8 @@ export function DocSectionCard({
             className="hub-pager-card is-next"
             onClick={() => onNavigateSection(nextSection.id)}
           >
-            <small>{lang === "vi" ? "Bài tiếp theo" : "Next"} →</small>
-            <strong>{nextSection.title}</strong>
+            <small>{lang === "vi" ? "Tiếp theo" : "Next"} →</small>
+            <strong>{getShortNavLabel(nextSection.id, nextSection.title, lang)}</strong>
           </button>
         )}
       </div>

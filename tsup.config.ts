@@ -11,6 +11,7 @@ export default defineConfig({
     "tools/index": "src/tools/index.ts",
     "react/index": "src/react/index.ts",
   },
+  tsconfig: "tsconfig.lib.json",
   format: ["esm", "cjs"],
   dts: true,
   sourcemap: true,

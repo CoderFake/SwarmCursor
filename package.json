@@ -76,11 +76,13 @@
   },
   "files": [
     "dist",
-    "docs",
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && cp src/styles/swarm-cursor.css dist/styles.css && cp src/site/styles.css dist/docs-site.css && cp src/presets/logo-cf.svg dist/logo-cf.svg && cp src/presets/index.html dist/index.html && npx esbuild src/presets/landing-demo.tsx --bundle --format=esm --minify --outfile=dist/landing-demo.js",
+    "build": "npm run build:lib",
+    "build:lib": "tsup && cp src/styles/swarm-cursor.css dist/styles.css",
+    "build:site": "mkdir -p dist-site && cp src/styles/swarm-cursor.css dist-site/styles.css && cp src/site/styles.css dist-site/docs-site.css && cp src/presets/logo-cf.svg dist-site/logo-cf.svg && cp src/presets/index.html dist-site/index.html && npx esbuild src/presets/landing-demo.tsx --bundle --format=esm --minify --outfile=dist-site/landing-demo.js",
+    "prepare": "npm run build:lib",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

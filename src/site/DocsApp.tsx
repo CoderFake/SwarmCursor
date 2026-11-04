@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  SwarmCanvas,
-  SwarmControls,
-  SwarmElement,
-  SwarmProvider,
-} from "../react";
+import { SwarmCanvas } from "../react";
 import { wasmKernel } from "../kernel";
 import { buildSwarmLandingScene } from "../presets/swarm-landing";
 import { DocSectionCard } from "./components/DocSectionCard";
@@ -12,6 +7,7 @@ import {
   HubSidebar,
   HubTopbar,
   ModuleIcon,
+  getShortNavLabel,
   type HubModuleGroup,
   type HubModuleKey,
   type SiteViewMode,
@@ -20,14 +16,14 @@ import { getDocsLocale } from "./locales";
 import type { DocSection, DocsLocaleBundle, Lang } from "./types";
 
 const SUBPACKAGE_PATHS = [
-  { pkg: "swarm-cursor", descEn: "Full Bundle", descVi: "Gói tổng hợp" },
-  { pkg: "swarm-cursor/react", descEn: "7 React Components", descVi: "7 React Components" },
-  { pkg: "swarm-cursor/three", descEn: "3D & GLB Sculptor", descVi: "Điêu khắc 3D & GLB" },
-  { pkg: "swarm-cursor/tools", descEn: "2D Image & Pen Tools", descVi: "Quét ảnh 2D & Công cụ vẽ" },
-  { pkg: "swarm-cursor/kernel", descEn: "Rust/WASM SIMD128", descVi: "Lõi Rust/WASM SIMD128" },
-  { pkg: "swarm-cursor/engine", descEn: "ECS & Task Auction", descVi: "ECS & Đấu giá tác vụ" },
-  { pkg: "swarm-cursor/scanner", descEn: "DOM Auto-Scanner", descVi: "Bộ quét DOM tự động" },
-  { pkg: "swarm-cursor/renderers", descEn: "Zero-Tick Renderers", descVi: "Bộ dựng 60fps trực tiếp" },
+  { pkg: "swarm-cursor", descEn: "Full Bundle", descVi: "Gói đầy đủ" },
+  { pkg: "swarm-cursor/react", descEn: "React Components", descVi: "React Components" },
+  { pkg: "swarm-cursor/three", descEn: "3D & GLB", descVi: "3D & GLB" },
+  { pkg: "swarm-cursor/tools", descEn: "2D Image & Pen", descVi: "Ảnh 2D & Vẽ" },
+  { pkg: "swarm-cursor/kernel", descEn: "Rust/WASM SIMD128", descVi: "Lõi WASM SIMD128" },
+  { pkg: "swarm-cursor/engine", descEn: "ECS & Auction", descVi: "ECS & Đấu giá" },
+  { pkg: "swarm-cursor/scanner", descEn: "DOM Scanner", descVi: "Quét DOM" },
+  { pkg: "swarm-cursor/renderers", descEn: "60fps Renderers", descVi: "Dựng 60fps" },
 ];
 
 function HubCatalogView({
@@ -59,17 +55,16 @@ function HubCatalogView({
 
   return (
     <div className="hub-page-stack">
-      {/* PageTitle (Identical to WEUP_MCP_HUB/shared/ui/page-title.tsx) */}
       <div className="hub-page-title">
         <div className="hub-page-title-main">
-          <SwarmElement id="hub-catalog-h1" tool="text" grow snapAxis="x">
-            <h1>
-              {lang === "vi"
-                ? "Kho Module & Tài liệu SwarmCursor 2.0"
-                : "SwarmCursor 2.0 Module & Documentation Hub"}
-            </h1>
-          </SwarmElement>
-          <p className="hub-page-desc">{ui.hero.lead}</p>
+          <h1>
+            {lang === "vi" ? "Kho Module SwarmCursor 2.0" : "SwarmCursor 2.0 Hub"}
+          </h1>
+          <p className="hub-page-desc">
+            {lang === "vi"
+              ? "Thư viện điều phối bầy đàn con trỏ AI cho DOM, 3D Three.js/GLB và ảnh 2D tăng tốc bởi Rust/WASM SIMD128."
+              : "Multi-agent AI cursor choreography for React DOM, Three.js/GLB 3D meshes, and 2D images powered by Rust/WASM SIMD128."}
+          </p>
         </div>
         <div className="hub-page-title-actions">
           <button
@@ -77,7 +72,7 @@ function HubCatalogView({
             className="hub-btn-primary"
             onClick={() => onSelectSection("installation")}
           >
-            <span>{ui.hero.ctaStart}</span>
+            <span>{lang === "vi" ? "Bắt đầu" : "Get Started"}</span>
             <span>→</span>
           </button>
           <button
@@ -85,40 +80,30 @@ function HubCatalogView({
             className="hub-btn-outline"
             onClick={onOpenArtboard}
           >
-            <span>{ui.nav.artboardMode}</span>
+            <span>Showcase</span>
             <span>↗</span>
           </button>
         </div>
       </div>
 
-      {/* Module Catalog Grid (Identical to WEUP_MCP_HUB CatalogCard Grid) */}
       <div className="hub-catalog-grid">
         {modules.map((mod) => (
           <section
             key={mod.key}
             id={`catalog-card-${mod.key}`}
             className="hub-catalog-card"
-            data-swarm="rect"
           >
             <div className="hub-catalog-head">
               <div className="hub-catalog-icon">
-                <ModuleIcon moduleKey={mod.key} size={22} />
+                <ModuleIcon moduleKey={mod.key} size={20} />
               </div>
               <div className="hub-catalog-meta">
                 <h2>{lang === "vi" ? mod.titleVi : mod.titleEn}</h2>
                 <p>
-                  {mod.items.length} {lang === "vi" ? "tài liệu" : "guides"} · v2.0.0
+                  {mod.items.length} {lang === "vi" ? "bài" : "guides"} ·{" "}
+                  {lang === "vi" ? mod.badgeVi : mod.badgeEn}
                 </p>
               </div>
-            </div>
-
-            <div className="hub-catalog-badges">
-              <span className="hub-badge is-success">
-                {lang === "vi" ? "Sẵn sàng 60fps" : "60fps Ready"}
-              </span>
-              <span className="hub-badge is-soft">
-                {lang === "vi" ? mod.badgeVi : mod.badgeEn}
-              </span>
             </div>
 
             <p className="hub-catalog-desc">
@@ -127,7 +112,6 @@ function HubCatalogView({
 
             <code className="hub-code-value">{mod.importPath}</code>
 
-            {/* Direct Guide Links inside this Module */}
             <div className="hub-catalog-topics">
               {mod.items.map((sec) => (
                 <button
@@ -136,7 +120,7 @@ function HubCatalogView({
                   className="hub-topic-pill"
                   onClick={() => onSelectSection(sec.id)}
                 >
-                  <span>{sec.title}</span>
+                  <span>{getShortNavLabel(sec.id, sec.title, lang)}</span>
                   <span>→</span>
                 </button>
               ))}
@@ -148,9 +132,7 @@ function HubCatalogView({
                 className="hub-btn-outline is-sm"
                 onClick={() => onSelectModule(mod.key)}
               >
-                <span>
-                  {lang === "vi" ? "Mở Không gian Module" : "Open Module Workspace"}
-                </span>
+                <span>{lang === "vi" ? "Mở Module" : "Open Module"}</span>
                 <span>↗</span>
               </button>
             </div>
@@ -158,29 +140,17 @@ function HubCatalogView({
         ))}
       </div>
 
-      {/* Quick Connection & Sub-Packages Panel (WEUP_MCP_HUB McpUrlsPanel style) */}
-      <section
-        id="hub-quick-install"
-        className="hub-panel"
-        data-swarm="rect"
-      >
+      <section id="hub-quick-install" className="hub-panel">
         <div className="hub-panel-header">
           <div>
             <h2>
               {lang === "vi"
-                ? "Cài đặt nhanh & 8 Sub-Packages độc lập"
-                : "Quick Installation & 8 Tree-Shakeable Sub-Packages"}
+                ? "Cài đặt & 8 Sub-Packages"
+                : "Installation & 8 Sub-Packages"}
             </h2>
-            <p>
-              {lang === "vi"
-                ? "Cài đặt trực tiếp từ GitHub và chỉ import đúng sub-package bạn cần sử dụng."
-                : "Install directly from GitHub and import only the sub-packages your application requires."}
-            </p>
           </div>
           <span className="hub-badge is-success">
-            {wasmKernel.isWasmAccelerated
-              ? "SIMD128 Accelerated"
-              : "SIMD128 Ready"}
+            {wasmKernel.isWasmAccelerated ? "SIMD128 Active" : "SIMD128 Ready"}
           </span>
         </div>
 
@@ -238,7 +208,6 @@ export function DocsApp() {
   const [activePageId, setActivePageId] = useState<string>("catalog");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [replaySignal, setReplaySignal] = useState(0);
   const mainScrollRef = useRef<HTMLElement | null>(null);
 
   const bundle = useMemo(() => getDocsLocale(lang), [lang]);
@@ -262,52 +231,44 @@ export function DocsApp() {
       {
         key: "getting-started",
         titleEn: "Getting Started",
-        titleVi: "Bắt đầu & Cài đặt",
-        subtitleEn:
-          "Install SwarmCursor 2.0, explore the 8 modular sub-packages, and choose from 3 integration modes.",
-        subtitleVi:
-          "Cài đặt SwarmCursor 2.0, khám phá kiến trúc 8 sub-packages và 3 chế độ tích hợp nhanh.",
-        badgeEn: "Setup & Quick Start",
-        badgeVi: "Cài đặt & Khởi tạo",
+        titleVi: "Bắt đầu",
+        subtitleEn: "Install SwarmCursor 2.0 and set up 3 integration modes.",
+        subtitleVi: "Cài đặt SwarmCursor 2.0 và cấu hình 3 chế độ tích hợp.",
+        badgeEn: "Setup",
+        badgeVi: "Cài đặt",
         importPath: 'import { SwarmProvider } from "swarm-cursor/react"',
         items: bundle.gettingStarted,
       },
       {
         key: "dom-components",
-        titleEn: "DOM & React Components",
-        titleVi: "DOM & React Components",
-        subtitleEn:
-          "Auto-scan live HTML/React DOM layouts with <SwarmProvider>, <SwarmCanvas>, <SwarmFollower>, and <SwarmControls>.",
-        subtitleVi:
-          "Tự động quét và dựng giao diện React/DOM bằng <SwarmProvider>, <SwarmCanvas>, <SwarmFollower> và <SwarmControls>.",
-        badgeEn: "React 18 / 19",
-        badgeVi: "React 18 / 19",
+        titleEn: "DOM & React",
+        titleVi: "DOM & React",
+        subtitleEn: "Auto-scan React/HTML layouts with SwarmProvider, SwarmCanvas & SwarmFollower.",
+        subtitleVi: "Tự động quét giao diện React/HTML với SwarmProvider, SwarmCanvas & SwarmFollower.",
+        badgeEn: "React 18/19",
+        badgeVi: "React 18/19",
         importPath: 'import { SwarmProvider, SwarmElement } from "swarm-cursor/react"',
         items: domItems,
       },
       {
         key: "media-builders",
-        titleEn: "3D & 2D Media Builders",
-        titleVi: "Bộ dựng 3D & Ảnh 2D",
-        subtitleEn:
-          "Choreograph Three.js/GLB 3D meshes (extrude, particles, slice) and 2D images (mosaic, scanline, halftone).",
-        subtitleVi:
-          "Điêu khắc mô hình 3D Three.js/GLB (extrude, particles, slice) và quét ảnh 2D (mosaic, scanline, halftone).",
-        badgeEn: "Three.js & 2D Image",
-        badgeVi: "Three.js & Ảnh 2D",
+        titleEn: "3D & 2D Media",
+        titleVi: "3D & Ảnh 2D",
+        subtitleEn: "Sculpt Three.js/GLB 3D meshes and progressive 2D images.",
+        subtitleVi: "Điêu khắc mô hình 3D Three.js/GLB và quét ảnh 2D.",
+        badgeEn: "Three.js & 2D",
+        badgeVi: "Three.js & 2D",
         importPath: 'import { Swarm3D, SwarmImage } from "swarm-cursor/react"',
         items: mediaItems,
       },
       {
         key: "subsystems",
-        titleEn: "Rust/WASM & CSS Theming",
-        titleVi: "Lõi WASM & Thuộc tính CSS",
-        subtitleEn:
-          "Direct access to the 5 Rust/WASM SIMD128 kernels, ECS scheduler, data-swarm-* HTML attributes, and CSS tokens.",
-        subtitleVi:
-          "Truy cập trực tiếp 5 hàm lõi Rust/WASM SIMD128, bộ lập lịch ECS, thuộc tính data-swarm-* và biến CSS.",
-        badgeEn: "SIMD128 & Tokens",
-        badgeVi: "SIMD128 & Biến CSS",
+        titleEn: "WASM & CSS",
+        titleVi: "WASM & CSS",
+        subtitleEn: "Rust/WASM SIMD128 kernels, ECS scheduler, and CSS tokens.",
+        subtitleVi: "Lõi Rust/WASM SIMD128, bộ lập lịch ECS và biến CSS.",
+        badgeEn: "SIMD128",
+        badgeVi: "SIMD128",
         importPath: 'import { wasmKernel } from "swarm-cursor/kernel"',
         items: bundle.subsystems,
       },
@@ -364,7 +325,6 @@ export function DocsApp() {
     setViewMode("docs");
     setSidebarCollapsed(false);
     setActivePageId("catalog");
-    setReplaySignal((n) => n + 1);
     scrollMainToTop();
   };
 
@@ -374,7 +334,6 @@ export function DocsApp() {
       setViewMode("docs");
       setSidebarCollapsed(false);
       setActivePageId(found.items[0].id);
-      setReplaySignal((n) => n + 1);
       scrollMainToTop();
     }
   };
@@ -383,20 +342,20 @@ export function DocsApp() {
     setViewMode("docs");
     setSidebarCollapsed(false);
     setActivePageId(secId);
-    setReplaySignal((n) => n + 1);
     scrollMainToTop();
   };
 
-  const handleScrollToAnchor = (anchorId: string) => {
-    const el = document.getElementById(anchorId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+  const handleLangChange = (nextLang: Lang) => {
+    setLang(nextLang);
+    if (typeof window !== "undefined" && window.history?.replaceState) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("lang", nextLang);
+      window.history.replaceState({}, "", url.toString());
     }
   };
 
   return (
     <div className="hub-shell">
-      {/* Left Floating Rounded-[28px] Context-Aware Sidebar (Identical to WEUP_MCP_HUB) */}
       <HubSidebar
         lang={lang}
         collapsed={sidebarCollapsed}
@@ -413,32 +372,19 @@ export function DocsApp() {
         activePageId={activePageId}
         activeModule={activeModule}
         modules={modules}
-        activeSection={activeSection}
         onSelectCatalog={handleSelectCatalog}
         onSelectModule={handleSelectModule}
         onSelectSection={handleSelectSection}
-        onScrollToAnchor={handleScrollToAnchor}
-        onLangChange={(nextLang) => {
-          setLang(nextLang);
-          if (typeof window !== "undefined" && window.history?.replaceState) {
-            const url = new URL(window.location.href);
-            url.searchParams.set("lang", nextLang);
-            window.history.replaceState({}, "", url.toString());
-          }
-          setReplaySignal((n) => n + 1);
-        }}
+        onLangChange={handleLangChange}
       />
 
-      {/* Right Workspace Column */}
       <div
         className={`hub-workspace ${
           sidebarCollapsed || viewMode === "artboard" ? "is-sidebar-collapsed" : ""
         } ${viewMode === "artboard" ? "is-artboard-mode" : ""}`}
       >
-        {/* Subtle Aurora Background */}
         <div className="hub-aurora" aria-hidden="true" />
 
-        {/* Single Floating Pill Header (NO double header!) */}
         <HubTopbar
           lang={lang}
           ui={bundle.ui}
@@ -450,54 +396,31 @@ export function DocsApp() {
           onSelectCatalog={handleSelectCatalog}
           onSelectModule={handleSelectModule}
           onViewModeChange={handleViewModeChange}
-          onReplaySwarm={() => setReplaySignal((n) => n + 1)}
-          onLangChange={(nextLang) => {
-            setLang(nextLang);
-            if (typeof window !== "undefined" && window.history?.replaceState) {
-              const url = new URL(window.location.href);
-              url.searchParams.set("lang", nextLang);
-              window.history.replaceState({}, "", url.toString());
-            }
-            setReplaySignal((n) => n + 1);
-          }}
+          onLangChange={handleLangChange}
         />
 
-        {/* Scrollable Main Content Area */}
         <main id="main" ref={mainScrollRef} className="hub-main">
           {viewMode === "docs" ? (
-            <SwarmProvider
-              key={`hub-swarm-${lang}-${activePageId}-${replaySignal}`}
-              scrollMode="manual"
-              autoScrollSpeed={180}
-              autoStart={true}
-              showRulers={false}
-              deepScan={false}
-              fastMode={true}
-              showCursorLabels={true}
-              agentPill={{ maxIcons: 5, position: "bottom-center" }}
-            >
-              {activePageId === "catalog" || !activeSection ? (
-                <HubCatalogView
-                  lang={lang}
-                  bundle={bundle}
-                  modules={modules}
-                  onSelectModule={handleSelectModule}
-                  onSelectSection={handleSelectSection}
-                  onOpenArtboard={() => handleViewModeChange("artboard")}
-                />
-              ) : (
-                <DocSectionCard
-                  lang={lang}
-                  section={activeSection}
-                  ui={bundle.ui}
-                  prevSection={prevSection}
-                  nextSection={nextSection}
-                  onBackToCatalog={handleSelectCatalog}
-                  onNavigateSection={handleSelectSection}
-                />
-              )}
-              <SwarmControls position="bottom-right" />
-            </SwarmProvider>
+            activePageId === "catalog" || !activeSection ? (
+              <HubCatalogView
+                lang={lang}
+                bundle={bundle}
+                modules={modules}
+                onSelectModule={handleSelectModule}
+                onSelectSection={handleSelectSection}
+                onOpenArtboard={() => handleViewModeChange("artboard")}
+              />
+            ) : (
+              <DocSectionCard
+                lang={lang}
+                section={activeSection}
+                ui={bundle.ui}
+                prevSection={prevSection}
+                nextSection={nextSection}
+                onBackToCatalog={handleSelectCatalog}
+                onNavigateSection={handleSelectSection}
+              />
+            )
           ) : (
             <div className="hub-artboard-wrap">
               <SwarmCanvas
@@ -515,9 +438,8 @@ export function DocsApp() {
           )}
         </main>
 
-        {/* Minimal Workspace Footer (Identical to WEUP_MCP_HUB) */}
         {viewMode === "docs" && (
-          <footer className="hub-footer" data-swarm-ignore="true">
+          <footer className="hub-footer">
             <div className="hub-footer-inner">
               <span>{bundle.ui.footer.title}</span>
               <span>{bundle.ui.footer.subtitle}</span>

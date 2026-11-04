@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "exclude": [
+    "src/site",
+    "src/presets/landing-demo.tsx",
+    "tests",
+    "dist",
+    "dist-site"
+  ]
+}
