@@ -20,6 +20,36 @@ const SCROLL_MODES: Array<{ value: ScrollMode; label: string }> = [
   { value: "hybrid", label: "Hybrid" },
 ];
 
+const SWARM_STORAGE_KEY = "swarm_cursor_settings_v1";
+
+interface PersistedSwarmSettings {
+  scrollMode?: ScrollMode;
+  tempoMultiplier?: number;
+  rulers?: boolean;
+  paused?: boolean;
+  open?: boolean;
+}
+
+function readSwarmSettings(): PersistedSwarmSettings {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(SWARM_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PersistedSwarmSettings) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSwarmSettings(patch: Partial<PersistedSwarmSettings>): void {
+  if (typeof window === "undefined") return;
+  try {
+    const next = { ...readSwarmSettings(), ...patch };
+    window.localStorage.setItem(SWARM_STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
 export function SwarmControls({
   engine,
   autoScroll,
@@ -27,20 +57,53 @@ export function SwarmControls({
   defaultOpen = false,
   children,
 }: SwarmControlsProps) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(() => {
+    const saved = readSwarmSettings();
+    return typeof saved.open === "boolean" ? saved.open : defaultOpen;
+  });
   const [, setForce] = useState(0);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const refresh = () => setForce((n) => n + 1);
+
+  const toggleOpen = (nextOpen: boolean | ((prev: boolean) => boolean)) => {
+    setOpen((prev) => {
+      const resolved = typeof nextOpen === "function" ? nextOpen(prev) : nextOpen;
+      writeSwarmSettings({ open: resolved });
+      return resolved;
+    });
+  };
+
+  useEffect(() => {
+    const saved = readSwarmSettings();
+    if (
+      saved.scrollMode === "manual" ||
+      saved.scrollMode === "auto" ||
+      saved.scrollMode === "hybrid"
+    ) {
+      autoScroll.setMode(saved.scrollMode);
+    }
+    if (typeof saved.tempoMultiplier === "number" && saved.tempoMultiplier > 0) {
+      engine.setTempoMultiplier(saved.tempoMultiplier);
+    }
+    if (typeof saved.rulers === "boolean") {
+      engine.rulers.want = saved.rulers ? 1 : 0;
+      engine.rulers.lastNeed = saved.rulers ? engine.time : -10;
+    }
+    if (typeof saved.paused === "boolean") {
+      engine.paused = saved.paused;
+    }
+    refresh();
+  }, [engine, autoScroll]);
 
   useEffect(() => {
     if (!open || typeof document === "undefined") return;
     const onPointerDown = (e: PointerEvent) => {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        toggleOpen(false);
       }
     };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") toggleOpen(false);
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -91,7 +154,7 @@ export function SwarmControls({
           <button
             type="button"
             className="swarm-tp-close"
-            onClick={() => setOpen(false)}
+            onClick={() => toggleOpen(false)}
             aria-label="Close settings"
           >
             ✕
@@ -122,9 +185,15 @@ export function SwarmControls({
               type="button"
               className="swarm-tp-btn primary"
               onClick={() => {
-                if (!engine.started) engine.start();
-                else if (engine.paused) engine.resume();
-                else engine.pause();
+                if (!engine.started) {
+                  engine.start();
+                  engine.paused = false;
+                } else if (engine.paused) {
+                  engine.resume();
+                } else {
+                  engine.pause();
+                }
+                writeSwarmSettings({ paused: engine.paused });
                 refresh();
               }}
             >
@@ -137,6 +206,8 @@ export function SwarmControls({
                 engine.reset();
                 if (typeof window !== "undefined") window.scrollTo(0, 0);
                 engine.start();
+                engine.paused = false;
+                writeSwarmSettings({ paused: false });
                 refresh();
               }}
             >
@@ -156,6 +227,7 @@ export function SwarmControls({
                 className={autoScroll.mode === m.value ? "active" : ""}
                 onClick={() => {
                   autoScroll.setMode(m.value);
+                  writeSwarmSettings({ scrollMode: m.value });
                   refresh();
                 }}
               >
@@ -178,6 +250,7 @@ export function SwarmControls({
                 }
                 onClick={() => {
                   engine.setTempoMultiplier(t);
+                  writeSwarmSettings({ tempoMultiplier: t });
                   refresh();
                 }}
               >
@@ -197,6 +270,7 @@ export function SwarmControls({
               engine.rulers.want = engine.rulers.want > 0 ? 0 : 1;
               engine.rulers.lastNeed =
                 engine.rulers.want > 0 ? engine.time : -10;
+              writeSwarmSettings({ rulers: engine.rulers.want > 0 });
               refresh();
             }}
           >
@@ -211,7 +285,7 @@ export function SwarmControls({
       <button
         type="button"
         className="swarm-turbopack-trigger"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => toggleOpen((v) => !v)}
         aria-expanded={open}
         title="SwarmCursor Settings"
       >

@@ -54,6 +54,8 @@ export interface SwarmProviderProps {
   controlsPosition?: "bottom-right" | "bottom-left" | "top-right";
   controlsSlot?: React.ReactNode;
   showCursorLabels?: boolean;
+  /** Whether to render the top/left Figma ruler bars (default: true) */
+  showRulers?: boolean;
   designWidth?: number;
   /** Recursively scans inner component DOM elements (headings, SVG paths, buttons, 3D canvases) */
   deepScan?: boolean;
@@ -72,6 +74,7 @@ export function SwarmProvider({
   controlsPosition = "bottom-right",
   controlsSlot,
   showCursorLabels = false,
+  showRulers = true,
   designWidth = DESIGN_WIDTH,
   deepScan = false,
   fastMode = true,
@@ -236,7 +239,7 @@ export function SwarmProvider({
           </>
         )}
       </div>
-      <RulersOverlay engine={activeEngine} />
+      {showRulers && <RulersOverlay engine={activeEngine} />}
       {agentPill && (
         <SwarmAgentPill
           engine={activeEngine}

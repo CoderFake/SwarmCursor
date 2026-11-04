@@ -1,40 +1,75 @@
 import React, { useState } from "react";
 import { SwarmElement } from "../../react";
-import type { DocSection, DocsUI } from "../types";
+import type { DocSection, DocsUI, Lang } from "../types";
 import { Interactive3DSandbox, InteractiveImageSandbox } from "./InteractiveSandboxes";
 
 function renderHighlightedLine(line: string): React.ReactNode {
   const trimmed = line.trim();
-  if (trimmed.startsWith("//") || trimmed.startsWith("#") || trimmed.startsWith("/*") || trimmed.startsWith("*")) {
+  if (
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("#") ||
+    trimmed.startsWith("/*") ||
+    trimmed.startsWith("*")
+  ) {
     return <span className="tok-comment">{line}</span>;
   }
-  const parts = line.split(/(".*?"|'.*?'|`.*?`|\b(?:import|from|export|function|return|const|let|type|interface|true|false|null|undefined|async|await|new)\b|<\/?[A-Z][A-Za-z0-9]*|\b\d+(?:\.\d+)?\b)/g);
+  const parts = line.split(
+    /(".*?"|'.*?'|`.*?`|\b(?:import|from|export|function|return|const|let|type|interface|true|false|null|undefined|async|await|new)\b|<\/?[A-Z][A-Za-z0-9]*|\b\d+(?:\.\d+)?\b)/g
+  );
   return parts.map((part, idx) => {
     if (!part) return null;
     if (/^["'`]/.test(part)) {
-      return <span key={idx} className="tok-string">{part}</span>;
+      return (
+        <span key={idx} className="tok-string">
+          {part}
+        </span>
+      );
     }
-    if (/^(import|from|export|function|return|const|let|type|interface|async|await|new)$/.test(part)) {
-      return <span key={idx} className="tok-keyword">{part}</span>;
+    if (
+      /^(import|from|export|function|return|const|let|type|interface|async|await|new)$/.test(
+        part
+      )
+    ) {
+      return (
+        <span key={idx} className="tok-keyword">
+          {part}
+        </span>
+      );
     }
     if (/^(true|false|null|undefined|\d+(?:\.\d+)?)$/.test(part)) {
-      return <span key={idx} className="tok-literal">{part}</span>;
+      return (
+        <span key={idx} className="tok-literal">
+          {part}
+        </span>
+      );
     }
     if (/^<\/?[A-Z]/.test(part)) {
-      return <span key={idx} className="tok-component">{part}</span>;
+      return (
+        <span key={idx} className="tok-component">
+          {part}
+        </span>
+      );
     }
     return <React.Fragment key={idx}>{part}</React.Fragment>;
   });
 }
 
 export function DocSectionCard({
+  lang,
   section,
-  index,
   ui,
+  prevSection,
+  nextSection,
+  onBackToCatalog,
+  onNavigateSection,
 }: {
+  lang: Lang;
   section: DocSection;
-  index: number;
   ui: DocsUI;
+  prevSection: DocSection | null;
+  nextSection: DocSection | null;
+  onBackToCatalog: () => void;
+  onNavigateSection: (id: string) => void;
 }) {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
 
@@ -46,138 +81,194 @@ export function DocSectionCard({
     }
   };
 
-  const sectionNum = String(index + 1).padStart(2, "0");
-
   return (
-    <section id={section.id} className="docs-section-card">
-      <div id={`${section.id}-overview`} className="docs-section-header">
-        <div className="docs-section-meta-row">
-          <span className="docs-section-index">#{sectionNum}</span>
-          <span className="docs-section-badge">{section.badge}</span>
+    <div id={section.id} className="hub-page-stack">
+      {/* PageTitle (Identical to WEUP_MCP_HUB/shared/ui/page-title.tsx) */}
+      <div id={`${section.id}-overview`} className="hub-page-title">
+        <div className="hub-page-title-main">
+          <button
+            type="button"
+            className="hub-back-inline"
+            onClick={onBackToCatalog}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            <span>{lang === "vi" ? "Quay lại Kho Module" : "Back to Module Hub"}</span>
+          </button>
+
+          <SwarmElement id={`title-${section.id}`} tool="text" grow snapAxis="x">
+            <h1>{section.title}</h1>
+          </SwarmElement>
+          <p className="hub-page-desc">{section.summary}</p>
         </div>
-        <SwarmElement
-          id={`title-${section.id}`}
-          tool="text"
-          grow
-          snapAxis="x"
-        >
-          <h2 className="docs-section-title">{section.title}</h2>
-        </SwarmElement>
-        <p className="docs-section-summary">{section.summary}</p>
+
+        <div className="hub-page-title-actions">
+          <span className="hub-badge is-brand">{section.badge}</span>
+        </div>
       </div>
 
+      {/* Panel 1: Architecture & Integration Workflow (WEUP_MCP_HUB ClientGuidePanel style) */}
       {section.steps && section.steps.length > 0 && (
-        <div id={`${section.id}-steps`} className="docs-steps-grid">
-          {section.steps.map((step, i) => (
-            <div
-              key={i}
-              id={`step-${section.id}-${i}`}
-              className="docs-step-card"
-              data-swarm="rect"
-            >
-              <div className="docs-step-top">
-                <span className="docs-step-badge">{step.badge}</span>
-                <span className="docs-step-index">0{i + 1}</span>
-              </div>
-              <h3 className="docs-step-title">{step.title}</h3>
-              <p className="docs-step-body">{step.body}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {section.sandbox === "3d" && (
-        <div id={`${section.id}-sandbox`}>
-          <Interactive3DSandbox ui={ui} />
-        </div>
-      )}
-      {section.sandbox === "image" && (
-        <div id={`${section.id}-sandbox`}>
-          <InteractiveImageSandbox ui={ui} />
-        </div>
-      )}
-
-      <div id={`${section.id}-code`} className="docs-code-list">
-        {section.codeExamples.map((ex, idx) => {
-          const lines = ex.code.split("\n");
-          const isCopied = copiedIdx === idx;
-          return (
-            <div
-              key={idx}
-              id={`${section.id}-code-${idx}`}
-              className="docs-code-block"
-              data-swarm="rect"
-            >
-              <div className="docs-code-topbar">
-                <div className="docs-code-dots">
-                  <span className="dot-red" />
-                  <span className="dot-amber" />
-                  <span className="dot-green" />
-                  <strong>{ex.title}</strong>
-                </div>
-                <div className="docs-code-actions">
-                  <span className="docs-code-filename">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    {ex.filename}
-                  </span>
-                  <button
-                    type="button"
-                    className={`docs-copy-btn ${isCopied ? "is-copied" : ""}`}
-                    onClick={() => handleCopy(ex.code, idx)}
-                  >
-                    {isCopied ? (
-                      <>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        <span>{ui.table.copiedBtn.replace("✓ ", "")}</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                        <span>{ui.table.copyBtn}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-              <pre className="docs-code-pre">
-                <code>
-                  {lines.map((ln, lIdx) => (
-                    <div key={lIdx} className="docs-code-line">
-                      <span className="docs-line-num">{lIdx + 1}</span>
-                      <span className="docs-line-content">{renderHighlightedLine(ln)}</span>
-                    </div>
-                  ))}
-                </code>
-              </pre>
-            </div>
-          );
-        })}
-      </div>
-
-      {section.propsTable && (
-        <div
-          id={`${section.id}-props`}
-          className="docs-table-wrap"
+        <section
+          id={`${section.id}-steps`}
+          className="hub-panel"
           data-swarm="rect"
         >
-          <div className="docs-table-header">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <line x1="9" y1="21" x2="9" y2="9" />
-            </svg>
-            <h4>{section.propsTable.title}</h4>
+          <div className="hub-panel-header">
+            <div>
+              <h2>
+                {lang === "vi"
+                  ? "Quy trình tích hợp & Kiến trúc"
+                  : "Integration Workflow & Architecture"}
+              </h2>
+              <p>
+                {lang === "vi"
+                  ? "Các bước cấu hình và cơ chế hoạt động cốt lõi của thành phần này."
+                  : "Step-by-step setup and core execution mechanics for this module."}
+              </p>
+            </div>
           </div>
-          <div className="docs-table-scroll">
-            <table className="docs-table">
+          <div className="hub-panel-body">
+            <div className="hub-steps-grid">
+              {section.steps.map((step, i) => (
+                <div key={i} className="hub-step-item">
+                  <div className="hub-step-head">
+                    <div className="hub-step-title-row">
+                      <span className="hub-step-num">{i + 1}</span>
+                      <h3>{step.title}</h3>
+                    </div>
+                    <span className="hub-badge is-soft">{step.badge}</span>
+                  </div>
+                  <p className="hub-step-text">{step.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Panel 2: Live Interactive Sandbox (3D or Image) */}
+      {section.sandbox === "3d" && (
+        <section id={`${section.id}-sandbox`} className="hub-panel">
+          <div className="hub-panel-header">
+            <div>
+              <h2>
+                {lang === "vi"
+                  ? "Buồng thử nghiệm Điêu khắc 3D & WASM SIMD128"
+                  : "Live 3D Sculpting & WASM SIMD128 Sandbox"}
+              </h2>
+              <p>{ui.sandbox.threeTitle}</p>
+            </div>
+          </div>
+          <div className="hub-panel-body">
+            <Interactive3DSandbox ui={ui} />
+          </div>
+        </section>
+      )}
+
+      {section.sandbox === "image" && (
+        <section id={`${section.id}-sandbox`} className="hub-panel">
+          <div className="hub-panel-header">
+            <div>
+              <h2>
+                {lang === "vi"
+                  ? "Buồng thử nghiệm Quét ảnh 2D (<SwarmImage>)"
+                  : "Live 2D Progressive Image Sandbox (<SwarmImage>)"}
+              </h2>
+              <p>{ui.sandbox.imageTitle}</p>
+            </div>
+          </div>
+          <div className="hub-panel-body">
+            <InteractiveImageSandbox ui={ui} />
+          </div>
+        </section>
+      )}
+
+      {/* Panel 3: Code Examples */}
+      <section
+        id={`${section.id}-code`}
+        className="hub-panel"
+        data-swarm="rect"
+      >
+        <div className="hub-panel-header">
+          <div>
+            <h2>
+              {lang === "vi"
+                ? "Ví dụ mã nguồn & Cách sử dụng"
+                : "Code Examples & Usage Patterns"}
+            </h2>
+            <p>
+              {lang === "vi"
+                ? "Sao chép trực tiếp vào dự án React / TypeScript của bạn."
+                : "Copy and paste directly into your React / TypeScript application."}
+            </p>
+          </div>
+        </div>
+        <div className="hub-panel-body">
+          {section.codeExamples.map((ex, idx) => {
+            const lines = ex.code.split("\n");
+            const isCopied = copiedIdx === idx;
+            return (
+              <div key={idx} className="hub-code-card">
+                <div className="hub-code-bar">
+                  <div className="hub-code-title">
+                    <span className="dot-red" />
+                    <span className="dot-amber" />
+                    <span className="dot-green" />
+                    <strong>{ex.title}</strong>
+                  </div>
+                  <div className="hub-code-actions">
+                    <span className="hub-code-file">{ex.filename}</span>
+                    <button
+                      type="button"
+                      className={`hub-copy-btn ${isCopied ? "is-copied" : ""}`}
+                      onClick={() => handleCopy(ex.code, idx)}
+                    >
+                      {isCopied
+                        ? ui.table.copiedBtn.replace("✓ ", "")
+                        : ui.table.copyBtn}
+                    </button>
+                  </div>
+                </div>
+                <pre className="hub-code-pre">
+                  <code>
+                    {lines.map((ln, lIdx) => (
+                      <div key={lIdx} className="hub-code-line">
+                        <span className="hub-line-num">{lIdx + 1}</span>
+                        <span className="hub-line-text">
+                          {renderHighlightedLine(ln)}
+                        </span>
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Panel 4: Responsive DataTable for Props & API Reference (Identical to WEUP_MCP_HUB/shared/ui/data-table.tsx) */}
+      {section.propsTable && (
+        <section
+          id={`${section.id}-props`}
+          className="hub-panel is-flush"
+          data-swarm="rect"
+        >
+          <div className="hub-panel-header is-flush">
+            <div>
+              <h2>{section.propsTable.title}</h2>
+              <p>
+                {lang === "vi"
+                  ? "Bảng tra cứu đầy đủ các thuộc tính, kiểu dữ liệu và giá trị mặc định."
+                  : "Complete reference of properties, TypeScript types, and default values."}
+              </p>
+            </div>
+          </div>
+          <div className="hub-table-wrap">
+            <table className="hub-data-table">
               <thead>
                 <tr>
                   <th>{ui.table.nameCol}</th>
@@ -189,23 +280,61 @@ export function DocSectionCard({
               <tbody>
                 {section.propsTable.rows.map((row, rIdx) => (
                   <tr key={rIdx}>
-                    <td>
-                      <code className="docs-prop-name">{row.name}</code>
+                    <td data-label={ui.table.nameCol}>
+                      <code className="hub-prop-name">{row.name}</code>
                     </td>
-                    <td>
-                      <code className="docs-prop-type">{row.type}</code>
+                    <td data-label={ui.table.typeCol}>
+                      <code className="hub-prop-type">{row.type}</code>
                     </td>
-                    <td>
-                      <code className="docs-prop-default">{row.defaultVal}</code>
+                    <td data-label={ui.table.defaultCol}>
+                      <code className="hub-prop-default">{row.defaultVal}</code>
                     </td>
-                    <td className="docs-prop-desc">{row.desc}</td>
+                    <td data-label={ui.table.descCol} className="is-stacked">
+                      {row.desc}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       )}
-    </section>
+
+      {/* Prev / Next Navigation Cards */}
+      <div className="hub-pager">
+        {prevSection ? (
+          <button
+            type="button"
+            className="hub-pager-card"
+            onClick={() => onNavigateSection(prevSection.id)}
+          >
+            <small>← {lang === "vi" ? "Bài trước" : "Previous"}</small>
+            <strong>{prevSection.title}</strong>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="hub-pager-card"
+            onClick={onBackToCatalog}
+          >
+            <small>← {lang === "vi" ? "Quay lại" : "Return to"}</small>
+            <strong>
+              {lang === "vi" ? "Kho Module (Catalog)" : "Module Catalog"}
+            </strong>
+          </button>
+        )}
+
+        {nextSection && (
+          <button
+            type="button"
+            className="hub-pager-card is-next"
+            onClick={() => onNavigateSection(nextSection.id)}
+          >
+            <small>{lang === "vi" ? "Bài tiếp theo" : "Next"} →</small>
+            <strong>{nextSection.title}</strong>
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

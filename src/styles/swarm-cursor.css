@@ -227,16 +227,14 @@
 }
 
 [data-swarm]:not([data-swarm-done="true"]) {
-  opacity: 0.96;
-  outline: 1px dashed rgba(13, 153, 255, 0.38);
-  outline-offset: 2px;
+  opacity: 1;
+  outline: none;
 }
 
 [data-swarm][data-swarm-drawing="true"] {
   opacity: 1;
-  outline: 1.5px solid #0d99ff;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(13, 153, 255, 0.14);
+  outline: none;
+  box-shadow: 0 0 0 1.5px rgba(13, 153, 255, 0.55);
 }
 
 [data-swarm][data-swarm-done="true"] {
