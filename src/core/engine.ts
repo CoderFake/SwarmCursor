@@ -322,7 +322,7 @@ export class SwarmEngine {
         h: Math.max(...ys) - Math.min(...ys),
       };
     }
-    if (el.kind === "3d") {
+    if (el.kind === "3d" || el.kind === "image") {
       return {
         x: el.x + el.dx,
         y: el.y + el.dy,
@@ -899,6 +899,10 @@ export class SwarmEngine {
       case "3d":
         return defaultToolRegistry
           .get("3d")!
+          .runLead(this, cursor, task);
+      case "image":
+        return defaultToolRegistry
+          .get("image")!
           .runLead(this, cursor, task);
     }
   }

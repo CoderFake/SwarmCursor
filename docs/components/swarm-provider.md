@@ -1,6 +1,6 @@
-# `<SwarmProvider>`, `<SwarmElement>` & `<Swarm3D>` (DOM-Driven & 3D Mode)
+# `<SwarmProvider>`, `<SwarmElement>`, `<Swarm3D>` & `<SwarmImage>` (DOM-Driven, 3D & Image Build Mode)
 
-Chế độ **DOM-Driven** cho phép bạn giữ nguyên cấu trúc HTML/React/Tailwind và các canvas Three.js/WebGL của dự án. Khi người dùng kéo trang (hoặc khi trang tự động cuộn), `<SwarmProvider>` tự động quét tọa độ các `<SwarmElement>`, `<Swarm3D>`, hoặc đệ quy vào toàn bộ DOM con bên trong component (`deepScan={true}`) và điều phối đàn chuột AI bay tới thực hiện thao tác vẽ tương ứng trước khi làm hiện phần tử thật.
+Chế độ **DOM-Driven** cho phép bạn giữ nguyên cấu trúc HTML/React/Tailwind, ảnh 2D và các canvas Three.js/WebGL của dự án. Khi người dùng kéo trang (hoặc khi trang tự động cuộn), `<SwarmProvider>` tự động quét tọa độ các `<SwarmElement>`, `<Swarm3D>`, `<SwarmImage>`, hoặc đệ quy vào toàn bộ DOM con bên trong component (`deepScan={true}`) và điều phối đàn chuột AI bay tới thực hiện thao tác vẽ tương ứng trước khi làm hiện phần tử thật.
 
 ---
 
@@ -94,6 +94,32 @@ export default function PortfolioSection() {
 | `squadSize` | `number` | `4` | Số lượng con trỏ AI hợp tác cùng lúc trên vật thể 3D này (`1` Lead + `N-1` Assistants). |
 | `deps` | `string[]` | `undefined` | Danh sách task ID phải thỏa mãn trước khi bắt đầu dựng khối 3D. |
 | `onProgress` | `(progress: number, weights: Phase3DWeights) => void` | `undefined` | Callback nhận tiến độ `0..1` và trọng số từng pha `{ extrude, particles, slice }` mỗi frame. |
+
+---
+
+## Props của `<SwarmImage>` (Hiệu ứng Xây dựng Hình ảnh 2D)
+
+Hỗ trợ **3 thuật toán xây dựng hình ảnh** (`mosaic`, `scanline`, `halftone`) hoặc kết hợp cả 3 qua `buildMode="all"`:
+
+| Prop | Kiểu dữ liệu | Mặc định | Mô tả |
+| :--- | :--- | :--- | :--- |
+| `id` | `string` *(bắt buộc)* | — | ID duy nhất của ảnh (task ID trong DAG sẽ là `img:${id}`). |
+| `src` | `string` *(bắt buộc)* | — | Đường dẫn URL của ảnh. |
+| `alt` | `string` | `""` | Văn bản thay thế cho thẻ `<img>`. |
+| `buildMode` | `"mosaic" \| "scanline" \| "halftone" \| "all"` | `"all"` | **`"mosaic"`**: Phân giải lũy tiến từ khối ô vuông thô (`32px -> 16px -> 8px -> 4px -> 1px`) như Quadtree/Progressive JPEG.<br>**`"scanline"`**: Tia laser ngang quét từ đỉnh xuống đáy ảnh kèm lưới blueprint.<br>**`"halftone"`**: Ma trận chấm bi in lụa tăng dần bán kính và độ tương phản.<br>**`"all"`**: Chuỗi hóa cả 3 pha (`mosaic` $\rightarrow$ `halftone` $\rightarrow$ `scanline`). |
+| `deps` | `string[]` | `undefined` | Danh sách task ID phải thỏa mãn trước khi bắt đầu dựng ảnh. |
+
+```tsx
+import { SwarmImage } from "swarm-cursor/react";
+
+<SwarmImage
+  id="architecture-diagram"
+  src="/images/diagram.webp"
+  buildMode="mosaic"
+  deps={["r:card-1"]}
+  className="w-full h-64 rounded-2xl"
+/>
+```
 
 ---
 

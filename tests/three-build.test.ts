@@ -7,6 +7,8 @@ import {
   PARTICLE_BUILD_VERTEX_SHADER,
   PARTICLE_BUILD_FRAGMENT_SHADER,
 } from "../src/three";
+import { computeImageBuildState } from "../src/tools";
+import { SceneBuilder } from "../src/core/scene-builder";
 
 describe("@swarm/three (CDF Surface Sampler, 3 Build Algorithms & 3D Bridge)", () => {
   it("samples uniform points across 3D mesh triangles in O(log M) using Cumulative Area Prefix-Sum", () => {
@@ -57,5 +59,31 @@ describe("@swarm/three (CDF Surface Sampler, 3 Build Algorithms & 3D Bridge)", (
     expect(anchors.boxCorners.length).toBe(8);
     expect(anchors.laserLeft.x).toBeLessThan(anchors.laserRight.x);
     handle.dispose();
+  });
+
+  it("computes progressive Image Construction states (Mosaic Quadtree, Scanline Laser, Halftone Dot-Matrix)", () => {
+    const mosaicStart = computeImageBuildState("mosaic", 0.1);
+    const mosaicEnd = computeImageBuildState("mosaic", 1.0);
+    expect(mosaicStart.pixelBlockSize).toBeGreaterThanOrEqual(16);
+    expect(mosaicEnd.pixelBlockSize).toBe(1);
+    expect(mosaicEnd.blurPx).toBe(0);
+
+    const scanMid = computeImageBuildState("scanline", 0.5);
+    expect(scanMid.scanlineRatio).toBeCloseTo(0.5, 2);
+
+    const halftoneMid = computeImageBuildState("halftone", 0.4);
+    expect(halftoneMid.halftoneRadiusScale).toBeGreaterThan(0.2);
+
+    const builder = new SceneBuilder(1200);
+    const taskId = builder.addImage("hero-photo", 100, 120, 480, 320, {
+      buildMode: "mosaic",
+      src: "/demo.jpg",
+    });
+    expect(taskId).toBe("img:hero-photo");
+    const imgEl = builder.elMap.get("hero-photo");
+    expect(imgEl?.kind).toBe("image");
+    if (imgEl?.kind === "image") {
+      expect(imgEl.buildMode).toBe("mosaic");
+    }
   });
 });

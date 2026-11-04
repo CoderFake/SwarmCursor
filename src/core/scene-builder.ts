@@ -15,6 +15,8 @@ import type {
   SwarmDupGroup,
   SwarmElementNode,
   SwarmGuideEl,
+  SwarmImageBuildMode,
+  SwarmImageEl,
   SwarmPathEl,
   SwarmRectEl,
   SwarmScene,
@@ -27,6 +29,15 @@ import type {
 export interface Add3DOptions {
   buildMode?: Swarm3DBuildMode;
   squadSize?: number;
+  src?: string;
+  deps?: string[];
+  sticky?: boolean;
+  domEl?: HTMLElement | null;
+}
+
+export interface AddImageOptions {
+  buildMode?: SwarmImageBuildMode;
+  r?: number;
   src?: string;
   deps?: string[];
   sticky?: boolean;
@@ -262,6 +273,43 @@ export class SceneBuilder {
       "3d:" + id,
       y,
       { type: "3d", el: id, buildMode, squadSize },
+      opts.deps ?? []
+    );
+  }
+
+  public addImage(
+    id: string,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    opts: AddImageOptions = {}
+  ): string {
+    const buildMode = opts.buildMode ?? "mosaic";
+    const el: SwarmImageEl = {
+      kind: "image",
+      id,
+      v: 0,
+      vis: false,
+      dx: 0,
+      dy: 0,
+      x,
+      y,
+      w,
+      h,
+      r: opts.r ?? 12,
+      buildMode,
+      progress: 0,
+      phase: "idle",
+      src: opts.src,
+      sticky: opts.sticky,
+      domEl: opts.domEl,
+    };
+    this.registerEl(el);
+    return this.registerTask(
+      "img:" + id,
+      y,
+      { type: "image", el: id, buildMode },
       opts.deps ?? []
     );
   }

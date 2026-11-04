@@ -101,6 +101,7 @@ export interface SwarmGuideEl extends BaseElementNode {
 }
 
 export type Swarm3DBuildMode = "extrude" | "particles" | "slice" | "all";
+export type SwarmImageBuildMode = "mosaic" | "scanline" | "halftone" | "all";
 
 export interface Swarm3DEl extends BaseElementNode {
   kind: "3d";
@@ -115,12 +116,26 @@ export interface Swarm3DEl extends BaseElementNode {
   src?: string;
 }
 
+export interface SwarmImageEl extends BaseElementNode {
+  kind: "image";
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  r: number;
+  buildMode: SwarmImageBuildMode;
+  progress: number;
+  phase: "idle" | "mosaic" | "scanline" | "halftone" | "done";
+  src?: string;
+}
+
 export type SwarmElementNode =
   | SwarmPathEl
   | SwarmRectEl
   | SwarmTextEl
   | SwarmGuideEl
-  | Swarm3DEl;
+  | Swarm3DEl
+  | SwarmImageEl;
 
 export type SwarmTaskSpec =
   | { type: "path"; el: string }
@@ -129,7 +144,8 @@ export type SwarmTaskSpec =
   | { type: "guide"; el: string }
   | { type: "dup"; group: string; k: number }
   | { type: "edit"; el: string }
-  | { type: "3d"; el: string; buildMode?: Swarm3DBuildMode; squadSize?: number };
+  | { type: "3d"; el: string; buildMode?: Swarm3DBuildMode; squadSize?: number }
+  | { type: "image"; el: string; buildMode?: SwarmImageBuildMode };
 
 export interface SwarmTask {
   id: string;
@@ -196,11 +212,21 @@ export interface Laser3DOverlayItem {
   mode: "slice" | "particles";
 }
 
+export interface ImageBuildOverlayItem {
+  t: "imagebuild";
+  b: BoundingBox;
+  progress: number;
+  mode: SwarmImageBuildMode;
+  phase: "mosaic" | "scanline" | "halftone";
+  badge?: string;
+}
+
 export type SwarmOverlayItem =
   | BoxOverlayItem
   | MeasureOverlayItem
   | Gizmo3DOverlayItem
-  | Laser3DOverlayItem;
+  | Laser3DOverlayItem
+  | ImageBuildOverlayItem;
 
 export interface SwarmCursor {
   id: number;

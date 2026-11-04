@@ -1,6 +1,6 @@
 import { DESIGN_WIDTH, PALETTE, TYPE_STYLES, sansStyle } from "../core/constants";
 import { SceneBuilder } from "../core/scene-builder";
-import type { Swarm3DBuildMode, SwarmScene } from "../core/types";
+import type { Swarm3DBuildMode, SwarmImageBuildMode, SwarmScene } from "../core/types";
 import { DOMLayoutCache } from "./layout-cache";
 
 export interface DeepScanOptions {
@@ -80,6 +80,13 @@ function parse3DBuildMode(raw: string | null): Swarm3DBuildMode {
   return "all";
 }
 
+function parseImageBuildMode(raw: string | null): SwarmImageBuildMode {
+  if (raw === "mosaic" || raw === "scanline" || raw === "halftone" || raw === "all") {
+    return raw;
+  }
+  return "all";
+}
+
 function hasDirectTextContent(el: HTMLElement): boolean {
   for (let i = 0; i < el.childNodes.length; i++) {
     const child = el.childNodes[i];
@@ -135,7 +142,7 @@ export function scanDeepDOMElements(
 
   const registerDOMNode = (
     el: HTMLElement,
-    kindHint: "3d" | "path" | "text" | "rect",
+    kindHint: "3d" | "image" | "path" | "text" | "rect",
     parentTaskId: string | null
   ): string => {
     const seqIdx = autoIdx++;
@@ -173,7 +180,17 @@ export function scanDeepDOMElements(
           } else {
             const depRaw = (depEl?.getAttribute("data-swarm") || "rect").toLowerCase();
             deps.push(
-              `${depRaw === "text" ? "t" : depRaw === "path" ? "p" : depRaw === "3d" ? "3d" : "r"}:${depId}`
+              `${
+                depRaw === "text"
+                  ? "t"
+                  : depRaw === "path"
+                    ? "p"
+                    : depRaw === "3d"
+                      ? "3d"
+                      : depRaw === "image"
+                        ? "img"
+                        : "r"
+              }:${depId}`
             );
           }
         });
@@ -204,6 +221,27 @@ export function scanDeepDOMElements(
         buildMode: mode,
         squadSize: Number.isFinite(squadAttr) && squadAttr > 0 ? squadAttr : default3DSquadSize,
         src: el.getAttribute("data-swarm-src") || undefined,
+        deps,
+        domEl: el,
+      });
+    } else if (kindHint === "image") {
+      const mode = parseImageBuildMode(
+        el.getAttribute("data-swarm-image") || el.getAttribute("data-swarm-mode")
+      );
+      const computed =
+        typeof window !== "undefined" ? window.getComputedStyle(el) : null;
+      const borderRadius = computed
+        ? parseFloat(computed.borderRadius) || 12
+        : 12;
+      const imgSrc =
+        el.getAttribute("data-swarm-src") ||
+        (el as HTMLImageElement).src ||
+        el.querySelector("img")?.getAttribute("src") ||
+        undefined;
+      taskId = builder.addImage(id, x, y, w, h, {
+        r: borderRadius,
+        buildMode: mode,
+        src: imgSrc,
         deps,
         domEl: el,
       });
@@ -299,6 +337,16 @@ export function scanDeepDOMElements(
       return;
     }
 
+    const isImageNode =
+      node.hasAttribute("data-swarm-image") ||
+      explicitTool === "image" ||
+      (node.tagName.toUpperCase() === "IMG" && insideDeepScope);
+
+    if (isImageNode) {
+      registerDOMNode(htmlEl, "image", parentTaskId);
+      return;
+    }
+
     if (node.tagName.toUpperCase() === "SVG") {
       if (insideDeepScope || explicitTool) {
         registerDOMNode(htmlEl, "path", parentTaskId);
@@ -367,7 +415,7 @@ export function scanDeepDOMElements(
   } else {
     // Also support scanning all [data-swarm] and their immediate semantic children
     const topTargets = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-swarm], [data-swarm-3d]")
+      root.querySelectorAll<HTMLElement>("[data-swarm], [data-swarm-3d], [data-swarm-image]")
     );
     for (const target of topTargets) {
       walkSubtree(target, null, 0, true);

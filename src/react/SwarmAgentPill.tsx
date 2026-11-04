@@ -63,15 +63,18 @@ export function SwarmAgentPill({
 
   const [queueState, setQueueState] = useState<{
     step: number;
+    randomCount: number;
     items: Array<{ key: number; icon: AgentIconSpec }>;
   }>(() => ({
     step: 0,
+    randomCount: Math.floor(11 + Math.random() * 15),
     items: createInitialIconQueue(clampedMax, pool),
   }));
 
   useEffect(() => {
     setQueueState((prev) => ({
       step: prev.step,
+      randomCount: prev.randomCount,
       items: prev.items.slice(0, clampedMax),
     }));
   }, [clampedMax]);
@@ -92,11 +95,19 @@ export function SwarmAgentPill({
         return;
       }
       setQueueState((prev) => {
-        const currentHeadId = prev.items[0]?.icon.id;
-        const nextIcon = pickRandomAgentIcon(pool, currentHeadId);
+        const activeIds = prev.items
+          .slice(0, Math.max(1, clampedMax - 1))
+          .map((item) => item.icon.id);
+        const nextIcon = pickRandomAgentIcon(pool, activeIds);
         const key = nextKeyRef.current++;
+        const delta = Math.floor(Math.random() * 5) - 2;
+        const nextRandomCount = Math.max(
+          8,
+          Math.min(28, prev.randomCount + delta)
+        );
         return {
           step: prev.step + 1,
+          randomCount: nextRandomCount,
           items: [{ key, icon: nextIcon }, ...prev.items.slice(0, clampedMax - 1)],
         };
       });
@@ -105,7 +116,11 @@ export function SwarmAgentPill({
     return () => window.clearInterval(timer);
   }, [pool, clampedMax, intervalMs, paused, isDone, hideWhenDone, engine]);
 
-  const resolvedCount = count ?? engine?.cursors.length ?? FLOCK_TARGET_CURSORS;
+  const resolvedCount =
+    count ??
+    (engine && engine.cursors.length > 0
+      ? engine.cursors.length
+      : queueState.randomCount || FLOCK_TARGET_CURSORS);
   const formattedLabel =
     typeof label === "function"
       ? label(resolvedCount)

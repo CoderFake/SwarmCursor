@@ -93,10 +93,14 @@ export function getAgentIconPool(ids?: AgentIconId[]): AgentIconSpec[] {
 
 export function pickRandomAgentIcon(
   pool: readonly AgentIconSpec[] = AI_AGENT_ICONS,
-  avoidId?: AgentIconId
+  avoid?: AgentIconId | readonly AgentIconId[]
 ): AgentIconSpec {
   if (pool.length <= 1) return pool[0] ?? AI_AGENT_ICONS[0];
-  const candidates = avoidId ? pool.filter((i) => i.id !== avoidId) : pool;
+  const avoidSet = new Set<AgentIconId>(
+    Array.isArray(avoid) ? avoid : avoid ? [avoid] : []
+  );
+  const candidates =
+    avoidSet.size > 0 ? pool.filter((i) => !avoidSet.has(i.id)) : pool;
   const list = candidates.length > 0 ? candidates : pool;
   const idx = Math.floor(Math.random() * list.length);
   return list[idx];
@@ -107,9 +111,14 @@ export function createInitialIconQueue(
   pool: readonly AgentIconSpec[] = AI_AGENT_ICONS
 ): Array<{ key: number; icon: AgentIconSpec }> {
   const count = Math.max(1, Math.min(5, maxIcons));
+  const shuffled = [...(pool.length > 0 ? pool : AI_AGENT_ICONS)];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   const items: Array<{ key: number; icon: AgentIconSpec }> = [];
   for (let i = 0; i < count; i++) {
-    const icon = pool[i % pool.length] ?? AI_AGENT_ICONS[i % AI_AGENT_ICONS.length];
+    const icon = shuffled[i % shuffled.length] ?? AI_AGENT_ICONS[i % AI_AGENT_ICONS.length];
     items.push({ key: i + 1, icon });
   }
   return items;

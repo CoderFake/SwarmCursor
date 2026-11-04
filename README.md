@@ -23,7 +23,26 @@ Hỗ trợ đầy đủ **3 thuật toán hiệu ứng xây dựng 3D** (có th�
   - **1 Lead Cursor**: Kéo trục 3D Gizmo X/Y/Z hoặc dựng khung chính.
   - **N Assistant Cursors**: Bay quanh các đỉnh 3D được chiếu lên màn hình, bắn tia hàn hạt (`3d-extrude-beam`) và quét tia laser cắt lớp (`active3DLasers`).
 
-### 4. Tối ưu Hiệu năng bằng Rust/WASM & Render Zero-React-Tick (`@swarm/kernel` & `@swarm/renderers`)
+### 4. Hiệu ứng Xây dựng Hình ảnh 2D (`<SwarmImage>` / `data-swarm="image"`)
+Cung cấp **3 thuật toán hiệu ứng xây ảnh (Image Construction)** lấy cảm hứng từ Progressive JPEG/Quadtree Subdivisions, Holographic CRT Rasterization và Halftone Screen-Printing (có thể dùng riêng hoặc kết hợp cả 3 qua `buildMode="all"`):
+- **`mosaic` (Progressive Quadtree / Macro-Block Pixelation Refinement)**: Khởi tạo ảnh từ lưới ô vuông thô (`32px` $\rightarrow$ `16px` $\rightarrow$ `8px` $\rightarrow$ `4px` $\rightarrow$ `0px`) kết hợp con trỏ quét chéo tinh chỉnh độ nét.
+- **`scanline` (Holographic Laser Raster Scan)**: Con trỏ kéo tia laser ngang màu xanh/tím quét từ đỉnh xuống đáy ảnh (`clip-path: inset(...)` + `IMG·SCAN` badge), để lộ ảnh thật bên dưới đường quét kèm lưới blueprint phía trước.
+- **`halftone` (Halftone Dot-Matrix Screen-Printing)**: Tái tạo ảnh qua ma trận chấm bi in lụa tăng dần bán kính và độ tương phản trước khi hội tụ thành ảnh gốc sắc nét.
+- **`all` (Multi-Pass Image Synthesis)**: Kết hợp cả 3 pha (`mosaic` dựng bố cục màu $\rightarrow$ `scanline` quét tia laser $\rightarrow$ `halftone` khóa nét).
+
+```tsx
+import { SwarmImage } from "swarm-cursor/react";
+
+<SwarmImage
+  id="project-cover"
+  src="/images/architecture-cover.webp"
+  buildMode="mosaic" // "mosaic" | "scanline" | "halftone" | "all"
+  deps={["r:project-card"]}
+  className="w-full h-64 rounded-2xl"
+/>
+```
+
+### 5. Tối ưu Hiệu năng bằng Rust/WASM & Render Zero-React-Tick (`@swarm/kernel` & `@swarm/renderers`)
 - **Lõi biên dịch Rust $\rightarrow$ WebAssembly (`crates/swarm-kernel-wasm`)**:
   - Lưu trữ toàn bộ trạng thái con trỏ trong `Float32Array` phẳng (`SoACursorBuffer`, 16 floats/cursor).
   - Thuật toán **Uniform Spatial Hash Grid Boids $O(N)$** và phép chiếu **Batch 4x4 Matrix 3D $\rightarrow$ 2D** chạy trong WASM (kèm JS TypedArray fallback tự động).

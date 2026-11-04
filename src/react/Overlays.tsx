@@ -299,7 +299,7 @@ export function SelectionAndGuidesOverlay({ engine }: { engine: SwarmEngine }) {
             />
           </g>
         );
-      } else {
+      } else if (item.t === "measure") {
         const ptA = { x: toScreenX(item.a.x), y: toCursorScreenY(item.a.y) };
         const ptB = { x: toScreenX(item.b.x), y: toCursorScreenY(item.b.y) };
         svgNodes.push(

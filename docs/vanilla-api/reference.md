@@ -67,12 +67,28 @@ const unregister = registerSwarm3D("my-3d-id", {
 
 ---
 
-## 4. `@swarm/tools` — Pluggable Tool Registry & Multi-Agent Squads
+## 4. `@swarm/tools` — Pluggable Tool Registry, Multi-Agent Squads & Image Construction (`mosaic` · `scanline` · `halftone`)
 
 ```ts
-import { ToolRegistry, SquadCoordinator } from "swarm-cursor";
+import {
+  ToolRegistry,
+  SquadCoordinator,
+  computeImageBuildState,
+  SceneBuilder,
+} from "swarm-cursor";
 
-// Đăng ký thêm công cụ vẽ tùy chỉnh (mở rộng không cần sửa core engine)
+// 1. Thêm tác vụ xây dựng ảnh 2D vào SceneBuilder
+const builder = new SceneBuilder(1280);
+const imgTask = builder.addImage("hero-cover", 120, 200, 560, 340, {
+  buildMode: "mosaic", // "mosaic" | "scanline" | "halftone" | "all"
+  src: "/assets/cover.webp",
+});
+
+// 2. Tính toán trạng thái hiệu ứng xây ảnh theo tiến độ 0..1
+const state = computeImageBuildState("all", 0.5);
+// state = { activePhase, pixelBlockSize, scanlineRatio, halftoneRadiusScale, blurPx }
+
+// 3. Đăng ký thêm công cụ vẽ tùy chỉnh (mở rộng không cần sửa core engine)
 const registry = new ToolRegistry();
 registry.register({
   type: "custom-shader",

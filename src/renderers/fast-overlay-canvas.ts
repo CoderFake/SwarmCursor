@@ -1,6 +1,10 @@
 import { GUIDE_RED, SELECTION_BLUE } from "../core/constants";
 import type { SwarmEngine } from "../core/engine";
-import type { Gizmo3DOverlayItem, Laser3DOverlayItem } from "../core/types";
+import type {
+  Gizmo3DOverlayItem,
+  ImageBuildOverlayItem,
+  Laser3DOverlayItem,
+} from "../core/types";
 
 const BOX_EDGES_3D: ReadonlyArray<[number, number]> = [
   [0, 1],
@@ -175,6 +179,16 @@ export class FastOverlayCanvasController {
           ctx.moveTo(ax, ay);
           ctx.lineTo(bx, by);
           ctx.stroke();
+          if (item.label) {
+            const isHoriz = Math.abs(ay - by) < 2;
+            this.drawBadgePill(
+              ctx,
+              isHoriz ? (ax + bx) * 0.5 : ax + 18,
+              isHoriz ? ay + 12 : (ay + by) * 0.5,
+              item.label,
+              GUIDE_RED
+            );
+          }
         } else if (item.t === "gizmo3d") {
           this.drawGizmo3D(ctx, item, toScreenX, (y) =>
             toScreenY(y, cursor.sticky)
@@ -182,6 +196,11 @@ export class FastOverlayCanvasController {
         } else if (item.t === "laser3d") {
           this.drawLaser3D(ctx, item, toScreenX, (y) =>
             toScreenY(y, cursor.sticky)
+          );
+        } else if (item.t === "imagebuild") {
+          this.drawImageBuild(ctx, item, toScreenX, (y) =>
+            toScreenY(y, cursor.sticky),
+            s
           );
         }
       }
@@ -267,6 +286,82 @@ export class FastOverlayCanvasController {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(text, centerX, centerY + 0.5);
+    ctx.restore();
+  }
+
+  private drawImageBuild(
+    ctx: CanvasRenderingContext2D,
+    item: ImageBuildOverlayItem,
+    toX: (x: number) => number,
+    toY: (y: number) => number,
+    scale: number
+  ): void {
+    const x = toX(item.b.x);
+    const y = toY(item.b.y);
+    const w = item.b.w * scale;
+    const h = item.b.h * scale;
+    if (w <= 2 || h <= 2) return;
+
+    ctx.save();
+    ctx.strokeStyle = SELECTION_BLUE;
+    ctx.lineWidth = 1.25;
+    ctx.strokeRect(x, y, w, h);
+
+    if (item.phase === "mosaic") {
+      // Progressive Quadtree / Macro-Block Pixelation Grid
+      const cols = Math.max(4, Math.min(16, Math.round(4 + item.progress * 12)));
+      const rows = Math.max(3, Math.min(12, Math.round(3 + item.progress * 9)));
+      const cw = w / cols;
+      const ch = h / rows;
+      const maxCells = Math.ceil(cols * rows * item.progress);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c;
+          if (idx > maxCells) break;
+          const hue = 215 + ((r * 17 + c * 31) % 65);
+          const alpha = (1 - item.progress) * 0.42;
+          ctx.fillStyle = `hsla(${hue}, 82%, 66%, ${alpha.toFixed(2)})`;
+          ctx.fillRect(x + c * cw + 0.5, y + r * ch + 0.5, cw - 1, ch - 1);
+        }
+      }
+    } else if (item.phase === "scanline") {
+      // Laser Raster Scanline + Blueprint Diagonals below scanline
+      const scanY = y + h * item.progress;
+      ctx.strokeStyle = "rgba(13, 153, 255, 0.28)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x, scanY);
+      ctx.lineTo(x + w, y + h);
+      ctx.moveTo(x + w, scanY);
+      ctx.lineTo(x, y + h);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#38BDF8";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(x, scanY);
+      ctx.lineTo(x + w, scanY);
+      ctx.stroke();
+    } else {
+      // Halftone Dot-Matrix Screen-Printing Grid
+      const cols = 10;
+      const rows = 8;
+      const cw = w / cols;
+      const ch = h / rows;
+      const maxR = Math.min(cw, ch) * 0.42 * item.progress;
+      ctx.fillStyle = "rgba(124, 58, 237, 0.32)";
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.beginPath();
+          ctx.arc(x + (c + 0.5) * cw, y + (r + 0.5) * ch, maxR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    if (item.badge) {
+      this.drawBadgePill(ctx, x + w * 0.5, y + h + 14, item.badge, SELECTION_BLUE);
+    }
     ctx.restore();
   }
 

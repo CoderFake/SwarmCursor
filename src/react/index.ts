@@ -33,3 +33,5 @@ export { SwarmAgentPill } from "./SwarmAgentPill";
 export type { SwarmAgentPillProps } from "./SwarmAgentPill";
 export { Swarm3D, useSwarm3D } from "./Swarm3D";
 export type { Swarm3DProps, UseSwarm3DOptions } from "./Swarm3D";
+export { SwarmImage } from "./SwarmImage";
+export type { SwarmImageProps } from "./SwarmImage";
