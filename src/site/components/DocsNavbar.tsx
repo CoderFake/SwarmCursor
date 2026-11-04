@@ -501,7 +501,7 @@ export function HubTopbar({
 
         <button
           type="button"
-          className="hub-action-pill"
+          className="hub-action-pill hub-hide-sm"
           onClick={downloadSwarmCursorSkillsZip}
           title={
             lang === "vi"
