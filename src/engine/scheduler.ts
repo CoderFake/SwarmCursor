@@ -103,7 +103,10 @@ export function notifyTaskCompleted(
     copy?.ids.forEach((id) => {
       const el = engine.els.get(id);
       if (el) {
-        if (el.domEl) {
+        el.dx = 0;
+        el.dy = 0;
+        const pendingEdit = engine.byTask.get(`e:${id}`);
+        if (el.domEl && (!pendingEdit || pendingEdit.state === "done")) {
           el.domEl.setAttribute("data-swarm-done", "true");
         }
         onElementDone?.(el);

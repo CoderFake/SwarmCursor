@@ -8,7 +8,7 @@ import {
   RULER_SIZE,
 } from "../core/constants";
 import { clamp, stepBoidsFlock } from "../core/physics";
-import { SoACursorBuffer, SwarmKernel } from "../kernel";
+import { SoACursorBuffer, SwarmKernel, wasmKernel } from "../kernel";
 import { defaultToolRegistry, SquadCoordinator } from "../tools";
 import type {
   BoundingBox,
@@ -99,7 +99,7 @@ export class SwarmEngine {
   public retiredWorkers = 0;
   public height = 4060;
   public designWidth = DESIGN_WIDTH;
-  public kernel: SwarmKernel = SwarmKernel.createSync();
+  public kernel: SwarmKernel = wasmKernel;
   public soaBuffer: SoACursorBuffer = new SoACursorBuffer(256);
   public squadCoordinator: SquadCoordinator = new SquadCoordinator();
   private leadCursorByTask = new Map<string, number>();
@@ -372,23 +372,79 @@ export class SwarmEngine {
       this.spawnCooldown = 0.035;
     }
 
-    for (const c of this.cursors) {
-      if (c.task || c.leaving || c.follow || !this.started) continue;
-      const task = this.pick(c, avail);
-      if (task) {
-        avail.splice(avail.indexOf(task), 1);
-        task.state = "active";
-        c.task = task;
-        this.leadCursorByTask.set(task.id, c.id);
-        c.worked = true;
-        if (this.isSticky(task)) {
-          c.sticky = true;
-          c.y -= this.stick;
+    const idleCursors = this.cursors.filter(
+      (c) => !c.task && !c.leaving && !c.follow && this.started
+    );
+
+    if (
+      idleCursors.length > 1 &&
+      avail.length > 1 &&
+      this.kernel.isWasmAccelerated &&
+      this.pick === SwarmEngine.prototype.pick
+    ) {
+      const taskInputs = avail.map((t) => {
+        const elId =
+          "el" in t.spec
+            ? t.spec.el
+            : this.groups.get(t.spec.group)?.copies[t.spec.k]?.ids[0] ?? "";
+        const elNode = this.els.get(elId);
+        const tx =
+          elNode && "x" in elNode ? elNode.x + elNode.dx : this.designWidth * 0.5;
+        return {
+          x: tx,
+          y: t.y,
+          state: 1 as const,
+          activeWorkers: 0,
+          maxSquad: 1,
+          progress: 0,
+        };
+      });
+      const bids = this.kernel.auctionTasksBatch(
+        idleCursors.map((c) => ({ x: c.x, y: c.y })),
+        taskInputs,
+        this.viewTop - 40,
+        this.viewBot,
+        this.frontier
+      );
+      const assignedTasks = new Set<Required<SwarmTask>>();
+      for (let i = 0; i < idleCursors.length; i++) {
+        const c = idleCursors[i];
+        const bid = bids[i];
+        const task = bid && bid.taskIdx >= 0 ? avail[bid.taskIdx] : null;
+        if (task && !assignedTasks.has(task)) {
+          assignedTasks.add(task);
+          task.state = "active";
+          c.task = task;
+          this.leadCursorByTask.set(task.id, c.id);
+          c.worked = true;
+          if (this.isSticky(task)) {
+            c.sticky = true;
+            c.y -= this.stick;
+          }
+          c.idleFor = 0;
+          c.gen = this.run(c, task);
+        } else {
+          this.squadCoordinator.tryAssignAssistant(this, c);
         }
-        c.idleFor = 0;
-        c.gen = this.run(c, task);
-      } else {
-        this.squadCoordinator.tryAssignAssistant(this, c);
+      }
+    } else {
+      for (const c of idleCursors) {
+        const task = this.pick(c, avail);
+        if (task) {
+          avail.splice(avail.indexOf(task), 1);
+          task.state = "active";
+          c.task = task;
+          this.leadCursorByTask.set(task.id, c.id);
+          c.worked = true;
+          if (this.isSticky(task)) {
+            c.sticky = true;
+            c.y -= this.stick;
+          }
+          c.idleFor = 0;
+          c.gen = this.run(c, task);
+        } else {
+          this.squadCoordinator.tryAssignAssistant(this, c);
+        }
       }
     }
 
