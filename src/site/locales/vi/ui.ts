@@ -3,8 +3,8 @@ import type { DocsUI } from "../../types";
 export const VI_UI: DocsUI = {
   nav: {
     subtitle: "CoderFake · Lõi Rust/WASM & 3D",
-    docsMode: "📚 Tài liệu Tương tác (DOM Swarm)",
-    artboardMode: "🎨 Artboard Showcase (Canvas)",
+    docsMode: "Tài liệu Tương tác",
+    artboardMode: "Artboard Showcase",
     replayBtn: "Vẽ lại bằng Swarm",
     replayTooltip: "Cho đàn chuột AI vẽ lại toàn bộ trang tài liệu",
   },
@@ -12,7 +12,7 @@ export const VI_UI: DocsUI = {
     tag: "SWARMCURSOR 2.0 · RUST/WASM SIMD128 · MÃ NGUỒN MỞ MIT",
     title: "Tài liệu Toàn diện & Trình diễn Đàn Chuột AI Đa Tác Tử.",
     lead: "Toàn bộ trang hướng dẫn này đang được đàn chuột AI của SwarmCursor 2.0 trực tiếp vẽ khung, gõ chữ, kéo thước căn lề đỏ, điêu khắc lưới 3D và quét ảnh 2D ở tốc độ 60fps bằng lõi Rust/WASM SIMD128.",
-    ctaStart: "Bắt đầu ngay ↓",
+    ctaStart: "Khám phá Tài liệu",
     stats: [
       {
         title: "8 Sub-Packages",

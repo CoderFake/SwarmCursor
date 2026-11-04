@@ -3,8 +3,8 @@ import type { DocsUI } from "../../types";
 export const EN_UI: DocsUI = {
   nav: {
     subtitle: "CoderFake · Rust/WASM & 3D Engine",
-    docsMode: "📚 Interactive Docs (DOM Swarm)",
-    artboardMode: "🎨 Artboard Showcase (Canvas)",
+    docsMode: "Interactive Docs",
+    artboardMode: "Artboard Showcase",
     replayBtn: "Replay Swarm",
     replayTooltip: "Replay AI cursor swarm choreography across the documentation",
   },
@@ -12,7 +12,7 @@ export const EN_UI: DocsUI = {
     tag: "SWARMCURSOR 2.0 · RUST/WASM SIMD128 · MIT OPEN SOURCE",
     title: "Complete Bilingual Guide & Live Multi-Agent Cursor Choreography.",
     lead: "This entire documentation portal is actively constructed by SwarmCursor 2.0 AI cursors—drawing wireframes, typing copy, snapping red ruler guides, sculpting 3D meshes, and scanning 2D images at 60fps via the Rust/WASM SIMD128 kernel.",
-    ctaStart: "Get Started ↓",
+    ctaStart: "Explore Documentation",
     stats: [
       {
         title: "8 Sub-Packages",

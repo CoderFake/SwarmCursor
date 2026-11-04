@@ -220,18 +220,29 @@
 /* DOM-Driven Mode ([data-swarm]) */
 [data-swarm] {
   transition:
-    opacity 0.25s ease,
-    transform 0.25s ease,
-    filter 0.25s ease;
+    opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
 }
 
 [data-swarm]:not([data-swarm-done="true"]) {
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0.96;
+  outline: 1px dashed rgba(13, 153, 255, 0.38);
+  outline-offset: 2px;
+}
+
+[data-swarm][data-swarm-drawing="true"] {
+  opacity: 1;
+  outline: 1.5px solid #0d99ff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(13, 153, 255, 0.14);
 }
 
 [data-swarm][data-swarm-done="true"] {
   opacity: 1;
+  outline: none;
+  transform: none;
   pointer-events: auto;
 }
 

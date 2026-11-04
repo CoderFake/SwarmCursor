@@ -48,6 +48,8 @@ export interface SwarmProviderProps {
   children: React.ReactNode;
   scrollMode?: ScrollMode;
   autoScrollSpeed?: number;
+  /** Automatically starts cursor choreography on mount (default: true) */
+  autoStart?: boolean;
   controls?: boolean;
   controlsPosition?: "bottom-right" | "bottom-left" | "top-right";
   controlsSlot?: React.ReactNode;
@@ -65,6 +67,7 @@ export function SwarmProvider({
   children,
   scrollMode = "manual",
   autoScrollSpeed = 180,
+  autoStart = true,
   controls = false,
   controlsPosition = "bottom-right",
   controlsSlot,
@@ -112,6 +115,10 @@ export function SwarmProvider({
       designWidth,
     });
     engineRef.current = rebuilt;
+    if (autoStart) {
+      rebuilt.start();
+    }
+    setTick((t) => t + 1);
 
     const fastCursorCtrl =
       fastMode && fastCursorsRef.current
@@ -132,10 +139,15 @@ export function SwarmProvider({
       rebuilt.vp.left = 0;
     };
 
-    const onScroll = () => rebuilt.setScroll(window.scrollY);
+    const onScroll = () => {
+      rebuilt.setScroll(window.scrollY);
+      if (window.scrollY > 0 && !rebuilt.started) {
+        rebuilt.start();
+      }
+    };
     const onWheel = () => {
       autoScroll.notifyUserInteraction();
-      if (window.scrollY > 0) rebuilt.start();
+      if (!rebuilt.started) rebuilt.start();
     };
     const onPointerMove = (e: PointerEvent) => {
       rebuilt.mouse = { x: e.clientX, y: e.clientY };
@@ -181,10 +193,13 @@ export function SwarmProvider({
   const ctxValue: SwarmContextValue = {
     engine: activeEngine,
     autoScroll,
-    start: () => activeEngine.start(),
-    pause: () => activeEngine.pause(),
-    resume: () => activeEngine.resume(),
-    reset: () => activeEngine.reset(),
+    start: () => engineRef.current?.start(),
+    pause: () => engineRef.current?.pause(),
+    resume: () => engineRef.current?.resume(),
+    reset: () => {
+      engineRef.current?.reset();
+      engineRef.current?.start();
+    },
     setScrollMode: (m: ScrollMode) => autoScroll.setMode(m),
   };
 
@@ -196,7 +211,6 @@ export function SwarmProvider({
         data-swarm-deep={deepScan ? "true" : undefined}
       >
         {children}
-        <MainCanvas engine={activeEngine} />
         {fastMode ? (
           <>
             <canvas
@@ -206,10 +220,14 @@ export function SwarmProvider({
                 position: "fixed",
                 inset: 0,
                 pointerEvents: "none",
-                zIndex: 25,
+                zIndex: 42,
               }}
             />
-            <div ref={fastCursorsRef} className="cursors" />
+            <div
+              ref={fastCursorsRef}
+              className="cursors"
+              style={{ zIndex: 44 }}
+            />
           </>
         ) : (
           <>
