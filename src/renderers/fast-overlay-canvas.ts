@@ -62,7 +62,7 @@ export class FastOverlayCanvasController {
     const toScreenY = (y: number, sticky = false) =>
       (y + (sticky ? engine.stick : 0)) * s - scrollY;
 
-    // 1. Draw active guides
+    // 1. Draw active guides & editable vector paths
     for (const el of engine.list) {
       if (el.kind === "guide" && el.vis && el.op > 0) {
         ctx.save();
@@ -81,6 +81,45 @@ export class FastOverlayCanvasController {
         }
         ctx.stroke();
         ctx.restore();
+      } else if (el.kind === "path" && el.edit && el.placed > 0) {
+        const placedPts = el.pts
+          .slice(0, el.placed)
+          .map((pt) => ({ x: toScreenX(pt.x), y: toScreenY(pt.y, el.sticky) }));
+        const ownerCursor =
+          el.owner != null
+            ? engine.cursors.find((c) => c.id === el.owner)
+            : null;
+        const previewPts = ownerCursor
+          ? [
+              ...placedPts,
+              {
+                x: toScreenX(ownerCursor.x),
+                y: toScreenY(ownerCursor.y, el.sticky),
+              },
+            ]
+          : placedPts;
+        if (previewPts.length > 0) {
+          ctx.save();
+          ctx.strokeStyle = SELECTION_BLUE;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(previewPts[0].x, previewPts[0].y);
+          for (let i = 1; i < previewPts.length; i++) {
+            ctx.lineTo(previewPts[i].x, previewPts[i].y);
+          }
+          if (el.shut && placedPts.length > 1) {
+            ctx.lineTo(placedPts[0].x, placedPts[0].y);
+          }
+          ctx.stroke();
+          ctx.fillStyle = "#ffffff";
+          for (const pt of placedPts) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
       }
     }
 
@@ -100,6 +139,15 @@ export class FastOverlayCanvasController {
           ctx.lineWidth = 1;
           ctx.strokeRect(x, y, w, h);
 
+          if (item.underline && item.underline.w > 0) {
+            const ux = toScreenX(item.underline.x);
+            const uy = toScreenY(item.underline.y, cursor.sticky);
+            ctx.beginPath();
+            ctx.moveTo(ux, uy);
+            ctx.lineTo(ux + item.underline.w * s, uy);
+            ctx.stroke();
+          }
+
           if (item.handles) {
             ctx.fillStyle = "#fff";
             for (const [hx, hy] of [
@@ -111,6 +159,10 @@ export class FastOverlayCanvasController {
               ctx.fillRect(hx - 3.5, hy - 3.5, 7, 7);
               ctx.strokeRect(hx - 3.5, hy - 3.5, 7, 7);
             }
+          }
+
+          if (item.badge && w > 0) {
+            this.drawBadgePill(ctx, x + w * 0.5, y + h + 14, item.badge, color);
           }
         } else if (item.t === "measure") {
           const ax = toScreenX(item.a.x);
@@ -181,6 +233,40 @@ export class FastOverlayCanvasController {
       ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
       ctx.strokeRect(p.x - 3, p.y - 3, 6, 6);
     }
+    if (item.badge) {
+      const maxY = Math.max(...pts.map((p) => p.y));
+      this.drawBadgePill(ctx, orig.x, maxY + 14, item.badge, "#7C3AED");
+    }
+    ctx.restore();
+  }
+
+  private drawBadgePill(
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    text: string,
+    bgColor: string
+  ): void {
+    ctx.save();
+    ctx.font = "600 10px Inter, system-ui, -apple-system, sans-serif";
+    const padX = 6;
+    const textW = ctx.measureText(text).width;
+    const pillW = Math.ceil(textW + padX * 2);
+    const pillH = 16;
+    const rx = centerX - pillW * 0.5;
+    const ry = centerY - pillH * 0.5;
+    ctx.fillStyle = bgColor;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(rx, ry, pillW, pillH, 4);
+    } else {
+      ctx.rect(rx, ry, pillW, pillH);
+    }
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, centerX, centerY + 0.5);
     ctx.restore();
   }
 

@@ -170,7 +170,9 @@ export function SwarmControls({
               <button
                 key={t}
                 type="button"
-                className={engine.tempoMultiplier === t ? "active" : ""}
+                className={
+                  Math.abs(engine.tempoMultiplier - t) < 0.05 ? "active" : ""
+                }
                 onClick={() => {
                   engine.setTempoMultiplier(t);
                   refresh();
