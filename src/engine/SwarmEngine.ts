@@ -250,7 +250,22 @@ export class SwarmEngine {
     );
 
     if (this.started) {
-      this.frontier = Math.max(this.frontier, this.viewBot);
+      const isDomScene = this.list.some((el) => el.domEl);
+      if (this.vp.scrollY <= 24) {
+        const initialCap = isDomScene
+          ? this.viewTop + this.vp.vh * 0.82
+          : Math.min(650, this.viewTop + (this.viewBot - this.viewTop) * 0.82);
+        this.frontier = Math.max(this.frontier, initialCap);
+      } else {
+        const activeSpan = Math.min(
+          this.vp.vh / Math.max(0.65, this.vp.s),
+          this.viewBot - this.viewTop
+        );
+        this.frontier = Math.max(
+          this.frontier,
+          this.viewTop + activeSpan * 0.86
+        );
+      }
     }
 
     const avail = this.started ? this.available() : [];
