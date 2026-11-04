@@ -9,3 +9,7 @@ export * from "./core/engine";
 export * from "./core/dom-scanner";
 export * from "./core/vanilla-mount";
 export * from "./presets/swarm-landing";
+export * from "./kernel";
+export * from "./scanner";
+export * from "./three";
+export * from "./tools";

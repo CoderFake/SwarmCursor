@@ -14,11 +14,14 @@ import {
 import { clamp, stepBoidsFlock } from "./physics";
 import { getLineHeightPx, measureTextBlock } from "./text-measure";
 import { buildSwarmLandingScene } from "../presets/swarm-landing";
+import { SoACursorBuffer, SwarmKernel } from "../kernel";
+import { defaultToolRegistry, SquadCoordinator } from "../tools";
 import type {
   BoundingBox,
   BoxOverlayItem,
   MeasureOverlayItem,
   Point2D,
+  Swarm3DEl,
   SwarmCursor,
   SwarmDupGroup,
   SwarmElementNode,
@@ -77,6 +80,10 @@ export class SwarmEngine {
   public retiredWorkers = 0;
   public height = 4060;
   public designWidth = DESIGN_WIDTH;
+  public kernel: SwarmKernel = SwarmKernel.createSync();
+  public soaBuffer: SoACursorBuffer = new SoACursorBuffer(256);
+  public squadCoordinator: SquadCoordinator = new SquadCoordinator();
+  private leadCursorByTask = new Map<string, number>();
 
   private options: SwarmEngineOptions;
   private initialCursorsCount: number;
@@ -104,6 +111,8 @@ export class SwarmEngine {
     this.groups.clear();
     this.cursors = [];
     this.guideDeps.clear();
+    this.leadCursorByTask.clear();
+    this.squadCoordinator?.clear();
     this.started = false;
     this.flocking = false;
     this.frontier = 0;
@@ -144,6 +153,9 @@ export class SwarmEngine {
         copy.op = 1;
         copy.flash = 0;
         copy.dragging = false;
+      } else if (copy.kind === "3d") {
+        copy.progress = 0;
+        copy.phase = "idle";
       }
       this.els.set(copy.id, copy);
       this.list.push(copy);
@@ -308,6 +320,14 @@ export class SwarmEngine {
         y: Math.min(...ys),
         w: Math.max(...xs) - Math.min(...xs),
         h: Math.max(...ys) - Math.min(...ys),
+      };
+    }
+    if (el.kind === "3d") {
+      return {
+        x: el.x + el.dx,
+        y: el.y + el.dy,
+        w: el.w,
+        h: el.h,
       };
     }
     return { x: el.pos, y: 0, w: 0, h: 0 };
@@ -492,6 +512,7 @@ export class SwarmEngine {
         avail.splice(avail.indexOf(task), 1);
         task.state = "active";
         c.task = task;
+        this.leadCursorByTask.set(task.id, c.id);
         c.worked = true;
         if (this.isSticky(task)) {
           c.sticky = true;
@@ -499,6 +520,9 @@ export class SwarmEngine {
         }
         c.idleFor = 0;
         c.gen = this.run(c, task);
+      } else {
+        // Multi-Agent Work-Stealing: join an active 3D or large container squad
+        this.squadCoordinator.tryAssignAssistant(this, c);
       }
     }
 
@@ -527,9 +551,8 @@ export class SwarmEngine {
       }
       if (c.gen && c.gen.next(dt).done) {
         if (c.task) {
-          c.task.state = "done";
-          c.task.doneAt = this.time;
-          this.notifyTaskDone(c.task);
+          const finishedTask = c.task;
+          const leadId = this.leadCursorByTask.get(finishedTask.id);
           c.task = null;
           c.ov = null;
           if (c.sticky) {
@@ -537,6 +560,12 @@ export class SwarmEngine {
             c.y += this.stick;
           }
           c.shape = "arrow";
+          if (leadId === undefined || leadId === c.id) {
+            finishedTask.state = "done";
+            finishedTask.doneAt = this.time;
+            this.leadCursorByTask.delete(finishedTask.id);
+            this.notifyTaskDone(finishedTask);
+          }
         }
         c.gen = null;
         if (c.leaving) {
@@ -545,6 +574,8 @@ export class SwarmEngine {
         }
       }
     }
+
+    this.soaBuffer.syncFromCursors(this.cursors);
   }
 
   private notifyTaskDone(task: Required<SwarmTask>): void {
@@ -623,11 +654,31 @@ export class SwarmEngine {
     return touched;
   }
 
+  private isDependencySatisfied(depId: string): boolean {
+    const depTask = this.byTask.get(depId);
+    if (!depTask) return true;
+    if (depTask.state === "done") return true;
+    // Early pipeline unlock: when a parent container rect has drawn >= 60% of its frame,
+    // unlock inner child tasks so a squad of cursors can build inner DOM simultaneously!
+    if (depTask.state === "active" && depTask.spec.type === "rect") {
+      const rectEl = this.els.get(depTask.spec.el) as SwarmRectEl | undefined;
+      if (rectEl && rectEl.vis) {
+        if (rectEl.styled || !rectEl.draw) return true;
+        const ratio = Math.min(
+          rectEl.draw.w / Math.max(1, rectEl.w),
+          rectEl.draw.h / Math.max(1, rectEl.h)
+        );
+        if (ratio >= 0.6) return true;
+      }
+    }
+    return false;
+  }
+
   public available(): Array<Required<SwarmTask>> {
     const out: Array<Required<SwarmTask>> = [];
     for (const t of this.tasks) {
       if (t.state !== "wait" || t.y > this.frontier) continue;
-      if (t.deps.every((depId) => this.byTask.get(depId)?.state === "done")) {
+      if (t.deps.every((depId) => this.isDependencySatisfied(depId))) {
         out.push(t);
       }
     }
@@ -789,6 +840,10 @@ export class SwarmEngine {
     task: Required<SwarmTask>
   ): Generator<void, void, number> {
     const spec = task.spec;
+    const plugin = defaultToolRegistry.get(spec.type);
+    if (plugin) {
+      return plugin.runLead(this, cursor, task);
+    }
     switch (spec.type) {
       case "path":
         return this.drawPath(
@@ -823,6 +878,10 @@ export class SwarmEngine {
           cursor,
           this.els.get(spec.el) as SwarmTextEl
         );
+      case "3d":
+        return defaultToolRegistry
+          .get("3d")!
+          .runLead(this, cursor, task);
     }
   }
 
