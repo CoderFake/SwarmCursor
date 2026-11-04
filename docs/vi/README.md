@@ -22,3 +22,8 @@ Chào mừng bạn đến với tài liệu Tiếng Việt chính thức của *
 
 ## 4. Tùy biến & Thuộc tính (`customization/`)
 - [Thuộc tính HTML `data-swarm-*`, Biến CSS & 9 AI Icons (`theming-and-attributes.md`)](./customization/theming-and-attributes.md)
+
+## 5. Bộ Kỹ năng cho AI Coding Agent (`skills/swarm-cursor/`)
+- [`SKILL.md` (Chỉ dẫn chính cho AI Agent bằng tiếng Anh)](../../skills/swarm-cursor/SKILL.md)
+- [`01-getting-started.md`](../../skills/swarm-cursor/references/01-getting-started.md) · [`02-dom-and-react-components.md`](../../skills/swarm-cursor/references/02-dom-and-react-components.md) · [`03-media-3d-and-2d-builders.md`](../../skills/swarm-cursor/references/03-media-3d-and-2d-builders.md) · [`04-wasm-engine-and-theming.md`](../../skills/swarm-cursor/references/04-wasm-engine-and-theming.md)
+- **Tải trực tiếp gói `.zip`**: [`swarm-cursor-skills.zip`](https://sc-hd.vercel.app/swarm-cursor-skills.zip)

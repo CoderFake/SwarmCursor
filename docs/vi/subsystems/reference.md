@@ -39,13 +39,15 @@ import {
   typeTextCoroutine,
   drawPathCoroutine,
   duplicateGroupCoroutine,
+  editTextCoroutine,
   dragGuideCoroutine,
 } from "swarm-cursor/engine";
 
-// Khởi tạo Engine điều phối
+// SwarmEngine tự động tái sử dụng singleton `wasmKernel` (Rust/WASM SIMD128)
+// và giao việc song cho đàn chuột rảnh qua `wasmKernel.auctionTasksBatch(...)`
 const engine = new SwarmEngine({
-  workerCount: 18,
-  speedMultiplier: 1,
+  initialCursors: 18,
+  tempoMultiplier: 0.85,
 });
 ```
 

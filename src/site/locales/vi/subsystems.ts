@@ -17,7 +17,7 @@ export const VI_SUBSYSTEMS: DocSection[] = [
       {
         badge: "SIMD 3 & 4",
         title: "projectPoints3DBatch & auctionTasksBatch",
-        body: "Nhân ma trận 4×4 MVP chiếu đỉnh 3D -> 2D và đấu giá giao việc song song giữa các con trỏ rảnh.",
+        body: "Nhân ma trận 4×4 MVP chiếu đỉnh 3D -> 2D và đấu giá giao việc song song giữa các con trỏ rảnh (tích hợp trực tiếp vào `SwarmEngine.step()` qua singleton `wasmKernel`).",
       },
       {
         badge: "SIMD 5",

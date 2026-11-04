@@ -17,7 +17,7 @@ export const EN_SUBSYSTEMS: DocSection[] = [
       {
         badge: "SIMD 3 & 4",
         title: "projectPoints3DBatch & auctionTasksBatch",
-        body: "`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction.",
+        body: "`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction (wired into `SwarmEngine.step()` via singleton `wasmKernel`).",
       },
       {
         badge: "SIMD 5",

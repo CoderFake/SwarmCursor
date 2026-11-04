@@ -5,6 +5,7 @@
 - **Live Documentation & Interactive Showcase**: **[https://sc-hd.vercel.app/](https://sc-hd.vercel.app/)**
 - **Repository**: **[https://github.com/CoderFake/SwarmCursor](https://github.com/CoderFake/SwarmCursor)**
 - **Documentation**: **[🇬🇧 English (`docs/en/`)](./docs/en/README.md)** · **[🇻🇳 Tiếng Việt (`docs/vi/`)](./docs/vi/README.md)**
+- **AI Coding Agent Skill (`.zip` / `SKILL.md`)**: **[`skills/swarm-cursor/SKILL.md`](./skills/swarm-cursor/SKILL.md)** · **[Download `swarm-cursor-skills.zip`](https://sc-hd.vercel.app/swarm-cursor-skills.zip)**
 
 ---
 

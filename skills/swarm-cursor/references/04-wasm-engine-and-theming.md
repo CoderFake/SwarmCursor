@@ -16,7 +16,7 @@ The Rust kernel (`crates/swarm-kernel-wasm/src/`) is compiled with `wasm32` SIMD
 O(N) Uniform Spatial Hash Grid Boids and 4-cursor-per-instruction `f32x4` Cubic Bezier flight solver.
 
 ### [SIMD 3 & 4] projectPoints3DBatch & auctionTasksBatch
-`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction.
+`f32x4` 4×4 MVP matrix vertex projection and parallel Euclidean + viewport priority task auction (wired into `SwarmEngine.step()` via singleton `wasmKernel`).
 
 ### [SIMD 5] deformSculpturalMeshBatch
 Multi-harmonic 3D mesh displacement (branchless polynomial `sin`/`cos`) in WASM linear memory.

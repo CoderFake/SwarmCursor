@@ -115,12 +115,15 @@ Choose the most specific entry point for tree-shaking and clean modular architec
 ## 3. Choosing the Right Integration Mode
 
 1. **Mode A — DOM-Driven React Wrapper (\`<SwarmProvider>\` + \`<SwarmElement>\` / \`data-swarm\`)** *(Recommended for websites & apps)*:
-   - Wrap your existing React page in \`<SwarmProvider scrollMode="manual" deepScan={true} fastMode={true} controls={true}>\`.
+   - Wrap your existing React page in \`<SwarmProvider scrollMode="hybrid" deepScan={true} fastMode={true} controls={true}>\`.
    - Annotate key structural cards/containers/headings with \`data-swarm="rect"\`, \`data-swarm="text"\`, \`data-swarm="path"\`, \`data-swarm="3d"\`, or \`data-swarm="image"\` (or use \`<SwarmElement id="..." tool="rect">\`).
 2. **Mode B — Fixed 1440px Artboard (\`<SwarmCanvas>\` + \`SceneBuilder\`)**:
    - Use when building a Figma-style interactive artboard showcase with explicit \`(x, y, w, h)\` scene coordinates.
 3. **Mode C — Ambient Mouse Follower (\`<SwarmFollower>\`)**:
    - Lightweight decorative cursor flock that orbits the user's pointer without scanning or modifying DOM elements.
+4. **Figma Alt+Drag Clone (\`dup\`) + Select-All Re-Type (\`edit\`) Choreography**:
+   - Group sibling cards into a \`SwarmDupGroup\` (\`d:\${groupId}:\${k}\` task with \`duplicateGroupCoroutine\`) and wire each cloned card's title text to an \`edit\` task (\`e:\${titleId}\` with \`editTextCoroutine\` depending on \`d:\${groupId}:\${k}\`).
+   - The cursor Alt+Drags (\`cursor.shape = "dup"\`) the cloned card from the source card with red Figma spacing guides (\`#F24822\`), then double-clicks the cloned title (\`el.selAll = true\` -> \`.text-sel\` highlight) and re-types the new title (\`engine.type(el, el.text, true)\`).
 
 ---
 
@@ -128,15 +131,17 @@ Choose the most specific entry point for tree-shaking and clean modular architec
 
 When writing custom integrations with \`SwarmEngine\`, \`SwarmKernel\`, or Three.js WebGL stages, ALWAYS follow these rules:
 
-1. **Do NOT promote every inner text node inside cards into separate \`data-swarm="text"\` tasks**:
-   - Keep inner text (\`<h3>\`, \`<p>\`, \`<span>\`, badges, buttons) inside their parent \`[data-swarm]\` card so they reveal together with the parent card's \`clip-path\`. Only use \`data-swarm="text"\` on top-level standalone hero headings.
+1. **Promote ONLY primary card/section titles for \`text\` / \`edit\` tasks**:
+   - Keep body descriptions, tags, and metadata native inside their parent \`[data-swarm]\` card so they reveal with the parent card's \`clip-path\`. Promote only the card's primary title (\`h2\`/\`h3\`/\`strong\`) when you want live typing or Alt+Drag Clone + Select-All Re-Type (\`dup\` + \`edit\`) choreography, updating \`.textContent\` and \`.text-sel\` directly in \`requestAnimationFrame\` with zero React re-renders per character.
 2. **Isolate \`MutationObserver\` from cursor and overlay layers**:
    - If observing DOM changes to register dynamic \`[data-swarm]\` nodes, observe ONLY the content container \`<div ref={contentRef}>{children}</div>\`, NEVER the parent wrapper containing \`.cursors\` or construction ghost layers.
 3. **Use Zero-React-Tick Renderers (\`FastCursorLayerController\` + \`FastOverlayCanvasController\`)**:
    - Never trigger React \`setState\` on every 60fps animation frame for cursor positions or rectangle drag progress.
-4. **Pause Off-Screen & Idle Loops**:
+4. **Parallel Rust/WASM \`wasmKernel.auctionTasksBatch\` & Singleton \`wasmKernel\`**:
+   - \`SwarmEngine\` automatically uses the singleton \`wasmKernel\` (\`import { wasmKernel } from "swarm-cursor/kernel"\`) and dispatches idle cursors to available viewport tasks in parallel via \`wasmKernel.auctionTasksBatch(...)\` (\`crates/swarm-kernel-wasm/src/auction.rs\`). Never instantiate a new \`SwarmKernel\` on every frame or component re-render.
+5. **Strict Viewport Entry Gating & Off-Screen Loop Pausing**:
+   - Gate below-the-fold sections until the user actually scrolls (\`scrollY > 64\` and \`rect.top <= vh * 0.72\`) so off-screen sections never build prematurely while idle at the top of the page.
    - Pause \`requestAnimationFrame\` when \`engine.flocking === true\` (all tasks done), when \`document.hidden === true\`, or when a 3D WebGL canvas leaves the viewport (\`IntersectionObserver\`).
-   - Reuse a singleton \`wasmKernel\` (\`import { wasmKernel } from "swarm-cursor/kernel"\`) rather than calling \`SwarmKernel.createSync()\` on every component mount.
 
 ---
 

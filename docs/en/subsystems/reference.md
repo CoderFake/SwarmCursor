@@ -37,12 +37,15 @@ import {
   typeTextCoroutine,
   drawPathCoroutine,
   duplicateGroupCoroutine,
+  editTextCoroutine,
   dragGuideCoroutine,
 } from "swarm-cursor/engine";
 
+// SwarmEngine automatically reuses the singleton Rust/WASM `wasmKernel`
+// and dispatches idle cursors in parallel via `wasmKernel.auctionTasksBatch(...)`
 const engine = new SwarmEngine({
-  workerCount: 18,
-  speedMultiplier: 1,
+  initialCursors: 18,
+  tempoMultiplier: 0.85,
 });
 ```
 

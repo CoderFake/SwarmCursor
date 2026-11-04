@@ -22,3 +22,8 @@ Welcome to the official English documentation of **SwarmCursor 2.0** (`https://g
 
 ## 4. Customization & HTML Attributes (`customization/`)
 - [`data-swarm-*` HTML Attributes, CSS Variables & 9 AI Icons (`theming-and-attributes.md`)](./customization/theming-and-attributes.md)
+
+## 5. AI Coding Agent Skill Bundle (`skills/swarm-cursor/`)
+- [`SKILL.md` (Main Agent Instructions)](../../skills/swarm-cursor/SKILL.md)
+- [`01-getting-started.md`](../../skills/swarm-cursor/references/01-getting-started.md) · [`02-dom-and-react-components.md`](../../skills/swarm-cursor/references/02-dom-and-react-components.md) · [`03-media-3d-and-2d-builders.md`](../../skills/swarm-cursor/references/03-media-3d-and-2d-builders.md) · [`04-wasm-engine-and-theming.md`](../../skills/swarm-cursor/references/04-wasm-engine-and-theming.md)
+- **One-Click Download**: [`swarm-cursor-skills.zip`](https://sc-hd.vercel.app/swarm-cursor-skills.zip)
