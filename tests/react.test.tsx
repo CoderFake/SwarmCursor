@@ -6,10 +6,11 @@ import {
   SwarmProvider,
   SwarmElement,
   SwarmControls,
+  SwarmFollower,
 } from "../src/react";
-import { buildSwarmLandingScene } from "../src/presets/swarm-landing";
+import { buildSwarmLandingScene, createSwarmFollower } from "../src";
 
-describe("React Adapter (SwarmCanvas, SwarmProvider, SwarmElement, SwarmControls)", () => {
+describe("React Adapter (SwarmCanvas, SwarmProvider, SwarmElement, SwarmControls, SwarmFollower)", () => {
   it("renders SwarmProvider and SwarmElement safely in SSR (renderToString)", () => {
     const html = renderToString(
       <SwarmProvider scrollMode="hybrid" controls>
@@ -28,5 +29,16 @@ describe("React Adapter (SwarmCanvas, SwarmProvider, SwarmElement, SwarmControls
       <SwarmCanvas scene={buildSwarmLandingScene} scrollMode="auto" />
     );
     expect(html).toBeDefined();
+  });
+
+  it("renders standalone SwarmFollower and steps mouse follow + circular orbit physics", () => {
+    const html = renderToString(<SwarmFollower count={24} radiusScale={1} />);
+    expect(html).toContain('class="cursors"');
+
+    const follower = createSwarmFollower({ count: 12 });
+    expect(follower.engine.cursors.length).toBe(12);
+    follower.engine.mouse = { x: 500, y: 400 };
+    follower.engine.follow(0.03, follower.engine.cursors, undefined, 1);
+    follower.destroy();
   });
 });

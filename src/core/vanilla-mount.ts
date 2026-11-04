@@ -220,3 +220,89 @@ export function createSwarm(options: CreateSwarmOptions = {}): SwarmInstance {
     },
   };
 }
+
+export interface SwarmFollowerOptions {
+  container?: HTMLElement;
+  count?: number;
+  radiusScale?: number;
+  tempoMultiplier?: number;
+  zIndex?: number;
+}
+
+export function createSwarmFollower(
+  options: SwarmFollowerOptions = {}
+): { engine: SwarmEngine; destroy: () => void } {
+  const count = options.count ?? 36;
+  const radiusScale = options.radiusScale ?? 1;
+  const engine = new SwarmEngine({
+    initialCursors: count,
+    flockCursors: count,
+    tempoMultiplier: options.tempoMultiplier ?? 1,
+    scene: { els: [], tasks: [], groups: [], height: 800, width: 1280 },
+  });
+  engine.started = true;
+  engine.flocking = true;
+  for (const c of engine.cursors) {
+    c.follow = true;
+  }
+
+  let layer: HTMLDivElement | null = null;
+  let rafId = 0;
+
+  if (typeof document !== "undefined") {
+    const parent = options.container ?? document.body;
+    layer = document.createElement("div");
+    layer.className = "cursors";
+    layer.style.cssText = `position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:${options.zIndex ?? 40};overflow:hidden;`;
+    parent.appendChild(layer);
+
+    const updateViewport = () => {
+      engine.vp.vw = window.innerWidth || 1280;
+      engine.vp.vh = window.innerHeight || 800;
+      engine.vp.s = 1;
+      engine.vp.left = 0;
+      engine.vp.scrollY = 0;
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      engine.mouse = { x: e.clientX, y: e.clientY };
+    };
+    const onPointerLeave = () => {
+      engine.mouse = null;
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onPointerLeave);
+
+    let lastTime = performance.now();
+    const tick = (now: number) => {
+      const dt =
+        Math.min(0.05, (now - lastTime) / 1000) * engine.tempoMultiplier;
+      lastTime = now;
+      engine.time += dt;
+      engine.follow(dt, engine.cursors, undefined, radiusScale);
+      if (layer) {
+        layer.innerHTML = engine.cursors
+          .map((c) => {
+            const [hx, hy] = CURSOR_HOTSPOTS[c.shape];
+            const sc = 1 - c.press * 0.12;
+            return `<div class="cursor" style="transform:translate(${c.x}px,${c.y}px)"><svg width="28" height="28" viewBox="0 0 28 28" style="transform:translate(${-hx}px,${-hy}px) rotate(${c.angle}deg) scale(${sc});transform-origin:${hx}px ${hy}px">${renderCursorSvgInner(c.shape, c.color)}</svg></div>`;
+          })
+          .join("");
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+  }
+
+  return {
+    engine,
+    destroy: () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      layer?.remove();
+    },
+  };
+}
+

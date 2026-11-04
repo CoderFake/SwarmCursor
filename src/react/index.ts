@@ -27,3 +27,5 @@ export type {
   SwarmContextValue,
 } from "./SwarmProvider";
 export { SwarmControls as SwarmControlsBar } from "./SwarmControls";
+export { SwarmFollower } from "./SwarmFollower";
+export type { SwarmFollowerProps } from "./SwarmFollower";
