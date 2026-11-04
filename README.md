@@ -52,11 +52,25 @@ import { SwarmImage } from "swarm-cursor/react";
 
 ---
 
-## Cài đặt nhanh
+## Cài đặt nhanh & Kiến trúc Sub-Packages
 
 ```bash
 npm install git+https://github.com/CoderFake/SwarmCursor.git
 ```
+
+SwarmCursor 2.0 được chia thành các **Sub-Packages độc lập (Tree-Shakeable Subpath Exports)** để dễ dàng mở rộng và chỉ import đúng phần cần dùng:
+
+| Sub-package Import | Nội dung & Trách nhiệm |
+|---|---|
+| `swarm-cursor` | Barrel export đầy đủ toàn bộ Core, Engine, Kernel, 3D, Scanner, Renderers, Tools |
+| `swarm-cursor/engine` | Lõi điều phối `SwarmEngine` đã tách nhỏ (`SwarmEngine`, `scheduler`, `cursor-motion`, `tool-coroutines`, `bounds-and-overlays`, `scene-loader`) |
+| `swarm-cursor/kernel` | Lõi biên dịch **Rust/WASM SIMD128** (`SwarmKernel`, `SoACursorBuffer`, `DAGTaskScheduler`, `boids-ops`, `bezier-ops`, `projection-ops`, `auction-ops`, `mesh-ops`) |
+| `swarm-cursor/three` | Tích hợp 3D / Three.js / GLB (`CumulativeAreaSampler`, `ProjectionBridge`, `PARTICLE_BUILD_*_SHADER`, `SwarmGLBController`) |
+| `swarm-cursor/scanner` | Quét đệ quy DOM & bộ đệm đo kích thước (`scanDeepDOM`, `LayoutReadCache`) |
+| `swarm-cursor/renderers` | Render 60fps không tốn React tick (`FastCursorLayerController`, `FastOverlayCanvasController`) |
+| `swarm-cursor/tools` | Hệ thống Plugin công cụ & Điều phối đội nhóm (`ToolRegistry`, `SquadCoordinator`, `three-tools`, `image-tools`) |
+| `swarm-cursor/react` | Các React Component (`<SwarmProvider>`, `<Swarm3D>`, `<SwarmImage>`, `<SwarmAgentPill>`, `<SwarmControls>`) |
+| `swarm-cursor/styles.css` | Stylesheet chuẩn cho con trỏ, khung chọn, kính mờ và hiệu ứng 3D/Image |
 
 ---
 

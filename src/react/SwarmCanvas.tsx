@@ -8,7 +8,7 @@ import {
   RULER_SIZE,
   SWARM_LOGO_PATHS,
 } from "../core/constants";
-import { SwarmEngine } from "../core/engine";
+import { SwarmEngine } from "../engine/SwarmEngine";
 import { getFontFamily, getLineHeightPx } from "../core/text-measure";
 import type {
   ScrollMode,

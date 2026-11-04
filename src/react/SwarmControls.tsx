@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { AutoScrollController } from "../core/autoscroll";
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type { ScrollMode } from "../core/types";
 
 export interface SwarmControlsProps {

@@ -8,7 +8,7 @@ import React, {
 import { AutoScrollController } from "../core/autoscroll";
 import { DESIGN_WIDTH } from "../core/constants";
 import { scanDOMElements } from "../core/dom-scanner";
-import { SwarmEngine } from "../core/engine";
+import { SwarmEngine } from "../engine/SwarmEngine";
 import { scanDeepDOMElements } from "../scanner";
 import {
   FastCursorLayerController,

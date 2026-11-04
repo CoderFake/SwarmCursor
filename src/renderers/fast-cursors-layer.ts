@@ -1,5 +1,5 @@
 import { ARROW_CURSOR_PATH, CURSOR_HOTSPOTS } from "../core/constants";
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type { CursorShape } from "../core/types";
 
 export interface FastCursorLayerOptions {

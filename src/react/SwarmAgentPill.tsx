@@ -7,7 +7,7 @@ import {
   pickRandomAgentIcon,
 } from "../core/agent-icons";
 import { FLOCK_TARGET_CURSORS } from "../core/constants";
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 
 export interface SwarmAgentPillProps {
   /** Optional SwarmEngine instance to sync live agent count and tempo */

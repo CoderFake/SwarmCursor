@@ -1,4 +1,4 @@
-import type { SwarmEngine } from "./engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type { ScrollMode } from "./types";
 
 export interface AutoScrollOptions {

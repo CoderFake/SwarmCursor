@@ -1,5 +1,5 @@
 import { GUIDE_RED, SELECTION_BLUE } from "../core/constants";
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type {
   Gizmo3DOverlayItem,
   ImageBuildOverlayItem,

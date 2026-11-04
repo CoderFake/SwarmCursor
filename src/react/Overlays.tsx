@@ -1,6 +1,6 @@
 import React from "react";
 import { GUIDE_RED, RULER_SIZE, SELECTION_BLUE } from "../core/constants";
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import { CursorView } from "./CursorSvg";
 
 export function SelectionAndGuidesOverlay({ engine }: { engine: SwarmEngine }) {

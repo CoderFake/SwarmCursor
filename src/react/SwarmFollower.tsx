@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FLOCK_TARGET_CURSORS } from "../core/constants";
-import { SwarmEngine } from "../core/engine";
+import { SwarmEngine } from "../engine/SwarmEngine";
 import { CursorView } from "./CursorSvg";
 import { SwarmAgentPill, type SwarmAgentPillProps } from "./SwarmAgentPill";
 

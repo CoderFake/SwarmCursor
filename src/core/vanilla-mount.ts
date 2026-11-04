@@ -14,7 +14,7 @@ import {
   SELECTION_BLUE,
 } from "./constants";
 import { scanDOMElements } from "./dom-scanner";
-import { SwarmEngine } from "./engine";
+import { SwarmEngine } from "../engine/SwarmEngine";
 import { getFontFamily, getLineHeightPx } from "./text-measure";
 import type {
   CursorShape,

@@ -5,7 +5,7 @@ export * from "./core/text-measure";
 export * from "./core/scene-builder";
 export * from "./core/physics";
 export * from "./core/autoscroll";
-export * from "./core/engine";
+export * from "./engine";
 export * from "./core/dom-scanner";
 export * from "./core/vanilla-mount";
 export * from "./presets/swarm-landing";

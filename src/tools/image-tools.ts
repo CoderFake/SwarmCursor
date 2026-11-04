@@ -1,4 +1,5 @@
-import { bumpVersion, type SwarmEngine } from "../core/engine";
+import { bumpVersion } from "../engine/scene-loader";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type {
   ImageBuildOverlayItem,
   SwarmCursor,

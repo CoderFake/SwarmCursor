@@ -37,6 +37,36 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "import": "./dist/engine/index.js",
+      "require": "./dist/engine/index.cjs"
+    },
+    "./kernel": {
+      "types": "./dist/kernel/index.d.ts",
+      "import": "./dist/kernel/index.js",
+      "require": "./dist/kernel/index.cjs"
+    },
+    "./three": {
+      "types": "./dist/three/index.d.ts",
+      "import": "./dist/three/index.js",
+      "require": "./dist/three/index.cjs"
+    },
+    "./scanner": {
+      "types": "./dist/scanner/index.d.ts",
+      "import": "./dist/scanner/index.js",
+      "require": "./dist/scanner/index.cjs"
+    },
+    "./renderers": {
+      "types": "./dist/renderers/index.d.ts",
+      "import": "./dist/renderers/index.js",
+      "require": "./dist/renderers/index.cjs"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js",
+      "require": "./dist/tools/index.cjs"
+    },
     "./react": {
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.js",

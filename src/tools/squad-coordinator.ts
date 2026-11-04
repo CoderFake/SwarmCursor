@@ -1,4 +1,4 @@
-import type { SwarmEngine } from "../core/engine";
+import type { SwarmEngine } from "../engine/SwarmEngine";
 import type {
   Swarm3DEl,
   SwarmCursor,
