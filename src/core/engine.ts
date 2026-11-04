@@ -73,6 +73,7 @@ export class SwarmEngine {
   public nextId = 0;
   public spawnCooldown = 0;
   public flocking = false;
+  public done = false;
   public lastT: Point2D | null = null;
   public tv: Point2D = { x: 0, y: 0 };
   public mouse: Point2D | null = null;
@@ -115,6 +116,7 @@ export class SwarmEngine {
     this.squadCoordinator?.clear();
     this.started = false;
     this.flocking = false;
+    this.done = false;
     this.frontier = 0;
     this.vel = 0;
     this.time = 0;
@@ -456,6 +458,7 @@ export class SwarmEngine {
       }
       if (this.cursors.every((c) => c.follow)) {
         this.flocking = true;
+        this.done = true;
         this.options.onAllTasksDone?.();
       }
     }

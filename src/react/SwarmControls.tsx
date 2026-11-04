@@ -54,8 +54,11 @@ export function SwarmControls({
   const totalCount = engine.tasks.length;
   const progressPct =
     totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 100;
+  const isCompleted =
+    totalCount > 0 &&
+    (engine.done || engine.flocking || doneCount === totalCount);
   const isBuilding =
-    engine.started && !engine.paused && !engine.flocking && totalCount > 0;
+    engine.started && !engine.paused && !isCompleted && totalCount > 0;
 
   return (
     <div
@@ -78,8 +81,8 @@ export function SwarmControls({
             <span className="swarm-tp-badge">
               {engine.paused
                 ? "Paused"
-                : engine.flocking
-                  ? "Orbiting"
+                : isCompleted
+                  ? "Completed"
                   : engine.started
                     ? "Building"
                     : "Idle"}
