@@ -76,12 +76,14 @@
   },
   "files": [
     "dist",
+    "skills",
     "README.md"
   ],
   "scripts": {
     "build": "npm run build:lib",
     "build:lib": "tsup && cp src/styles/swarm-cursor.css dist/styles.css",
-    "build:site": "mkdir -p dist-site && cp src/styles/swarm-cursor.css dist-site/styles.css && cp src/site/styles.css dist-site/docs-site.css && cp src/presets/logo-cf.svg dist-site/logo-cf.svg && cp src/presets/index.html dist-site/index.html && npx esbuild src/presets/landing-demo.tsx --bundle --format=esm --minify --outfile=dist-site/landing-demo.js",
+    "build:skills": "npx esbuild src/site/exportSkillsCli.ts --bundle --platform=node --format=esm --outfile=dist-site/.export-skills.mjs && node dist-site/.export-skills.mjs && rm -f dist-site/.export-skills.mjs",
+    "build:site": "mkdir -p dist-site && npm run build:skills && cp src/styles/swarm-cursor.css dist-site/styles.css && cp src/site/styles.css dist-site/docs-site.css && cp src/presets/logo-cf.svg dist-site/logo-cf.svg && cp src/presets/index.html dist-site/index.html && npx esbuild src/presets/landing-demo.tsx --bundle --format=esm --minify --outfile=dist-site/landing-demo.js",
     "prepare": "npm run build:lib",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

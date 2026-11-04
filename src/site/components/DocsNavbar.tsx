@@ -1,5 +1,6 @@
 import React from "react";
 import type { DocSection, DocsUI, Lang } from "../types";
+import { downloadSwarmCursorSkillsZip } from "../skillPackager";
 import { CoderFakeLogo } from "./CoderFakeLogo";
 
 export type SiteViewMode = "docs" | "artboard";
@@ -224,6 +225,32 @@ export function HubSidebar({
               >
                 <ModuleIcon moduleKey="artboard" size={17} />
                 <span>Showcase</span>
+              </button>
+
+              <button
+                type="button"
+                className="hub-nav-item"
+                onClick={() => {
+                  downloadSwarmCursorSkillsZip();
+                  onNavClick?.();
+                }}
+                title="Download swarm-cursor AI coding agent skill package (.zip)"
+              >
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>{lang === "vi" ? "Tải AI Skills (.zip)" : "Download Skills"}</span>
               </button>
             </div>
 
@@ -471,6 +498,33 @@ export function HubTopbar({
           <i className="hub-status-dot" />
           <span>v2.0 · SIMD128</span>
         </span>
+
+        <button
+          type="button"
+          className="hub-action-pill"
+          onClick={downloadSwarmCursorSkillsZip}
+          title={
+            lang === "vi"
+              ? "Tải trọn bộ tài liệu dạng AI Skills (thư mục tiếng Anh .zip)"
+              : "Download full English AI coding agent skill bundle (.zip)"
+          }
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span>{lang === "vi" ? "Tải Skills" : "Download Skills"}</span>
+        </button>
 
         <button
           type="button"

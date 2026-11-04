@@ -13,6 +13,10 @@ import {
   type SiteViewMode,
 } from "./components/DocsNavbar";
 import { getDocsLocale } from "./locales";
+import {
+  buildSkillArchiveFiles,
+  downloadSwarmCursorSkillsZip,
+} from "./skillPackager";
 import type { DocSection, DocsLocaleBundle, Lang } from "./types";
 
 const SUBPACKAGE_PATHS = [
@@ -74,6 +78,15 @@ function HubCatalogView({
           >
             <span>{lang === "vi" ? "Bắt đầu" : "Get Started"}</span>
             <span>→</span>
+          </button>
+          <button
+            type="button"
+            className="hub-btn-outline"
+            onClick={downloadSwarmCursorSkillsZip}
+            title="Download full English AI coding agent skill bundle (swarm-cursor-skills.zip)"
+          >
+            <span>{lang === "vi" ? "Tải AI Skills (.zip)" : "Download Skills (.zip)"}</span>
+            <span>↓</span>
           </button>
           <button
             type="button"
@@ -183,6 +196,64 @@ function HubCatalogView({
                   }
                 >
                   {copiedKey === sp.pkg
+                    ? ui.table.copiedBtn.replace("✓ ", "")
+                    : ui.table.copyBtn}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="hub-ai-skills" className="hub-panel">
+        <div className="hub-panel-header">
+          <div>
+            <h2>
+              {lang === "vi"
+                ? "AI Coding Agent Skills (Thư mục Tiếng Anh)"
+                : "AI Coding Agent Skills (English Bundle)"}
+            </h2>
+          </div>
+          <button
+            type="button"
+            className="hub-btn-primary"
+            onClick={downloadSwarmCursorSkillsZip}
+          >
+            <span>
+              {lang === "vi"
+                ? "Tải swarm-cursor-skills.zip"
+                : "Download swarm-cursor-skills.zip"}
+            </span>
+            <span>↓</span>
+          </button>
+        </div>
+
+        <div className="hub-panel-body">
+          <p className="hub-catalog-desc" style={{ marginBottom: 14 }}>
+            {lang === "vi"
+              ? "Đóng gói toàn bộ tài liệu tiếng Anh chuẩn hoá vào thư mục swarm-cursor/ (gồm SKILL.md, references/ và examples/) để Claude Code, Antigravity, Cursor hoặc Copilot tự động viết code SwarmCursor 2.0 chuẩn xác."
+              : "Packages the complete English documentation into a standard swarm-cursor/ skill folder (SKILL.md, references/, and examples/) ready for Claude Code, Antigravity, Cursor, and GitHub Copilot."}
+          </p>
+
+          <div className="hub-subpkg-grid">
+            {buildSkillArchiveFiles().map((file) => (
+              <div key={file.path} className="hub-subpkg-row">
+                <div className="hub-subpkg-info">
+                  <code>{file.path}</code>
+                  <span>
+                    {file.path.endsWith("SKILL.md")
+                      ? "Agent Entry & Rules"
+                      : file.path.includes("/references/")
+                        ? "English Reference Docs"
+                        : "Code Template"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="hub-copy-mini"
+                  onClick={() => copyText(file.content, file.path)}
+                >
+                  {copiedKey === file.path
                     ? ui.table.copiedBtn.replace("✓ ", "")
                     : ui.table.copyBtn}
                 </button>
