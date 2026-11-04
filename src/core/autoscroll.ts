@@ -47,7 +47,17 @@ export class AutoScrollController {
 
     if (engine.flocking) return;
 
-    const maxScroll = Math.max(0, engine.height * engine.vp.s - engine.vp.vh);
+    const docHeight =
+      typeof document !== "undefined"
+        ? Math.max(
+            document.documentElement.scrollHeight || 0,
+            document.body?.scrollHeight || 0
+          )
+        : 0;
+    const maxScroll = Math.max(
+      0,
+      Math.max(engine.height * engine.vp.s, docHeight) - engine.vp.vh
+    );
     if (engine.vp.scrollY >= maxScroll) return;
 
     // Director logic: adjust scroll speed based on active tasks inside the viewport

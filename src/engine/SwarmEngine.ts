@@ -251,20 +251,35 @@ export class SwarmEngine {
 
     if (this.started) {
       const isDomScene = this.list.some((el) => el.domEl);
+      const maxScroll = Math.max(1, this.height * this.vp.s - this.vp.vh);
       if (this.vp.scrollY <= 24) {
         const initialCap = isDomScene
           ? this.viewTop + this.vp.vh * 0.82
           : Math.min(650, this.viewTop + (this.viewBot - this.viewTop) * 0.82);
         this.frontier = Math.max(this.frontier, initialCap);
+      } else if (this.vp.scrollY >= maxScroll - 32) {
+        this.frontier = Math.max(this.frontier, this.height + 200);
       } else {
-        const activeSpan = Math.min(
-          this.vp.vh / Math.max(0.65, this.vp.s),
-          this.viewBot - this.viewTop
-        );
+        const scrollRatio = clamp(this.vp.scrollY / maxScroll, 0, 1);
+        const viewportSpan = this.viewBot - this.viewTop;
+        const viewFrontier = this.viewTop + viewportSpan * 0.86;
+        const proportionalFrontier = 650 + scrollRatio * (this.height - 450);
         this.frontier = Math.max(
           this.frontier,
-          this.viewTop + activeSpan * 0.86
+          viewFrontier,
+          proportionalFrontier
         );
+      }
+
+      // On mobile artboards (`s < 0.65`), multiple sections fit inside a single screen height;
+      // advance `frontier` automatically as current frontier tasks finish so it never stalls before the bottom.
+      if (!isDomScene && this.vp.s < 0.65 && this.frontier < this.height + 200) {
+        const hasPendingBeforeFrontier = this.tasks.some(
+          (t) => t.state !== "done" && t.y <= this.frontier
+        );
+        if (!hasPendingBeforeFrontier) {
+          this.frontier = Math.min(this.height + 200, this.frontier + 480);
+        }
       }
     }
 

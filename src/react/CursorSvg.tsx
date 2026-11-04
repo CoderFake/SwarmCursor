@@ -144,7 +144,6 @@ export function CursorView({
   c,
   X,
   Y,
-  showLabel = false,
 }: {
   c: SwarmCursor;
   X: number;
@@ -169,19 +168,6 @@ export function CursorView({
       >
         <CursorIcon shape={c.shape} color={c.color} />
       </svg>
-      {showLabel && (
-        <div
-          className="cursor-label"
-          style={{
-            left: 16,
-            top: 14,
-            background: c.color,
-            color: "#fff",
-          }}
-        >
-          {c.name}
-        </div>
-      )}
     </div>
   );
 }

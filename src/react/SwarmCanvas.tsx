@@ -317,6 +317,10 @@ export function SwarmCanvas({
       autoScroll.notifyUserInteraction();
       if (window.scrollY > 0) engine.start();
     };
+    const onTouchMove = () => {
+      autoScroll.notifyUserInteraction();
+      engine.start();
+    };
     const onPointerMove = (e: PointerEvent) => {
       engine.mouse = { x: e.clientX, y: e.clientY };
     };
@@ -330,6 +334,7 @@ export function SwarmCanvas({
     window.addEventListener("resize", updateViewport);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("wheel", onWheel, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
     window.addEventListener("pointermove", onPointerMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
 
@@ -350,6 +355,7 @@ export function SwarmCanvas({
       window.removeEventListener("resize", updateViewport);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("pointermove", onPointerMove);
       document.documentElement.removeEventListener(
         "pointerleave",

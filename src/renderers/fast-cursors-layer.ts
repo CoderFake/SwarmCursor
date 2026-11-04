@@ -77,17 +77,7 @@ export class FastCursorLayerController {
         svg.setAttribute("viewBox", "0 0 28 28");
         root.appendChild(svg);
 
-        let label: HTMLDivElement | null = null;
-        if (this.showLabels) {
-          label = document.createElement("div");
-          label.className = "cursor-label";
-          label.style.left = "16px";
-          label.style.top = "14px";
-          label.style.background = c.color;
-          label.style.color = "#fff";
-          label.textContent = c.name;
-          root.appendChild(label);
-        }
+        const label: HTMLDivElement | null = null;
 
         this.container.appendChild(root);
         entry = {

@@ -501,7 +501,7 @@ export function DocsApp() {
                 autoScrollSpeed={125}
                 controls={true}
                 controlsPosition="bottom-right"
-                showCursorLabels={true}
+                showCursorLabels={false}
                 showIntroLogo={true}
                 agentPill={{ maxIcons: 5, position: "bottom-center" }}
               />

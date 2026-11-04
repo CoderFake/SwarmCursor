@@ -147,12 +147,7 @@
 }
 
 .cursor-label {
-  position: absolute;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font: 600 11px/15px Inter, system-ui, sans-serif;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px #0000002e;
+  display: none !important;
 }
 
 .ruler {
