@@ -59,10 +59,12 @@ export class AutoScrollController {
 
     const effectiveSpeed =
       pendingInView.length > 6
-        ? this.speed * 0.45
+        ? this.speed * 0.28
         : pendingInView.length > 2
-          ? this.speed * 0.75
-          : this.speed * 1.25;
+          ? this.speed * 0.52
+          : pendingInView.length > 0
+            ? this.speed * 0.75
+            : this.speed * 1.05;
 
     const nextScrollY = Math.min(
       maxScroll,

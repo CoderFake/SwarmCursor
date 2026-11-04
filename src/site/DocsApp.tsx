@@ -498,7 +498,7 @@ export function DocsApp() {
                 key="artboard-canvas"
                 scene={buildSwarmLandingScene}
                 scrollMode="hybrid"
-                autoScrollSpeed={180}
+                autoScrollSpeed={125}
                 controls={true}
                 controlsPosition="bottom-right"
                 showCursorLabels={true}
