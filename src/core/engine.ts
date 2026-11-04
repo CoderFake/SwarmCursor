@@ -658,17 +658,35 @@ export class SwarmEngine {
     const depTask = this.byTask.get(depId);
     if (!depTask) return true;
     if (depTask.state === "done") return true;
-    // Early pipeline unlock: when a parent container rect has drawn >= 60% of its frame,
-    // unlock inner child tasks so a squad of cursors can build inner DOM simultaneously!
-    if (depTask.state === "active" && depTask.spec.type === "rect") {
-      const rectEl = this.els.get(depTask.spec.el) as SwarmRectEl | undefined;
-      if (rectEl && rectEl.vis) {
-        if (rectEl.styled || !rectEl.draw) return true;
-        const ratio = Math.min(
-          rectEl.draw.w / Math.max(1, rectEl.w),
-          rectEl.draw.h / Math.max(1, rectEl.h)
-        );
-        if (ratio >= 0.6) return true;
+    // Early pipeline unlock: when a parent task has reached >= 35% progress,
+    // unlock dependent tasks so the cursor swarm builds in parallel!
+    if (depTask.state === "active") {
+      if (depTask.spec.type === "rect") {
+        const rectEl = this.els.get(depTask.spec.el) as SwarmRectEl | undefined;
+        if (rectEl && rectEl.vis) {
+          if (rectEl.styled || !rectEl.draw) return true;
+          const ratio = Math.min(
+            rectEl.draw.w / Math.max(1, rectEl.w),
+            rectEl.draw.h / Math.max(1, rectEl.h)
+          );
+          if (ratio >= 0.35) return true;
+        }
+      } else if (depTask.spec.type === "text") {
+        const textEl = this.els.get(depTask.spec.el) as SwarmTextEl | undefined;
+        if (textEl && textEl.vis) {
+          if (!textEl.editing) return true;
+          if (
+            textEl.shown.length / Math.max(1, textEl.text.length) >=
+            0.35
+          ) {
+            return true;
+          }
+        }
+      } else if (depTask.spec.type === "3d") {
+        const threeEl = this.els.get(depTask.spec.el) as Swarm3DEl | undefined;
+        if (threeEl && threeEl.vis && threeEl.progress >= 0.35) {
+          return true;
+        }
       }
     }
     return false;
@@ -741,7 +759,7 @@ export class SwarmEngine {
     }
 
     const duration =
-      clamp(0.12 + Math.sqrt(dist) * 0.021, 0.14, 0.9) / (opts.speed ?? 1);
+      clamp(0.06 + Math.sqrt(dist) * 0.011, 0.07, 0.42) / (opts.speed ?? 1);
     const arcBend =
       (opts.bend ?? (Math.random() < 0.5 ? -1 : 1) * rand(0.04, 0.14)) *
       Math.min(dist, 600);
@@ -912,17 +930,21 @@ export class SwarmEngine {
 
     for (let i = 1; i < el.pts.length; i++) {
       yield* this.moveTo(cursor, this.anchor(el.pts[i]), {
+        speed: 1.8,
         bend: rand(-0.03, 0.03),
       });
       yield* this.click(cursor);
       el.placed = i + 1;
       bumpVersion(el);
-      yield* this.wait(rand(0.04, 0.12));
+      yield* this.wait(rand(0.015, 0.035));
     }
 
     if (el.closed) {
       cursor.shape = "pen-close";
-      yield* this.moveTo(cursor, el.pts[0], { bend: rand(-0.03, 0.03) });
+      yield* this.moveTo(cursor, el.pts[0], {
+        speed: 1.8,
+        bend: rand(-0.03, 0.03),
+      });
       yield* this.click(cursor);
       el.shut = true;
       bumpVersion(el);
@@ -934,9 +956,9 @@ export class SwarmEngine {
     yield* this.moveTo(
       cursor,
       { x: cursor.x + rand(14, 30), y: cursor.y + rand(10, 24) },
-      { speed: 1.4 }
+      { speed: 2.0 }
     );
-    yield* this.wait(0.3);
+    yield* this.wait(0.06);
     el.edit = false;
     if (el.fill) el.fillOn = true;
     bumpVersion(el);
@@ -982,7 +1004,7 @@ export class SwarmEngine {
       cursor,
       { x: el.x + el.w, y: el.y + el.h },
       {
-        speed: 0.75,
+        speed: 1.35,
         drag: true,
         bend: 0,
         onStep: () => {
@@ -998,10 +1020,10 @@ export class SwarmEngine {
     el.draw = null;
     bumpVersion(el);
     cursor.shape = "arrow";
-    yield* this.wait(rand(0.18, 0.3));
+    yield* this.wait(rand(0.04, 0.08));
     el.styled = true;
     bumpVersion(el);
-    yield* this.wait(0.35);
+    yield* this.wait(0.06);
     cursor.ov = null;
   }
 
@@ -1057,7 +1079,7 @@ export class SwarmEngine {
         cursor,
         { x: startX + el.w, y: startY + boxH },
         {
-          speed: 0.9,
+          speed: 1.5,
           drag: true,
           bend: 0,
           onStep: () => {
@@ -1075,11 +1097,11 @@ export class SwarmEngine {
     cursor.ov = () => [{ t: "box", b: this.bounds(el) }];
     yield* this.moveTo(
       cursor,
-      { x: cursor.x + rand(-30, 10), y: cursor.y + rand(10, 30) },
-      { speed: 1.5 }
+      { x: cursor.x + rand(-20, 8), y: cursor.y + rand(6, 18) },
+      { speed: 2.2 }
     );
     yield* this.type(el, el.text);
-    yield* this.wait(0.12);
+    yield* this.wait(0.04);
     el.editing = false;
     bumpVersion(el);
 
@@ -1087,13 +1109,13 @@ export class SwarmEngine {
     cursor.ov = () => [this.selection(el)];
 
     if (grow) {
-      const steps = [24, 32, 40, 48, 56, 64, 72].filter((s) => s < el.st.size);
+      const steps = [24, 36, 52, 68].filter((s) => s < el.st.size);
       for (const sz of [...steps, el.st.size]) {
-        yield* this.wait(0.06);
+        yield* this.wait(0.025);
         el.size = sz;
         bumpVersion(el);
       }
-      yield* this.wait(0.15);
+      yield* this.wait(0.05);
     }
 
     if (guide) {

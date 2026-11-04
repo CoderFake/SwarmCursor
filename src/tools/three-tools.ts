@@ -75,7 +75,7 @@ export function* run3DLeadCoroutine(
 
   const initialAnchors = resolve3DAnchors(engine, el);
   cursor.shape = "cross";
-  yield* engine.moveTo(cursor, initialAnchors.boxCorners[0], { speed: 1.1 });
+  yield* engine.moveTo(cursor, initialAnchors.boxCorners[0], { speed: 1.8 });
   yield* engine.click(cursor);
 
   cursor.ov = (): SwarmOverlayItem[] => {
@@ -110,7 +110,7 @@ export function* run3DLeadCoroutine(
   let p = 0.02;
   while (p < 0.32) {
     const dt = yield;
-    p = Math.min(0.32, p + (dt ?? 0.016) * engine.tempo * 0.42);
+    p = Math.min(0.32, p + (dt ?? 0.016) * engine.tempo * 0.85);
     update3DProgress(el, p);
     const anchors = resolve3DAnchors(engine, el);
     cursor.x = anchors.axes.y.x;
@@ -122,12 +122,12 @@ export function* run3DLeadCoroutine(
   cursor.shape = "pen-add";
   while (p < 0.65) {
     const dt = yield;
-    p = Math.min(0.65, p + (dt ?? 0.016) * engine.tempo * 0.38);
+    p = Math.min(0.65, p + (dt ?? 0.016) * engine.tempo * 0.8);
     update3DProgress(el, p);
     const anchors = resolve3DAnchors(engine, el);
     const wp = anchors.surfaceWaypoints[0] ?? anchors.origin;
-    cursor.x += (wp.x - cursor.x) * 0.25;
-    cursor.y += (wp.y - cursor.y) * 0.25;
+    cursor.x += (wp.x - cursor.x) * 0.32;
+    cursor.y += (wp.y - cursor.y) * 0.32;
     cursor.press = 0.6;
   }
 
@@ -135,7 +135,7 @@ export function* run3DLeadCoroutine(
   cursor.shape = "ew";
   while (p < 1.0) {
     const dt = yield;
-    p = Math.min(1.0, p + (dt ?? 0.016) * engine.tempo * 0.42);
+    p = Math.min(1.0, p + (dt ?? 0.016) * engine.tempo * 0.85);
     update3DProgress(el, p);
     const anchors = resolve3DAnchors(engine, el);
     cursor.x = anchors.laserLeft.x;
