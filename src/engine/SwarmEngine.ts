@@ -54,6 +54,7 @@ import {
   rand,
 } from "./scene-loader";
 import {
+  assistSubtaskCoroutine,
   dragGuideCoroutine,
   drawLogoCoroutine,
   drawPathCoroutine,
@@ -392,12 +393,29 @@ export class SwarmEngine {
     );
 
     if (
-      idleCursors.length > 1 &&
-      avail.length > 1 &&
+      idleCursors.length >= 1 &&
+      avail.length >= 1 &&
       this.kernel.isWasmAccelerated &&
       this.pick === SwarmEngine.prototype.pick
     ) {
-      const taskInputs = avail.map((t) => {
+      const isDomScene = this.list.some((el) => el.domEl);
+      const auctionCandidates = [...avail];
+      const activeAssistables = this.tasks.filter((t) => {
+        if (t.state !== "active" || t.spec.type === "3d" || t.spec.type === "dup") {
+          return false;
+        }
+        const elId = "el" in t.spec ? t.spec.el : "";
+        const el = this.els.get(elId);
+        if (!el) return false;
+        if (el.kind === "text") return el.text.length >= 48 && el.shown.length < el.text.length * 0.78;
+        if (el.kind === "rect") return el.w * el.h >= 36000 && !!el.draw;
+        return false;
+      });
+      for (const act of activeAssistables) {
+        auctionCandidates.push(act);
+      }
+
+      const taskInputs = auctionCandidates.map((t) => {
         const elId =
           "el" in t.spec
             ? t.spec.el
@@ -405,13 +423,37 @@ export class SwarmEngine {
         const elNode = this.els.get(elId);
         const tx =
           elNode && "x" in elNode ? elNode.x + elNode.dx : this.designWidth * 0.5;
+        const isChildSubtask =
+          t.spec.type === "edit" ||
+          (t.deps.length > 0 && elNode?.domEl?.getAttribute("data-swarm-auto") === "true") ||
+          (t.deps.length > 0 && (t.spec.type === "text" || (elNode?.kind === "rect" && elNode.w * elNode.h <= 18000)));
+        const priority =
+          t.spec.type === "edit"
+            ? 1.65
+            : isChildSubtask
+              ? t.spec.type === "text"
+                ? 1.35
+                : 1.22
+              : 0;
+        const isActive = t.state === "active";
+        const activeWorkers = isActive
+          ? this.cursors.filter((w) => w.task === t).length
+          : 0;
+        const maxSquad =
+          elNode?.kind === "text" && elNode.text.length >= 48
+            ? 2
+            : elNode?.kind === "rect" && elNode.w * elNode.h >= 36000
+              ? 2
+              : 1;
         return {
           x: tx,
           y: t.y,
-          state: 1 as const,
-          activeWorkers: 0,
-          maxSquad: 1,
-          progress: 0,
+          state: (isActive ? 2 : 1) as 1 | 2,
+          activeWorkers,
+          maxSquad,
+          progress: isActive ? 0.45 : 0,
+          priority,
+          parentGroup: t.deps.length > 0 ? t.deps[0].length : 0,
         };
       });
       const bids = this.kernel.auctionTasksBatch(
@@ -421,13 +463,20 @@ export class SwarmEngine {
         this.viewBot,
         this.frontier
       );
-      const assignedTasks = new Set<Required<SwarmTask>>();
+      const assignedLeadTasks = new Set<Required<SwarmTask>>();
       for (let i = 0; i < idleCursors.length; i++) {
         const c = idleCursors[i];
         const bid = bids[i];
-        const task = bid && bid.taskIdx >= 0 ? avail[bid.taskIdx] : null;
-        if (task && !assignedTasks.has(task)) {
-          assignedTasks.add(task);
+        const task =
+          bid && bid.taskIdx >= 0 ? auctionCandidates[bid.taskIdx] : null;
+        if (task && bid?.role === "lead" && task.state === "wait" && !assignedLeadTasks.has(task)) {
+          assignedLeadTasks.add(task);
+          if (isDomScene && (c.y < this.viewTop - 80 || c.y > this.viewBot + 80)) {
+            c.y =
+              c.y < this.viewTop
+                ? this.viewTop + 24 + Math.random() * 60
+                : this.viewBot - 24 - Math.random() * 60;
+          }
           task.state = "active";
           c.task = task;
           this.leadCursorByTask.set(task.id, c.id);
@@ -438,6 +487,17 @@ export class SwarmEngine {
           }
           c.idleFor = 0;
           c.gen = this.run(c, task);
+        } else if (task && bid?.role === "assistant" && task.state === "active") {
+          if (isDomScene && (c.y < this.viewTop - 80 || c.y > this.viewBot + 80)) {
+            c.y =
+              c.y < this.viewTop
+                ? this.viewTop + 24 + Math.random() * 60
+                : this.viewBot - 24 - Math.random() * 60;
+          }
+          c.task = task;
+          c.worked = true;
+          c.idleFor = 0;
+          c.gen = assistSubtaskCoroutine(this, c, task);
         } else {
           this.squadCoordinator.tryAssignAssistant(this, c);
         }

@@ -154,6 +154,9 @@ export function scanDeepDOMElements(
     el.removeAttribute("data-swarm-done");
     if (!el.hasAttribute("data-swarm")) {
       el.setAttribute("data-swarm", kindHint);
+      if (parentTaskId) {
+        el.setAttribute("data-swarm-auto", "true");
+      }
     }
 
     const { x, y, w, h } = computeGeometry(el, seqIdx);
@@ -372,11 +375,26 @@ export function scanDeepDOMElements(
       }
     } else if (insideDeepScope) {
       const tag = node.tagName.toUpperCase();
-      if (CONTROL_TAGS.has(tag)) {
+      const cls = typeof htmlEl.className === "string" ? htmlEl.className.toLowerCase() : "";
+      if (
+        CONTROL_TAGS.has(tag) ||
+        cls.includes("badge") ||
+        cls.includes("pill") ||
+        cls.includes("chip") ||
+        cls.includes("tag") ||
+        cls.includes("btn")
+      ) {
         registerDOMNode(htmlEl, "rect", parentTaskId);
         return;
       }
-      if (TEXT_TAGS.has(tag) && (hasDirectTextContent(htmlEl) || node.children.length <= 1)) {
+      if (
+        TEXT_TAGS.has(tag) &&
+        (hasDirectTextContent(htmlEl) ||
+          node.children.length <= 1 ||
+          tag === "P" ||
+          tag === "LI" ||
+          /^H[1-6]$/.test(tag))
+      ) {
         const txt = (htmlEl.textContent || "").trim();
         if (txt.length > 0) {
           registerDOMNode(htmlEl, "text", parentTaskId);

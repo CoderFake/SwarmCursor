@@ -6,6 +6,7 @@ import type {
   SwarmOverlayItem,
   SwarmPathEl,
   SwarmRectEl,
+  SwarmTask,
   SwarmTextEl,
 } from "../core/types";
 import { bumpVersion, rand } from "./scene-loader";
@@ -93,8 +94,13 @@ export function* drawRectCoroutine(
   cursor: SwarmCursor,
   el: SwarmRectEl
 ): Generator<void, void, number> {
+  const isCompactChild =
+    el.w * el.h <= 18000 ||
+    el.domEl?.getAttribute("data-swarm-auto") === "true";
   cursor.shape = "cross";
-  yield* engine.moveTo(cursor, () => ({ x: el.x, y: el.y }));
+  yield* engine.moveTo(cursor, () => ({ x: el.x, y: el.y }), {
+    speed: isCompactChild ? 1.95 : 1.0,
+  });
   cursor.press = 1;
   el.vis = true;
   el.draw = { w: 0, h: 0 };
@@ -105,7 +111,7 @@ export function* drawRectCoroutine(
     cursor,
     () => ({ x: el.x + el.w, y: el.y + el.h }),
     {
-      speed: 1.35,
+      speed: isCompactChild ? 2.15 : 1.35,
       drag: true,
       bend: 0,
       onStep: () => {
@@ -121,10 +127,10 @@ export function* drawRectCoroutine(
   el.draw = null;
   bumpVersion(el);
   cursor.shape = "arrow";
-  yield* engine.wait(rand(0.04, 0.08));
+  yield* engine.wait(isCompactChild ? 0.02 : rand(0.04, 0.08));
   el.styled = true;
   bumpVersion(el);
-  yield* engine.wait(0.06);
+  yield* engine.wait(isCompactChild ? 0.025 : 0.06);
   cursor.ov = null;
 }
 
@@ -137,6 +143,7 @@ export function* drawTextCoroutine(
 ): Generator<void, void, number> {
   if (el.dyn) el.text = el.dyn();
   const isDomBacked = !!el.domEl;
+  const isChildSubtask = el.domEl?.getAttribute("data-swarm-auto") === "true";
   if (guide && !isDomBacked) {
     if (guide.axis === "x") {
       el.dx = rand(28, 64);
@@ -152,7 +159,11 @@ export function* drawTextCoroutine(
   if (grow && !isDomBacked) el.size = 18;
 
   cursor.shape = "cross";
-  yield* engine.moveTo(cursor, () => ({ x: el.x + el.dx, y: el.y + el.dy }));
+  yield* engine.moveTo(
+    cursor,
+    () => ({ x: el.x + el.dx, y: el.y + el.dy }),
+    { speed: isChildSubtask ? 1.85 : 1.0 }
+  );
 
   if (el.w == null) {
     yield* engine.click(cursor);
@@ -285,7 +296,7 @@ export function* drawTextCoroutine(
     bumpVersion(el);
     yield* engine.wait(0.25);
   } else {
-    yield* engine.wait(0.2);
+    yield* engine.wait(isChildSubtask ? 0.04 : 0.2);
   }
 
   cursor.ov = null;
@@ -493,4 +504,40 @@ export function* editTextCoroutine(
   cursor.shape = "arrow";
   cursor.ov = () => [engine.selection(el)];
   yield* engine.wait(0.3);
+}
+
+export function* assistSubtaskCoroutine(
+  engine: SwarmEngine,
+  cursor: SwarmCursor,
+  task: Required<SwarmTask>
+): Generator<void, void, number> {
+  const elId = "el" in task.spec ? task.spec.el : "";
+  const el = engine.els.get(elId);
+  if (!el || !("x" in el)) return;
+
+  cursor.shape = el.kind === "text" ? "ibeam" : "cross";
+  const b = engine.bounds(el);
+  const targetX = b.x + Math.max(24, b.w * rand(0.52, 0.86));
+  const targetY = b.y + Math.max(10, b.h * rand(0.35, 0.72));
+
+  yield* engine.moveTo(cursor, { x: targetX, y: targetY }, { speed: 1.95 });
+  if (task.state !== "active") {
+    cursor.shape = "arrow";
+    cursor.ov = null;
+    return;
+  }
+
+  yield* engine.click(cursor);
+  let steps = 0;
+  while (task.state === "active" && steps < 18) {
+    steps++;
+    if (el.kind === "text" && el.editing && el.shown.length < el.text.length) {
+      const boost = Math.max(1, Math.ceil(el.text.length / 26));
+      el.shown = el.text.slice(0, Math.min(el.text.length, el.shown.length + boost));
+      bumpVersion(el);
+    }
+    yield* engine.wait(0.032);
+  }
+  cursor.shape = "arrow";
+  cursor.ov = null;
 }

@@ -7,6 +7,7 @@ import type {
 } from "./wasm-types";
 
 const TASK_STRIDE = 8;
+const MAX_WASM_TASKS = 1024;
 
 export function runAuctionTasksBatch(
   wasm: WasmExports | null,
@@ -17,7 +18,7 @@ export function runAuctionTasksBatch(
   frontierY = 1e9
 ): Array<WasmAuctionResult | null> {
   const nc = Math.min(cursorPositions.length, 256);
-  const nt = Math.min(tasks.length, 512);
+  const nt = Math.min(tasks.length, MAX_WASM_TASKS);
   if (nc === 0 || nt === 0) return cursorPositions.map(() => null);
 
   if (wasm) {
@@ -41,6 +42,8 @@ export function runAuctionTasksBatch(
       tView[tb + 3] = item.activeWorkers;
       tView[tb + 4] = item.maxSquad;
       tView[tb + 5] = item.progress;
+      tView[tb + 6] = item.priority ?? 0;
+      tView[tb + 7] = item.parentGroup ?? 0;
     }
 
     wasm.auction_tasks_batch(nc, nt, viewTop, viewBot, frontierY);

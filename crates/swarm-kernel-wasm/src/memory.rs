@@ -4,7 +4,7 @@ use crate::math::GRID_CELLS;
 pub const MAX_CURSORS: usize = 256;
 pub const STRIDE: usize = 16;
 pub const CELL_SIZE: f32 = 96.0;
-pub const MAX_TASKS: usize = 512;
+pub const MAX_TASKS: usize = 1024;
 pub const TASK_STRIDE: usize = 8;
 pub const MAX_MESH_VERTS: usize = 16384;
 

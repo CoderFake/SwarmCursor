@@ -36,6 +36,10 @@ export interface WasmAuctionTaskInput {
   activeWorkers: number;
   maxSquad: number;
   progress: number;
+  /** > 0 for child sub-tasks (`luồng con`: inner texts, bullets, badges, re-type edits) */
+  priority?: number;
+  /** Parent container group hash for intra-card sibling wave ordering */
+  parentGroup?: number;
 }
 
 export interface WasmAuctionResult {
