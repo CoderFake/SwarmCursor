@@ -350,7 +350,7 @@ export const Showcase = () => (
     badge: "07 · FOLLOWER, AGENT PILL & CONTROLS",
     title: "<SwarmFollower>, <SwarmAgentPill>, <SwarmControls> & useSwarm()",
     summary:
-      "Three standalone interaction & status components: `<SwarmFollower>` (Boids pointer chase & circular vortex orbit when idle), `<SwarmAgentPill>` (5-AI-icon left-to-right queue with `{N} agents`), and `<SwarmControls>` / `useSwarm()`.",
+      "Three standalone interaction & status components: `<SwarmFollower>` (Boids pointer chase & circular vortex orbit when idle), `<SwarmAgentPill>` (5-AI-icon left-to-right queue with `{N} agents`), and `<SwarmControls>` (Turbopack-style popover with automatic `localStorage` persistence via `swarm_cursor_settings_v1` and extensible `children` slot) / `useSwarm()`.",
     codeExamples: [
       {
         title: "Using <SwarmFollower>, <SwarmAgentPill>, and useSwarm() Hook",
@@ -417,6 +417,12 @@ export function CustomToolbar() {
           type: "AgentIconId[]",
           defaultVal: "All 9 AI icons",
           desc: "`claude`, `cohere`, `deepseek`, `gemini`, `grok`, `kimi`, `mistral`, `ollama`, `openai`.",
+        },
+        {
+          name: "position / children (SwarmControls)",
+          type: '"bottom-left" | "bottom-right" | "top-right" / ReactNode',
+          defaultVal: '"bottom-right"',
+          desc: "Automatically persists `scrollMode`, `tempoMultiplier`, `rulers`, `paused`, and `open` in `localStorage` (`swarm_cursor_settings_v1`) and supports custom settings rows via `children`.",
         },
       ],
     },

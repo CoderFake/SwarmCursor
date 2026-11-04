@@ -350,7 +350,7 @@ export const Showcase = () => (
     badge: "07 · FOLLOWER, AGENT PILL & CONTROLS",
     title: "<SwarmFollower>, <SwarmAgentPill>, <SwarmControls> & useSwarm()",
     summary:
-      "Bộ 3 component điều khiển & trạng thái độc lập: `<SwarmFollower>` (đàn chuột đuổi theo chuột thật & xoay vòng Boids Vortex khi dừng), `<SwarmAgentPill>` (hàng đợi 5 icon AI đẩy từ trái qua phải kèm `{N} agents`), và `<SwarmControls>` / `useSwarm()`.",
+      "Bộ 3 component điều khiển & trạng thái độc lập: `<SwarmFollower>` (đàn chuột đuổi theo chuột thật & xoay vòng Boids Vortex khi dừng), `<SwarmAgentPill>` (hàng đợi 5 icon AI đẩy từ trái qua phải kèm `{N} agents`), và `<SwarmControls>` (popover kiểu Turbopack tự động lưu trạng thái vào `localStorage` qua key `swarm_cursor_settings_v1` & hỗ trợ `children` mở rộng) / `useSwarm()`.",
     codeExamples: [
       {
         title: "Sử dụng <SwarmFollower>, <SwarmAgentPill> và useSwarm() Hook",
@@ -417,6 +417,12 @@ export function CustomToolbar() {
           type: "AgentIconId[]",
           defaultVal: "All 9 AI icons",
           desc: "`claude`, `cohere`, `deepseek`, `gemini`, `grok`, `kimi`, `mistral`, `ollama`, `openai`.",
+        },
+        {
+          name: "position / children (SwarmControls)",
+          type: '"bottom-left" | "bottom-right" | "top-right" / ReactNode',
+          defaultVal: '"bottom-right"',
+          desc: "Tự động lưu `scrollMode`, `tempoMultiplier`, `rulers`, `paused`, `open` vào `localStorage` (`swarm_cursor_settings_v1`) và hỗ trợ chèn thêm hàng cài đặt qua `children`.",
         },
       ],
     },
