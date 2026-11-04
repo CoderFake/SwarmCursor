@@ -44,6 +44,8 @@ export interface SwarmProviderProps {
   scrollMode?: ScrollMode;
   autoScrollSpeed?: number;
   controls?: boolean;
+  controlsPosition?: "bottom-right" | "bottom-left" | "top-right";
+  controlsSlot?: React.ReactNode;
   showCursorLabels?: boolean;
   designWidth?: number;
   /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
@@ -55,6 +57,8 @@ export function SwarmProvider({
   scrollMode = "manual",
   autoScrollSpeed = 180,
   controls = false,
+  controlsPosition = "bottom-right",
+  controlsSlot,
   showCursorLabels = false,
   designWidth = DESIGN_WIDTH,
   agentPill = false,
@@ -167,7 +171,13 @@ export function SwarmProvider({
         />
       )}
       {controls && (
-        <SwarmControlsBar engine={activeEngine} autoScroll={autoScroll} />
+        <SwarmControlsBar
+          engine={activeEngine}
+          autoScroll={autoScroll}
+          position={controlsPosition}
+        >
+          {controlsSlot}
+        </SwarmControlsBar>
       )}
     </SwarmContext.Provider>
   );
@@ -212,8 +222,10 @@ export function SwarmElement({
 
 export function SwarmControls({
   position = "bottom-right",
+  children,
 }: {
   position?: "bottom-right" | "bottom-left" | "top-right";
+  children?: React.ReactNode;
 }) {
   const ctx = useContext(SwarmContext);
   if (!ctx) return null;
@@ -222,6 +234,8 @@ export function SwarmControls({
       engine={ctx.engine}
       autoScroll={ctx.autoScroll}
       position={position}
-    />
+    >
+      {children}
+    </SwarmControlsBar>
   );
 }

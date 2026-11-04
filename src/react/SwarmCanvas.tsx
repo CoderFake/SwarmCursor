@@ -256,6 +256,8 @@ export interface SwarmCanvasProps {
   scrollMode?: ScrollMode;
   autoScrollSpeed?: number;
   controls?: boolean;
+  controlsPosition?: "bottom-right" | "bottom-left" | "top-right";
+  controlsSlot?: React.ReactNode;
   showCursorLabels?: boolean;
   showIntroLogo?: boolean;
   /** Opt-in bottom-bar AI agent queue pill (`{N} agents`). Off by default unless declared. */
@@ -268,6 +270,8 @@ export function SwarmCanvas({
   scrollMode = "manual",
   autoScrollSpeed = 180,
   controls = false,
+  controlsPosition = "bottom-right",
+  controlsSlot,
   showCursorLabels = false,
   showIntroLogo = true,
   agentPill = false,
@@ -381,7 +385,15 @@ export function SwarmCanvas({
           {...(typeof agentPill === "object" ? agentPill : {})}
         />
       )}
-      {controls && <SwarmControls engine={engine} autoScroll={autoScroll} />}
+      {controls && (
+        <SwarmControls
+          engine={engine}
+          autoScroll={autoScroll}
+          position={controlsPosition}
+        >
+          {controlsSlot}
+        </SwarmControls>
+      )}
     </>
   );
 }
