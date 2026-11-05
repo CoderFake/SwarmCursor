@@ -79,10 +79,18 @@ Use this skill whenever the user asks to integrate, configure, customize, or opt
 
 ## 1. Installation & Required CSS
 
-Install directly from GitHub:
+Install directly from the official GitHub Release \`v2.0.0\` or GitHub Packages:
 
 \`\`\`bash
-npm install git+https://github.com/CoderFake/SwarmCursor.git
+# Option 1 (Fastest — Prebuilt GitHub Release v2.0.0 tarball):
+npm install https://github.com/CoderFake/SwarmCursor/releases/download/v2.0.0/swarm-cursor-2.0.0.tgz
+
+# Option 2 (Pinned Git tag v2.0.0):
+npm install git+https://github.com/CoderFake/SwarmCursor.git#v2.0.0
+
+# Option 3 (GitHub Packages — @coderfake/swarm-cursor):
+npm install @coderfake/swarm-cursor --@coderfake:registry=https://npm.pkg.github.com
+
 # Optional peer dependency for 3D / GLB mesh construction:
 npm install three @types/three
 \`\`\`

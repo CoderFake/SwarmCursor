@@ -4,6 +4,7 @@
 
 - **Live Documentation & Interactive Showcase**: **[https://sc-hd.vercel.app/](https://sc-hd.vercel.app/)**
 - **Repository**: **[https://github.com/CoderFake/SwarmCursor](https://github.com/CoderFake/SwarmCursor)**
+- **Latest Release (`v2.0.0`)**: **[https://github.com/CoderFake/SwarmCursor/releases/tag/v2.0.0](https://github.com/CoderFake/SwarmCursor/releases/tag/v2.0.0)** · **[GitHub Package `@coderfake/swarm-cursor`](https://github.com/CoderFake/SwarmCursor/pkgs/npm/swarm-cursor)**
 - **Documentation**: **[🇬🇧 English (`docs/en/`)](./docs/en/README.md)** · **[🇻🇳 Tiếng Việt (`docs/vi/`)](./docs/vi/README.md)**
 - **AI Coding Agent Skill (`.zip` / `SKILL.md`)**: **[`skills/swarm-cursor/SKILL.md`](./skills/swarm-cursor/SKILL.md)** · **[Download `swarm-cursor-skills.zip`](https://sc-hd.vercel.app/swarm-cursor-skills.zip)**
 
@@ -61,7 +62,14 @@ import { SwarmImage } from "swarm-cursor/react";
 ## Installation & 8 Modular Sub-Packages
 
 ```bash
-npm install git+https://github.com/CoderFake/SwarmCursor.git
+# Option 1 (Fastest — Prebuilt GitHub Release v2.0.0 tarball):
+npm install https://github.com/CoderFake/SwarmCursor/releases/download/v2.0.0/swarm-cursor-2.0.0.tgz
+
+# Option 2 (Pinned Git Release tag v2.0.0):
+npm install git+https://github.com/CoderFake/SwarmCursor.git#v2.0.0
+
+# Option 3 (GitHub Packages — @coderfake/swarm-cursor):
+npm install @coderfake/swarm-cursor --@coderfake:registry=https://npm.pkg.github.com
 ```
 
 SwarmCursor 2.0 is architected into **8 independent tree-shakeable sub-packages**:

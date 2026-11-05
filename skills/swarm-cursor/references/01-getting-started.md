@@ -36,11 +36,17 @@ Import the full barrel from `swarm-cursor` or cherry-pick `/engine`, `/kernel`, 
 
 ## Code Examples
 
-### Installation & Stylesheet Import (`terminal / main.tsx`)
+### Installation (GitHub Release v2.0.0 / GitHub Packages) & Stylesheet Import (`terminal / main.tsx`)
 
 ```tsx
-# Install via npm / pnpm / yarn
-npm install git+https://github.com/CoderFake/SwarmCursor.git
+# Option 1 (Fastest — Prebuilt GitHub Release v2.0.0 tarball):
+npm install https://github.com/CoderFake/SwarmCursor/releases/download/v2.0.0/swarm-cursor-2.0.0.tgz
+
+# Option 2 (Install pinned v2.0.0 Git Release tag):
+npm install git+https://github.com/CoderFake/SwarmCursor.git#v2.0.0
+
+# Option 3 (GitHub Packages Registry — @coderfake/swarm-cursor):
+npm install @coderfake/swarm-cursor --@coderfake:registry=https://npm.pkg.github.com
 
 // In main.tsx or App.tsx:
 import "swarm-cursor/styles.css";

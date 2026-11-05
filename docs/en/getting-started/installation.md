@@ -6,11 +6,16 @@ Official Repository: **[https://github.com/CoderFake/SwarmCursor](https://github
 
 ## 1. Install Package
 
-### From GitHub Repository
+### From GitHub Release `v2.0.0` / GitHub Packages / Git Tag
 ```bash
-npm install git+https://github.com/CoderFake/SwarmCursor.git
-# or pnpm / yarn
-pnpm add git+https://github.com/CoderFake/SwarmCursor.git
+# Option 1 (Fastest — Prebuilt GitHub Release v2.0.0 tarball):
+npm install https://github.com/CoderFake/SwarmCursor/releases/download/v2.0.0/swarm-cursor-2.0.0.tgz
+
+# Option 2 (Pinned Git tag v2.0.0):
+npm install git+https://github.com/CoderFake/SwarmCursor.git#v2.0.0
+
+# Option 3 (GitHub Packages — @coderfake/swarm-cursor):
+npm install @coderfake/swarm-cursor --@coderfake:registry=https://npm.pkg.github.com
 ```
 
 ### From Local Workspace / Monorepo

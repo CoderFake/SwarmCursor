@@ -27,10 +27,16 @@ export const VI_GETTING_STARTED: DocSection[] = [
     ],
     codeExamples: [
       {
-        title: "Cài đặt & Import CSS chuẩn",
+        title: "Cài đặt (GitHub Release v2.0.0 / GitHub Packages) & Import CSS chuẩn",
         filename: "terminal / main.tsx",
-        code: `# Install via npm / pnpm / yarn
-npm install git+https://github.com/CoderFake/SwarmCursor.git
+        code: `# Cách 1 (Nhanh nhất — Cài thẳng gói prebuilt từ GitHub Release v2.0.0):
+npm install https://github.com/CoderFake/SwarmCursor/releases/download/v2.0.0/swarm-cursor-2.0.0.tgz
+
+# Cách 2 (Cài theo Git Release tag v2.0.0):
+npm install git+https://github.com/CoderFake/SwarmCursor.git#v2.0.0
+
+# Cách 3 (GitHub Packages Registry — @coderfake/swarm-cursor):
+npm install @coderfake/swarm-cursor --@coderfake:registry=https://npm.pkg.github.com
 
 // In main.tsx or App.tsx:
 import "swarm-cursor/styles.css";`,
