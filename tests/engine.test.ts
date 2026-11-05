@@ -72,4 +72,41 @@ describe("SwarmEngine & Coroutines", () => {
     ctrl.update(0.05, engine);
     expect(scrollSpy).toHaveBeenCalled();
   });
+
+  it("never duplicates or overflows text when assistant cursors boost long text subtasks", () => {
+    const longLine =
+      '  <article id="card" data-swarm="rect" data-swarm-deep>';
+    const longLead =
+      "Open-source MIT library. Tree-shakeable sub-packages for React 18/19, Three.js and Vanilla TypeScript.";
+    const builder = new SceneBuilder(1280);
+    builder.addText("code-ln", 100, 100, longLine, TYPE_STYLES.code);
+    builder.addText("cta-lead", 100, 160, longLead, TYPE_STYLES.lead, { w: 460 });
+
+    const engine = new SwarmEngine({
+      scene: builder.build(500),
+      initialCursors: 12,
+      minCursors: 12,
+    });
+    engine.start();
+    engine.setScroll(120);
+
+    for (let i = 0; i < 400; i++) {
+      engine.step(0.032);
+      const codeEl = engine.els.get("code-ln");
+      const leadEl = engine.els.get("cta-lead");
+      if (codeEl && codeEl.kind === "text") {
+        expect(codeEl.shown.length).toBeLessThanOrEqual(longLine.length);
+        expect(longLine.startsWith(codeEl.shown)).toBe(true);
+      }
+      if (leadEl && leadEl.kind === "text") {
+        expect(leadEl.shown.length).toBeLessThanOrEqual(longLead.length);
+        expect(longLead.startsWith(leadEl.shown)).toBe(true);
+      }
+    }
+
+    const codeEl = engine.els.get("code-ln");
+    const leadEl = engine.els.get("cta-lead");
+    expect(codeEl && codeEl.kind === "text" ? codeEl.shown : "").toBe(longLine);
+    expect(leadEl && leadEl.kind === "text" ? leadEl.shown : "").toBe(longLead);
+  });
 });

@@ -401,13 +401,25 @@ export class SwarmEngine {
       const isDomScene = this.list.some((el) => el.domEl);
       const auctionCandidates = [...avail];
       const activeAssistables = this.tasks.filter((t) => {
-        if (t.state !== "active" || t.spec.type === "3d" || t.spec.type === "dup") {
+        if (
+          t.state !== "active" ||
+          t.spec.type === "3d" ||
+          t.spec.type === "dup" ||
+          t.spec.type === "edit"
+        ) {
           return false;
         }
         const elId = "el" in t.spec ? t.spec.el : "";
         const el = this.els.get(elId);
         if (!el) return false;
-        if (el.kind === "text") return el.text.length >= 48 && el.shown.length < el.text.length * 0.78;
+        if (el.kind === "text") {
+          return (
+            el.editing &&
+            !el.selAll &&
+            el.text.length >= 48 &&
+            el.shown.length < el.text.length * 0.78
+          );
+        }
         if (el.kind === "rect") return el.w * el.h >= 36000 && !!el.draw;
         return false;
       });

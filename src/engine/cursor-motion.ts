@@ -89,17 +89,25 @@ export function* typeTextCoroutine(
   str: string,
   replaceAll = false
 ): Generator<void, void, number> {
-  for (let i = 0; i < str.length; i++) {
-    if (i === 0 && replaceAll) el.shown = "";
-    el.shown += str[i];
+  if (replaceAll) {
+    el.shown = "";
+    el.selAll = false;
+  }
+  while (el.shown.length < str.length) {
+    const nextIdx = el.shown.length;
+    const ch = str[nextIdx];
+    el.shown = str.slice(0, nextIdx + 1);
     el.selAll = false;
     bumpVersion(el);
     let delay = rand(0.012, 0.04);
-    if (str[i] === " ") delay += rand(0, 0.03);
-    if (str[i] === "\n") delay += 0.1;
+    if (ch === " ") delay += rand(0, 0.03);
+    if (ch === "\n") delay += 0.1;
     if (Math.random() < 0.025) delay += rand(0.08, 0.2);
     yield* engine.wait(delay);
   }
+  el.shown = str;
+  el.selAll = false;
+  bumpVersion(el);
 }
 
 export function* idleCoroutine(

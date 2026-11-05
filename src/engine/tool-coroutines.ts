@@ -531,9 +531,17 @@ export function* assistSubtaskCoroutine(
   let steps = 0;
   while (task.state === "active" && steps < 18) {
     steps++;
-    if (el.kind === "text" && el.editing && el.shown.length < el.text.length) {
+    if (
+      el.kind === "text" &&
+      el.editing &&
+      !el.selAll &&
+      el.shown.length < el.text.length
+    ) {
       const boost = Math.max(1, Math.ceil(el.text.length / 26));
-      el.shown = el.text.slice(0, Math.min(el.text.length, el.shown.length + boost));
+      el.shown = el.text.slice(
+        0,
+        Math.min(el.text.length, el.shown.length + boost)
+      );
       bumpVersion(el);
     }
     yield* engine.wait(0.032);
